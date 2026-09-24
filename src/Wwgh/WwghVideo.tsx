@@ -295,7 +295,7 @@ const Chimps: React.FC = () => {
           armR={f < raid ? -160 - wobble(f, 12) : -100 + 20 * Math.sin(f / 6) * ez(f, soak, soak + 6)}
           face={blendFace(FACES.neutral, FACES.happy, ez(f, soak, soak + 12), { lookX: 0.6, lookY: -0.3 })} />
         <LeafSponge x={1040} y={g - 250} t={pop(f, fold)} wet={ez(f, soak, soak + 6)} f={f} />
-        <NameCard x={420} y={180} name="GUINEA, WEST AFRICA" t={pop(f, guinea) * (1 - ez(f, climb + 20, climb + 30))} />
+        <NameCard x={420} y={180} name="GUINEA, WEST AFRICA" t={pop(f, guinea) * (1 - ez(f, climb - 10, climb))} />
       </View>
       <AiClip src="ai/wwgh/a2_chimp_1080.mp4" to={Math.min(raid, 145)} />
     </AbsoluteFill>
@@ -342,7 +342,7 @@ const Dolphins: React.FC = () => {
         <path d="M300 560 L900 560 M360 560 L360 900 M840 560 L840 900" stroke={C.ink} strokeWidth={9} />
         <Fig x={600} ground={560} scale={1.5} frame={f} bob={1} armL={60} armR={-60} lean={-3}
           face={blendFace(FACES.neutral, FACES.smug, ez(f, doubts, doubts + 12), { lookX: 0.6 })} />
-        <NameCard x={600} y={130} name="Diana Reiss" t={pop(f, reiss)} />
+        <NameCard x={600} y={250} name="Diana Reiss" t={pop(f, reiss)} />
         <Dolphin x={1180} y={640} k={0.9} f={f} rot={-12} />
         <g transform={`translate(1420 ${520 + 4 * Math.sin(f / 9)}) scale(${pop(f, sober)})`}>
           <rect x={-50} y={-80} width={100} height={140} rx={40} fill="#E6EEF3" stroke={C.ink} strokeWidth={6} />
@@ -372,7 +372,7 @@ const Elephants: React.FC = () => {
       <AbsoluteFill>
         <View {...cam}>
           <Dna x={960} y={540} t={pop(f, y2020)} snap={ez(f, gene, gene + 12)} f={f} />
-          <NameCard x={500} y={200} name="Janiak, 2020" t={pop(f, y2020 + 4)} />
+          <NameCard x={960} y={240} name="Janiak, 2020" t={pop(f, y2020 + 4)} />
         </View>
       </AbsoluteFill>
     );
@@ -451,7 +451,7 @@ const Ancestors: React.FC = () => {
       <AbsoluteFill>
         <View {...cam}>
           <Enzyme x={960} y={520} t={pop(f, carrigan)} swap={ez(f, mutation, mutation + 12)} turns={3 * ez(f, forty, forty + 40)} />
-          <NameCard x={960} y={200} name="Carrigan et al., 2015" t={pop(f, carrigan + 4)} />
+          <NameCard x={960} y={200} name="Carrigan et al., 2015" t={pop(f, carrigan + 4) * (1 - ez(f, forty - 8, forty))} />
         </View>
       </AbsoluteFill>
     );
@@ -522,8 +522,8 @@ const Wanting: React.FC = () => {
     <AbsoluteFill>
       <View {...cam}>
         <path d="M300 700 Q300 250 960 250 Q1620 250 1620 700" fill="#EDE3D2" stroke={C.ink} strokeWidth={8} />
-        <g opacity={pop(f, liking)}><Dial x={600} y={620} v={like} label="LIKING" color={C.teal} /></g>
-        <g opacity={pop(f, wanting)}><Dial x={1320} y={620} v={want} label="WANTING" color={C.amber} /></g>
+        <g opacity={pop(f, berridge + 6)}><Dial x={600} y={620} v={like} label="LIKING" color={C.teal} /></g>
+        <g opacity={pop(f, berridge + 12)}><Dial x={1320} y={620} v={want} label="WANTING" color={C.amber} /></g>
         {f >= dopamine ? Array.from({ length: 6 }, (_, i) => {
           const t = ((f - dopamine) / 30 + i / 6) % 1;
           return <circle key={i} cx={mix(960, 1320, t)} cy={320 + 280 * t + 20 * Math.sin(i + f / 6)} r={12} fill={C.amber} stroke={C.ink} strokeWidth={3} opacity={1 - t} />;
@@ -629,7 +629,7 @@ const RatParkScene: React.FC = () => {
 const End: React.FC = () => {
   const f = useCurrentFrame();
   const W = (x: string, n = 0) => w("end", x, n);
-  const both = W("Both,"), fun2 = W("Fun"), esc2 = W("Escape"), shrew = W("treeshrew's"), want = W("want."), phone = W("phone"), next = W("next");
+  const both = W("Both,"), fun2 = W("Fun", 1), esc2 = W("Escape", 1), shrew = W("treeshrew's"), want = W("want."), phone = W("phone"), next = W("next");
   const everyone = W("Everyone"), sleep = W("Sleep,"), food = W("food,"), parties = W("parties."), tell = W("Tell");
   if (f < shrew - 4) {
     const open = ez(f, fun2, fun2 + 12) * (1 - ez(f, esc2, esc2 + 12));
@@ -681,11 +681,20 @@ const End: React.FC = () => {
       </AbsoluteFill>
     );
   }
-  const cam = shots(f, [[everyone - 4, { x: 960, y: 520, s: 1.2 }], [tell, { x: 960, y: 540, s: 1 }]], 12);
+  const cam = shots(f, [
+    [everyone - 4, { x: 960, y: 520, s: 1 }],
+    [sleep, { x: 480, y: 480, s: 1.8 }],
+    [food, { x: 960, y: 480, s: 1.8 }],
+    [parties, { x: 1440, y: 480, s: 1.8 }],
+    [tell, { x: 960, y: 560, s: 1 }],
+  ], 10);
   return (
     <AbsoluteFill>
       <View {...cam}>
-        <PartyIcons x={960} y={480} t={[pop(f, sleep), pop(f, food), pop(f, parties)]} />
+        <g transform="translate(960 480) scale(1.6) translate(-960 -480)">
+          <PartyIcons x={960} y={480} t={[pop(f, sleep), pop(f, food), pop(f, parties)]} />
+        </g>
+        <Sam x={960} f={f} s={0.9} armR={-120} face={blendFace(FACES.neutral, FACES.smug, ez(f, tell, tell + 10), { lookX: 0 })} />
         <T x={960} y={760} size={64} op={pop(f, tell)}>fun or escape?</T>
       </View>
     </AbsoluteFill>
