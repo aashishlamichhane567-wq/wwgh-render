@@ -1,0 +1,23 @@
+{
+ "enzyme": {
+  "start": 300,
+  "len": 263,
+  "mutation": 56,
+  "forty": 142
+ },
+ "brain": {
+  "start": 104,
+  "len": 457,
+  "liking": 110,
+  "wanting": 171,
+  "dopamine": 243,
+  "doses": [
+   309,
+   327,
+   345,
+   370,
+   386
+  ],
+  "flat": 422
+ }
+}

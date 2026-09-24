@@ -3,6 +3,7 @@ import { AbsoluteFill, Audio, Sequence, staticFile, useCurrentFrame } from "remo
 import { ramp, walk } from "../Hangry/actions";
 import { FACES, blendFace, type Face } from "../Hangry/Stickman";
 import { AiClip } from "../AiClip";
+import { Evidence, Footage } from "../Evidence";
 import { C, Fig, Paper, View, ez, mix, snap } from "../Hangry2/kit";
 import { Bar, Calendar, LivingRoom, NameCard, Phone, T } from "../Hangry2/props2";
 import { SCENES } from "./timing";
@@ -78,6 +79,8 @@ const Hook: React.FC = () => {
         <FurTest x={1400} y={400} t={pop(f, scientists) * (1 - ez(f, never - 6, never))} v={mix(0.1, 0.92, ez(f, fur, heavy + 8))} />
       </View>
       <AiClip src="ai/wwgh/a1_treeshrew_1080.mp4" to={Math.min(every + 8, 145)} />
+      <Evidence src="real/treeshrew.jpg" from={0} to={every + 4} w={480} h={720} x={1300} y={440} rot={2}
+        title="Pen-tailed treeshrew" credit="Photo: Agnès Latouza · CC BY 4.0" />
     </AbsoluteFill>
   );
 };
@@ -298,6 +301,8 @@ const Chimps: React.FC = () => {
         <NameCard x={420} y={180} name="GUINEA, WEST AFRICA" t={pop(f, guinea) * (1 - ez(f, climb - 10, climb))} />
       </View>
       <AiClip src="ai/wwgh/a2_chimp_1080.mp4" to={Math.min(raid, 145)} />
+      <Evidence src="real/chimps.mp4" from={W("wild") - 6} to={raid + 6} w={800} h={600} y={450}
+        title="Wild chimpanzees at Bossou, Guinea" credit="Video: Hockings et al. 2007, PLoS ONE · CC BY 2.5" />
     </AbsoluteFill>
   );
 };
@@ -331,6 +336,8 @@ const Dolphins: React.FC = () => {
           <Puffer x={960 + 170 * pass} y={mix(640, 560, rise)} puff={0.6 + 0.4 * ez(f, defence, defence + 10)} toxin={ez(f, defence + 6, defence + 16)} />
           <T x={960} y={260} size={120} color={C.amber} op={pop(f, high)}>?</T>
         </View>
+        <Evidence src="real/dolphins.mp4" from={W("BBC") - 6} to={floating} w={1120} h={630} y={460} rot={1.5}
+          title="Bottlenose dolphins off Sydney (not the BBC footage)" credit="Video: Adam Fish · CC BY 3.0" />
       </AbsoluteFill>
     );
   }
@@ -391,6 +398,8 @@ const Elephants: React.FC = () => {
         {f >= light ? <Beer x={1380} y={FLOOR} t={pop(f, light + 6)} k={0.8} /> : null}
       </View>
       <AiClip src="ai/wwgh/a4_elephant_1080.mp4" to={Math.min(mess + 10, 145)} />
+      <Evidence src="real/elephant_marula.jpg" from={6} to={y2006 - 2} w={840} h={630} y={450}
+        title="A marula tree after an elephant got to it" credit="Photo: Chris Eason · CC BY 2.0" />
     </AbsoluteFill>
   );
 };
@@ -451,7 +460,10 @@ const Ancestors: React.FC = () => {
       <AbsoluteFill>
         <View {...cam}>
           <Enzyme x={960} y={520} t={pop(f, carrigan)} swap={ez(f, mutation, mutation + 12)} turns={3 * ez(f, forty, forty + 40)} />
-          <NameCard x={960} y={200} name="Carrigan et al., 2015" t={pop(f, carrigan + 4) * (1 - ez(f, forty - 8, forty))} />
+        </View>
+        <Sequence from={carrigan - 4}><Footage src="3d/enzyme.mp4" /></Sequence>
+        <View>
+          <NameCard x={960} y={140} name="Carrigan et al., 2015" t={pop(f, carrigan + 4) * (1 - ez(f, forty - 8, forty))} />
         </View>
       </AbsoluteFill>
     );
@@ -529,7 +541,10 @@ const Wanting: React.FC = () => {
           return <circle key={i} cx={mix(960, 1320, t)} cy={320 + 280 * t + 20 * Math.sin(i + f / 6)} r={12} fill={C.amber} stroke={C.ink} strokeWidth={3} opacity={1 - t} />;
         }) : null}
         <T x={960} y={330} size={40} op={pop(f, dopamine)} color={C.amber}>dopamine</T>
-        <NameCard x={960} y={170} name="Berridge & Robinson" t={pop(f, berridge) * (1 - ez(f, liking + 30, liking + 40))} />
+      </View>
+      <Sequence from={berridge - 4}><Footage src="3d/brain.mp4" /></Sequence>
+      <View>
+        <NameCard x={960} y={120} name="Berridge & Robinson" t={pop(f, berridge) * (1 - ez(f, liking + 30, liking + 40))} />
       </View>
     </AbsoluteFill>
   );
@@ -609,6 +624,8 @@ const RatParkScene: React.FC = () => {
             </>
           ) : null}
         </View>
+        <Evidence src="real/rats.mp4" from={6} to={alexander - 4} w={740} h={606} y={440} rot={-1.5}
+          title="A rat in a lab enclosure" credit="Video: Stryjek et al. 2012, PLoS ONE · CC BY 2.5" />
       </AbsoluteFill>
     );
   }
