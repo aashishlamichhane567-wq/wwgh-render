@@ -681,21 +681,26 @@ const End: React.FC = () => {
       </AbsoluteFill>
     );
   }
+  const funLast = W("fun", 2), escLast = W("escape", 2);
   const cam = shots(f, [
     [everyone - 4, { x: 960, y: 520, s: 1 }],
-    [sleep, { x: 480, y: 480, s: 1.8 }],
-    [food, { x: 960, y: 480, s: 1.8 }],
-    [parties, { x: 1440, y: 480, s: 1.8 }],
-    [tell, { x: 960, y: 560, s: 1 }],
-  ], 10);
+    [sleep, { x: 520, y: 400, s: 1.5 }],
+    [food, { x: 960, y: 400, s: 1.5 }],
+    [parties, { x: 1400, y: 400, s: 1.5 }],
+    [tell, { x: 960, y: 520, s: 1.1 }],
+    [funLast, { x: 900, y: 560, s: 1.35 }],
+  ], 8);
   return (
     <AbsoluteFill>
       <View {...cam}>
-        <g transform="translate(960 480) scale(1.6) translate(-960 -480)">
-          <PartyIcons x={960} y={480} t={[pop(f, sleep), pop(f, food), pop(f, parties)]} />
+        <line x1={-800} y1={FLOOR} x2={2800} y2={FLOOR} stroke={C.ink} strokeWidth={6} />
+        <g transform="translate(960 330) scale(1.5) translate(-960 -330)">
+          <PartyIcons x={960} y={330} t={[pop(f, sleep), pop(f, food), pop(f, parties)]} />
         </g>
-        <Sam x={960} f={f} s={0.9} armR={-120} face={blendFace(FACES.neutral, FACES.smug, ez(f, tell, tell + 10), { lookX: 0 })} />
-        <T x={960} y={760} size={64} op={pop(f, tell)}>fun or escape?</T>
+        <Sam x={960} f={f} armR={f < tell ? -40 : -140} armL={f < tell ? 40 : 30}
+          face={f < tell ? blendFace(FACES.neutral, FACES.happy, ez(f, everyone, everyone + 10), { lookY: -0.6 }) : blendFace(FACES.happy, FACES.smug, ez(f, tell, tell + 10))} />
+        <Signpost x={560} y={560} text="FUN" dir={-1} color={C.teal} t={pop(f, funLast)} k={0.8} />
+        <Signpost x={1360} y={560} text="ESCAPE" dir={1} color={C.red} t={pop(f, escLast)} k={0.8} />
       </View>
     </AbsoluteFill>
   );
