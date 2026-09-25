@@ -12,6 +12,10 @@ on:
       blender:
         description: render the Blender shots first
         default: "true"
+      parts:
+        description: 'JSON list of shot:first:last frame ranges, one runner each (shots not listed use public/3d/*.mp4 from the repo)'
+        default: '["brain:1:153", "brain:154:306", "brain:307:457"]'
+
 jobs:
   blender:
     if: inputs.blender == 'true'
@@ -19,7 +23,7 @@ jobs:
     timeout-minutes: 300
     strategy:
       matrix:
-        shot: [enzyme, brain]
+        part: ${{ fromJSON(inputs.parts) }}
     steps:
       - uses: actions/checkout@v4
       - name: Blender 4.5 LTS and its libraries
@@ -28,15 +32,18 @@ jobs:
           sudo apt-get install -y -qq ffmpeg libxrender1 libxi6 libxkbcommon0 libsm6 libgl1 libegl1 libxxf86vm1 libxfixes3
           curl -sSL https://download.blender.org/release/Blender4.5/blender-4.5.14-linux-x64.tar.xz | tar -xJ
           ./blender-4.5.14-linux-x64/blender --version | head -1
-      - name: Render ${{ matrix.shot }}
-        run: ./blender-4.5.14-linux-x64/blender -b --factory-startup -P blender/shots.py -- ${{ matrix.shot }} out/3d/${{ matrix.shot }} 2>&1 | grep -vE "strokes set empty|Fra:" | tail -20
-      - name: Frames to mp4
+      - name: Render ${{ matrix.part }}
         run: |
-          mkdir -p public/3d
-          ffmpeg -hide_banner -loglevel error -framerate 30 -i out/3d/${{ matrix.shot }}/%04d.png -c:v libx264 -crf 16 -pix_fmt yuv420p public/3d/${{ matrix.shot }}.mp4
-          ffprobe -v error -show_entries format=duration -of default=nw=1 public/3d/${{ matrix.shot }}.mp4
+          IFS=: read SHOT A Z <<< "${{ matrix.part }}"
+          echo "SHOT=$SHOT" >> $GITHUB_ENV; echo "A=$A" >> $GITHUB_ENV
+          ./blender-4.5.14-linux-x64/blender -b --factory-startup -P blender/shots.py -- $SHOT out/3d/$SHOT --range $A:$Z 2>&1 | grep -vE "strokes set empty|Fra:" | tail -20
+      - name: Frames to an mp4 segment
+        run: |
+          mkdir -p parts
+          ffmpeg -hide_banner -loglevel error -framerate 30 -start_number $A -i out/3d/$SHOT/%04d.png -c:v libx264 -crf 16 -pix_fmt yuv420p parts/${SHOT}_$(printf %04d $A).mp4
+          ls -la parts
       - uses: actions/upload-artifact@v4
-        with: { name: "3d-${{ matrix.shot }}", path: "public/3d/${{ matrix.shot }}.mp4", retention-days: 7 }
+        with: { name: "3d-${{ strategy.job-index }}", path: parts/*.mp4, retention-days: 7 }
 
   render:
     needs: blender
@@ -47,7 +54,15 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         if: inputs.blender == 'true'
-        with: { pattern: "3d-*", path: public/3d, merge-multiple: true }
+        with: { pattern: "3d-*", path: parts, merge-multiple: true }
+      - name: Join rendered segments into public/3d/<shot>.mp4
+        if: inputs.blender == 'true'
+        run: |
+          for shot in $(ls parts | sed 's/_[0-9]*\.mp4$//' | sort -u); do
+            ls parts/${shot}_*.mp4 | sort | sed "s|^|file '$PWD/|;s|$|'|" > list_$shot.txt
+            ffmpeg -hide_banner -loglevel error -f concat -safe 0 -i list_$shot.txt -c copy public/3d/$shot.mp4
+            ffprobe -v error -show_entries format=duration -of default=nw=1 public/3d/$shot.mp4
+          done
       - uses: actions/setup-node@v4
         with: { node-version: 24, cache: npm }
       - name: Fonts, ffmpeg and Chrome libraries

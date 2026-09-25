@@ -22,6 +22,7 @@ from mathutils import Vector
 ARGS = sys.argv[sys.argv.index("--") + 1:]
 SHOT, OUT = ARGS[0], ARGS[1]
 PREVIEW = [int(x) for x in ARGS[ARGS.index("--preview") + 1].split(",")] if "--preview" in ARGS else None
+RANGE = [int(x) for x in ARGS[ARGS.index("--range") + 1].split(":")] if "--range" in ARGS else None  # split a shot across runners
 B = json.load(open(os.path.join(os.path.dirname(__file__), "beats.json")))[SHOT]
 L = B["len"]
 
@@ -67,7 +68,7 @@ def setup(cam_from, cam_to):
     s = bpy.context.scene
     s.render.engine = "CYCLES"
     s.cycles.device = "CPU"
-    s.cycles.samples = 8 if PREVIEW else 24
+    s.cycles.samples = 8 if PREVIEW else 16
     s.cycles.use_denoising = True
     s.render.resolution_x, s.render.resolution_y = (640, 360) if PREVIEW else (1280, 720)
     s.render.fps = 30
@@ -191,8 +192,24 @@ def bez(p0, p1, p2, t):
 
 
 def brain():
-    s, target = setup((0.3, -10.0, 0.3), (0.35, -9.1, 0.1))
-    target.location = (0.3, 0, -0.25)
+    s, target = setup((0.2, -10.8, -0.1), (0.2, -10.2, -0.1))
+    cam = s.camera
+    cam.animation_data_clear()
+    WIDE, HOT, PATH, MID = ((0.2, -10.8, -0.1), (0.1, 0, -0.1)), ((1.0, -5.2, 0.1), (1.0, 0, -0.15)), ((0.25, -5.6, -0.35), (0.2, 0, -0.5)), ((0.4, -8.0, -0.2), (0.4, 0, -0.3))
+    cuts = [(1, WIDE), (B["liking"], HOT), (B["wanting"], PATH), (B["dopamine"], WIDE)]
+    cuts += [(d, (PATH, MID)[k % 2]) for k, d in enumerate(B["doses"])] + [(B["flat"], HOT), (B["flat"] + 24, WIDE)]
+    pref = bpy.context.preferences.edit
+    cuts.append((L + 1, WIDE))
+    for (f, (c, t)), (n, _) in zip(cuts, cuts[1:]):  # hard cut at f, then a slow push-in until the next cut
+        pref.keyframe_new_interpolation_type = "LINEAR"
+        cam.location, target.location = c, t
+        cam.keyframe_insert("location", frame=f)
+        target.keyframe_insert("location", frame=f)
+        pref.keyframe_new_interpolation_type = "CONSTANT"
+        cam.location = (c[0] + (t[0] - c[0]) * 0.08, c[1] * 0.92, c[2])
+        cam.keyframe_insert("location", frame=max(f, n - 1))
+        target.keyframe_insert("location", frame=max(f, n - 1))
+    pref.keyframe_new_interpolation_type = "BEZIER"
     tissue = material("tissue", "#D99A94", alpha=0.26, rough=0.5)
     bpy.ops.mesh.primitive_uv_sphere_add(radius=1.6, location=(0, 0, 0.35), segments=48, ring_count=24)
     cortex = bpy.context.object
@@ -257,8 +274,8 @@ def brain():
             o.scale = (1, 1, 1) if active else (0, 0, 0)
             o.keyframe_insert("location", frame=f)
             o.keyframe_insert("scale", frame=f)
-    text("LIKING", (1.45, -2.3, 0.35), 0.28, material("liketxt", TEAL, emit=0.3), B["liking"])
-    text("WANTING", (0.35, -2.3, -1.05), 0.28, material("wanttxt", "#C77F06", emit=0.3), W0)
+    text("LIKING", (1.55, -1.9, 0.2), 0.2, material("liketxt", TEAL, emit=0.3), B["liking"])
+    text("WANTING", (0.35, -1.9, -0.95), 0.2, material("wanttxt", "#C77F06", emit=0.3), W0)
     return s
 
 
@@ -269,5 +286,7 @@ for f in PREVIEW or []:
     s.render.filepath = os.path.join(os.path.abspath(OUT), f"preview_{f:04d}.png")
     bpy.ops.render.render(write_still=True)
 if not PREVIEW:
+    if RANGE:
+        s.frame_start, s.frame_end = RANGE
     s.render.filepath = os.path.join(os.path.abspath(OUT), "")
     bpy.ops.render.render(animation=True)
