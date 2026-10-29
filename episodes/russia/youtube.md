@@ -27,7 +27,7 @@ a revolution in the wrong month, the first human in space… and a pizza commerc
 11:22 Russia since 1991
 11:57 So that's Russia
 
-Maps: historical borders from historical-basemaps by André Ourednik (GPL-3.0), coastlines from Natural Earth (public domain).
+Maps: satellite imagery NASA Blue Marble (public domain); historical borders from historical-basemaps by André Ourednik (GPL-3.0); coastlines from Natural Earth (public domain).
 Narration is AI-generated. Dates and figures are rounded for time; estimates such as war deaths are the commonly cited ones.
 
 Which country should we do next? Tell me in the comments.

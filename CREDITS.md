@@ -7,6 +7,7 @@
 
 # The Entire History of Russia in 12 Minutes (src/Russia)
 - Historical borders: historical-basemaps by André Ourednik, GPL-3.0 — https://github.com/aourednik/historical-basemaps (src/Russia/maps.json is derived from it and stays under GPL-3.0)
+- Satellite imagery: NASA Earth Observatory, Blue Marble Next Generation (July 2004), public domain — https://visibleearth.nasa.gov/collection/1484/blue-marble (tiles in public/sat, built by episodes/russia/build_sat.py)
 - Coastlines, lakes, rivers: Natural Earth 1:50m, public domain — https://www.naturalearthdata.com
 - Voice: AI-generated (Chatterbox), cloned from this channel's own narrator. All drawings are original.
 

@@ -1,10 +1,13 @@
 import React, { useId } from "react";
+import { AbsoluteFill } from "remotion";
 import M from "./maps.json";
 import { C, FONT, R, ez, mix, type Cam } from "./kit";
+import { SatLayer } from "./sat";
 
 /**
- * The map world: Natural Earth land + historical-basemaps borders (episodes/russia/build_maps.py), in world px.
- * Strokes use non-scaling-stroke so lines stay the same weight at every zoom; labels divide by the camera scale.
+ * The map world: NASA Blue Marble satellite imagery (sat.tsx) under historical-basemaps borders clipped to
+ * Natural Earth coastlines (episodes/russia/build_maps.py), in world px. Strokes use non-scaling-stroke so lines
+ * stay the same weight at every zoom; labels divide by the camera scale.
  */
 
 type Maps = { W: number; H: number; K: number; COS: number; LON0: number; LAT1: number; land: string; lakes: string;
@@ -53,6 +56,7 @@ const RegionShape: React.FC<{ r: Region; s: number }> = ({ r, s }) => {
   if (!d) throw new Error(`map: no ${r.n} in ${r.y}`);
   const t = r.t ?? 1;
   if (t <= 0 || (r.op ?? 1) <= 0) return null;
+  const hatchInk = r.color === C.ink ? "#FFFFFF" : r.color;
   let clip: React.ReactNode = null;
   if (t < 1) {
     if (r.dir) {
@@ -69,38 +73,49 @@ const RegionShape: React.FC<{ r: Region; s: number }> = ({ r, s }) => {
       {r.hatch ? (
         <defs>
           <pattern id={`${id}h`} width={14 / s} height={14 / s} patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-            <rect width={14 / s} height={14 / s} fill={r.color} opacity={0.35} />
-            <line x1={0} y1={0} x2={0} y2={14 / s} stroke={r.color} strokeWidth={6 / s} />
+            <rect width={14 / s} height={14 / s} fill={hatchInk} opacity={0.18} />
+            <line x1={0} y1={0} x2={0} y2={14 / s} stroke={hatchInk} strokeWidth={5 / s} />
           </pattern>
         </defs>
       ) : null}
-      <path d={d} clipPath={clip ? `url(#${id})` : undefined} fill={r.hatch ? `url(#${id}h)` : r.color} fillRule="evenodd"
-        stroke={C.ink} strokeWidth={1.6} vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
+      <g clipPath={clip ? `url(#${id})` : undefined}>
+        <path d={d} fill={r.hatch ? `url(#${id}h)` : r.color} fillOpacity={r.hatch ? 1 : 0.5} fillRule="evenodd"
+          stroke="rgba(8,6,4,0.6)" strokeWidth={5} vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
+        <path d={d} fill="none" stroke={r.hatch ? "#FFFFFF" : r.color} strokeWidth={2.4} vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
+      </g>
     </g>
   );
 };
 
 /**
- * The map, seen through `cam`. `regions` draw under the lakes and coastline; children draw on top in world px
- * (use the label helpers below, which stay a constant size on screen).
+ * The map, seen through `cam`: satellite imagery, then borders and `regions`, then children in world px
+ * (use the label helpers below, which stay a constant size on screen). `rivers` named here are highlighted.
  */
 export const MapView: React.FC<{ cam: Cam; year?: string; borderOp?: number; regions?: Region[]; rivers?: string[]; children?: React.ReactNode; dim?: number }> = ({
   cam, year, borderOp = 1, regions = [], rivers = [], children, dim = 0,
 }) => (
-  <svg viewBox="0 0 1920 1080" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", background: R.sea }}>
-    <g transform={`translate(${960 - cam.s * cam.x} ${540 - cam.s * cam.y}) scale(${cam.s})`}>
-      <path d={MAP.land} fill={R.land} />
-      {Object.entries(MAP.rivers).map(([n, d]) => (
-        <path key={n} d={d} fill="none" stroke={R.river} strokeWidth={rivers.includes(n) ? 4 : 1.4} vectorEffect="non-scaling-stroke" strokeLinecap="round" />
-      ))}
-      {year ? <path d={MAP.borders[year]} fill="none" stroke="#B9AE9A" strokeWidth={1.3} vectorEffect="non-scaling-stroke" opacity={borderOp} /> : null}
-      {regions.map((r, i) => <RegionShape key={`${r.y}${r.n}${i}`} r={r} s={cam.s} />)}
-      <path d={MAP.lakes} fill={R.sea} stroke={C.ink} strokeWidth={1} vectorEffect="non-scaling-stroke" />
-      <path d={MAP.land} fill="none" stroke={C.ink} strokeWidth={2.2} vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
-      {dim > 0 ? <rect x={-2000} y={-2000} width={MW + 4000} height={MH + 4000} fill={C.bg} opacity={dim} /> : null}
-      {children}
-    </g>
-  </svg>
+  <AbsoluteFill>
+    <SatLayer cam={cam} W={MW} H={MH} />
+    <svg viewBox="0 0 1920 1080" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
+      <defs>
+        <filter id="pinOutline" x="-30%" y="-30%" width="160%" height="160%">
+          <feMorphology in="SourceAlpha" operator="dilate" radius={4} result="d" />
+          <feFlood floodColor="#FFFFFF" floodOpacity={0.9} />
+          <feComposite in2="d" operator="in" result="o" />
+          <feMerge><feMergeNode in="o" /><feMergeNode in="SourceGraphic" /></feMerge>
+        </filter>
+      </defs>
+      <g transform={`translate(${960 - cam.s * cam.x} ${540 - cam.s * cam.y}) scale(${cam.s})`}>
+        {Object.entries(MAP.rivers).filter(([n]) => rivers.includes(n)).map(([n, d]) => (
+          <path key={n} d={d} fill="none" stroke="#A8E2F5" strokeWidth={3.2} vectorEffect="non-scaling-stroke" strokeLinecap="round" opacity={0.9} />
+        ))}
+        {year ? <path d={MAP.borders[year]} fill="none" stroke="#FFFFFF" strokeWidth={1.3} vectorEffect="non-scaling-stroke" opacity={0.38 * borderOp} /> : null}
+        {regions.map((r, i) => <RegionShape key={`${r.y}${r.n}${i}`} r={r} s={cam.s} />)}
+        {dim > 0 ? <rect x={-2000} y={-2000} width={MW + 4000} height={MH + 4000} fill="#05080C" opacity={0.85 * dim} /> : null}
+        {children}
+      </g>
+    </svg>
+  </AbsoluteFill>
 );
 
 /** Fade/regrow helper: region `n` of year `y`, coloured, with entrance t. */
@@ -113,10 +128,12 @@ export const Label: React.FC<{ p: Place | LL; s: number; t: number; text: string
   if (t <= 0) return null;
   const [x, y] = typeof p === "string" ? P(p) : proj(p);
   const k = 1 / s;
+  const fill = color === C.ink ? "#FFFFFF" : color;
+  const ring = halo === C.bg ? "rgba(12,10,8,0.85)" : halo;
   return (
     <g transform={`translate(${x} ${y}) scale(${k * t})`}>
-      {dot ? <circle r={10} fill={color === C.ink ? C.red : color} stroke={C.ink} strokeWidth={4} /> : null}
-      <text x={dx} y={dy} textAnchor={anchor} fontFamily={FONT} fontWeight={900} fontSize={size} fill={color} stroke={halo} strokeWidth={size * 0.16} paintOrder="stroke" strokeLinejoin="round">
+      {dot ? <circle r={10} fill={color === C.ink ? C.red : color} stroke="#FFFFFF" strokeWidth={4} /> : null}
+      <text x={dx} y={dy} textAnchor={anchor} fontFamily={FONT} fontWeight={900} fontSize={size} fill={fill} stroke={ring} strokeWidth={size * 0.2} paintOrder="stroke" strokeLinejoin="round">
         {text}
       </text>
     </g>
@@ -127,7 +144,7 @@ export const Label: React.FC<{ p: Place | LL; s: number; t: number; text: string
 export const Pin: React.FC<{ p: Place | LL; s: number; k?: number; t?: number; dx?: number; dy?: number; children: React.ReactNode }> = ({ p, s, k = 1, t = 1, dx = 0, dy = 0, children }) => {
   if (t <= 0) return null;
   const [x, y] = typeof p === "string" ? P(p) : proj(p);
-  return <g transform={`translate(${x} ${y}) scale(${(k * t) / s}) translate(${dx} ${dy})`}>{children}</g>;
+  return <g transform={`translate(${x} ${y}) scale(${(k * t) / s}) translate(${dx} ${dy})`} filter="url(#pinOutline)">{children}</g>;
 };
 
 /** Curved arrow between places that draws on with t (0..1); `bend` bows it sideways; width in screen px. */

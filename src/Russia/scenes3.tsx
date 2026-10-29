@@ -97,9 +97,9 @@ const Napoleon: React.FC = () => {
     return (
       <AbsoluteFill>
         <MapView cam={cam} year="1815" regions={[reg(1815, "Russian Empire", C.red)]}>
+          {Array.from({ length: 6 }, (_, i) => <Pin key={i} p={[35.8 + Math.sin(i * 2.3) * 0.5, 55.5 + Math.cos(i * 1.7) * 0.25]} s={cam.s} k={1}><Boom t={((f - borodino - i * 9) % 40) / 24} k={0.8} /></Pin>)}
           <Label p="borodino" s={cam.s} t={pop(f, borodino)} text="BORODINO" dy={70} />
           <Label p="moscow" s={cam.s} t={1} text="MOSCOW" dy={-34} />
-          {Array.from({ length: 6 }, (_, i) => <Pin key={i} p={[35.8 + Math.sin(i * 2.3) * 0.5, 55.5 + Math.cos(i * 1.7) * 0.25]} s={cam.s} k={1}><Boom t={((f - borodino - i * 9) % 40) / 24} k={0.8} /></Pin>)}
         </MapView>
         <Over><Counter x={960} y={330} f={f} a={seventy} b={seventy + 30} to={70000} size={130} color={C.red} op={1} /><T x={960} y={410} size={50} op={pop(f, day - 6)}>IN ONE DAY</T></Over>
       </AbsoluteFill>

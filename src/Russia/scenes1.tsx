@@ -11,8 +11,20 @@ import {
 import { w } from "./overlays";
 
 export const useW = (key: string) => (x: string, n = 0) => w(key, x, n);
-/** Screen-space stage for figures over a map (identity camera). */
-export const Over: React.FC<{ children: React.ReactNode }> = ({ children }) => <View x={960} y={540} s={1}>{children}</View>;
+/** Screen-space stage for figures over a map (identity camera); a white outline keeps them readable on the imagery. */
+export const Over: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <View x={960} y={540} s={1}>
+    <defs>
+      <filter id="overOutline" x="-10%" y="-10%" width="120%" height="120%">
+        <feMorphology in="SourceAlpha" operator="dilate" radius={5} result="d" />
+        <feFlood floodColor="#FFFFFF" floodOpacity={0.92} />
+        <feComposite in2="d" operator="in" result="o" />
+        <feMerge><feMergeNode in="o" /><feMergeNode in="SourceGraphic" /></feMerge>
+      </filter>
+    </defs>
+    <g filter="url(#overOutline)">{children}</g>
+  </View>
+);
 
 export const RUSSIA_CAM: Cam = at([104, 60], 1.0);
 
