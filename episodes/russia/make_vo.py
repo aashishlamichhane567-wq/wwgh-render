@@ -1,0 +1,243 @@
+"""Voiceover + word timings for the Russia episode.
+
+  python make_vo.py tts      # Chatterbox, one take per script line, QA'd by faster-whisper -> public/vo_russia/<scene>.wav
+  python make_vo.py timing   # faster-whisper word times aligned to the script -> src/Russia/timing.ts
+  python make_vo.py estimate # no audio: timing.ts from word counts, for blocking out scenes before the VO exists
+
+Voice: Chatterbox cloned from the channel's own narrator (public/vo_wwgh/*.wav), exaggeration 0.45, cfg 0.3.
+Script syntax (episodes/russia/script.txt): "## key" starts a scene, one line = one TTS take, a blank line = longer
+pause, and shown{spoken} captions "shown" while the narrator says "spoken" (years, mostly).
+"""
+import difflib, json, os, re, subprocess, sys
+import numpy as np
+
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+SCRIPT = os.path.join(ROOT, "episodes/russia/script.txt")
+OUT_DIR = os.path.join(ROOT, "public/vo_russia")
+TIMING = os.path.join(ROOT, "src/Russia/timing.ts")
+REF = os.path.join(ROOT, "public/vo_wwgh/end.wav")
+SR = 24000
+FPS = 30
+GAP_LINE, GAP_PARA = 0.32, 0.75  # seconds of silence between takes
+LEAD, TAIL = 12, 16  # frames before / after the voice in each scene
+FIRST_LEAD = 24
+
+
+def parse():
+    scenes, key = {}, None
+    for raw in open(SCRIPT, encoding="utf-8"):
+        line = raw.rstrip("\n")
+        if line.startswith("## "):
+            key = line[3:].strip()
+            scenes[key] = []
+        elif line.startswith("#") or key is None:
+            continue
+        elif not line.strip():
+            if scenes[key] and scenes[key][-1] != "":
+                scenes[key].append("")
+        else:
+            scenes[key].append(line.strip())
+    for k in scenes:
+        while scenes[k] and scenes[k][-1] == "":
+            scenes[k].pop()
+    return scenes
+
+
+TOK = re.compile(r"(\S+?)\{([^}]*)\}(\S*)|(\S+)")
+
+
+def tokens(line):
+    """[(shown, spoken)] for a script line."""
+    out = []
+    for m in TOK.finditer(line):
+        if m.group(4):
+            out.append((m.group(4), m.group(4)))
+        else:
+            shown = m.group(1) + m.group(3)
+            # keep the shown token's punctuation on the spoken side so TTS phrasing survives
+            out.append((shown, m.group(2) + re.sub(r"[\w']", "", m.group(3))))
+    return out
+
+
+def spoken(line):
+    return " ".join(s for _, s in tokens(line))
+
+
+norm = lambda s: re.sub(r"[^a-z0-9']", "", s.lower().replace("’", "'"))
+
+
+def words_of(text):
+    return [w for w in (norm(x) for x in re.split(r"[\s\-]+", text)) if w]
+
+
+# ─────────────── TTS ───────────────
+
+def trim(wav, thr=0.012, pad=0.04):
+    a = np.abs(wav)
+    idx = np.where(a > thr)[0]
+    if not len(idx):
+        return wav
+    s = max(0, idx[0] - int(pad * SR))
+    e = min(len(wav), idx[-1] + int(pad * SR * 2))
+    return wav[s:e]
+
+
+def tts():
+    import torch, torchaudio
+    from chatterbox.tts import ChatterboxTTS
+    from faster_whisper import WhisperModel
+
+    torch.set_num_threads(os.cpu_count() or 4)
+    model = ChatterboxTTS.from_pretrained(device="cpu")
+    model.prepare_conditionals(REF, exaggeration=0.45)
+    asr = WhisperModel("base.en", device="cpu", compute_type="int8")
+    os.makedirs(OUT_DIR, exist_ok=True)
+    only = set(sys.argv[2:])
+    report = []
+    for key, lines in parse().items():
+        if only and key not in only:
+            continue
+        path = os.path.join(OUT_DIR, f"{key}.wav")
+        if os.path.exists(path) and not only:
+            print("skip", key, flush=True)
+            continue
+        parts = []
+        for line in lines:
+            if line == "":
+                parts.append(np.zeros(int(SR * (GAP_PARA - GAP_LINE)), dtype=np.float32))
+                continue
+            text = spoken(line)
+            # QA ignores voiced numbers: whisper writes "1547" where the script says "fifteen forty-seven"
+            want = [w for sh, sp in tokens(line) if sh == sp for w in words_of(sp)]
+            best = None
+            for attempt in range(4):
+                torch.manual_seed(1000 + attempt * 77 + len(parts))
+                wav = model.generate(text, exaggeration=0.45, cfg_weight=0.3, temperature=0.7)
+                wav = trim(wav.squeeze(0).numpy().astype(np.float32))
+                segs, _ = asr.transcribe(wav.astype(np.float32) if SR == 16000 else resample(wav), language="en", beam_size=1)
+                heard = [w for w in words_of(" ".join(s.text for s in segs)) if not w.isdigit()]
+                score = difflib.SequenceMatcher(None, want, heard).ratio()
+                dur = len(wav) / SR
+                rate = len(words_of(text)) / max(dur, 0.1)  # words per second: Chatterbox sometimes drags or rushes a take
+                ok = score >= 0.86 and 1.6 <= rate <= 3.9
+                print(f"  {key} try{attempt} score={score:.2f} wps={rate:.2f} {dur:.1f}s :: {text[:60]}", flush=True)
+                if best is None or score > best[0]:
+                    best = (score, wav)
+                if ok:
+                    break
+            if best[0] < 0.86:
+                report.append((key, best[0], text))
+            parts.append(best[1])
+            parts.append(np.zeros(int(SR * GAP_LINE), dtype=np.float32))
+        audio = np.concatenate(parts[:-1]) if parts else np.zeros(1, dtype=np.float32)
+        torchaudio.save(path, torch.from_numpy(audio).unsqueeze(0), SR)
+        print("wrote", path, f"{len(audio) / SR:.1f}s", flush=True)
+    for r in report:
+        print("LOW SCORE", r, flush=True)
+
+
+def resample(wav):
+    """24 kHz -> 16 kHz for whisper."""
+    n = int(len(wav) * 16000 / SR)
+    return np.interp(np.linspace(0, len(wav) - 1, n), np.arange(len(wav)), wav).astype(np.float32)
+
+
+def load_wav(path):
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", path, "-ac", "1", "-ar", "16000", "-f", "f32le", "-"], capture_output=True, check=True).stdout
+    return np.frombuffer(raw, dtype=np.float32)
+
+
+# ─────────────── Timing ───────────────
+
+def align(lines, audio16):
+    """[(start_s, end_s, shown)] for every shown token, from whisper word times matched to the spoken script."""
+    from faster_whisper import WhisperModel
+    asr = WhisperModel("small.en", device="cpu", compute_type="int8")
+    prompt = " ".join(spoken(l) for l in lines if l)
+    segs, _ = asr.transcribe(audio16, language="en", word_timestamps=True, initial_prompt=prompt[:800], beam_size=5)
+    heard = [(w.start, w.end, norm(w.word)) for s in segs for w in s.words if norm(w.word)]
+    shown, sp = [], []  # sp: (word, index into shown)
+    for l in lines:
+        if not l:
+            continue
+        for s_tok, p_tok in tokens(l):
+            shown.append(s_tok)
+            for w in words_of(p_tok):
+                sp.append((w, len(shown) - 1))
+    times = [None] * len(sp)
+    sm = difflib.SequenceMatcher(None, [w for w, _ in sp], [h[2] for h in heard], autojunk=False)
+    for a, b, n in sm.get_matching_blocks():
+        for i in range(n):
+            times[a + i] = heard[b + i][:2]
+    # interpolate unmatched spoken words between their matched neighbours
+    total = len(audio16) / 16000
+    i = 0
+    while i < len(sp):
+        if times[i] is not None:
+            i += 1
+            continue
+        j = i
+        while j < len(sp) and times[j] is None:
+            j += 1
+        t0 = times[i - 1][1] if i > 0 else 0.0
+        t1 = times[j][0] if j < len(sp) else total
+        step = (t1 - t0) / (j - i)
+        for k in range(i, j):
+            times[k] = (t0 + step * (k - i), t0 + step * (k - i + 1))
+        i = j
+    out = []
+    for idx, tok in enumerate(shown):
+        ts = [times[k] for k, (_, si) in enumerate(sp) if si == idx]
+        if not ts:  # a token with no spoken words (e.g. a lone dash): pin to the previous one
+            ts = [out[-1][:2]] if out else [(0.0, 0.1)]
+        out.append((ts[0][0], ts[-1][1], tok))
+    return out
+
+
+def write_timing(scenes_t):
+    lines = ["// GENERATED by episodes/russia/make_vo.py (Chatterbox, cloned channel voice: exaggeration 0.45, cfg 0.3) — do not edit by hand.",
+             "// Scene-relative frames; word times from faster-whisper aligned to the script.", "", "export const SCENES = {"]
+    start = 0
+    caps = {}
+    for i, (key, dur_s, words) in enumerate(scenes_t):
+        lead = FIRST_LEAD if i == 0 else LEAD
+        dur = lead + int(round(dur_s * FPS)) + TAIL
+        lines.append(f'  "{key}": {{ "start": {start}, "dur": {dur}, "lead": {lead} }},')
+        caps[key] = [[lead + int(round(s * FPS)), lead + max(int(round(s * FPS)) + 1, int(round(e * FPS))), t] for s, e, t in words]
+        start += dur
+    lines += ["} as const;", "", "/** Per scene: [startFrame, endFrame, token] for every spoken word. */",
+              f"export const CAPS: Record<string, [number, number, string][]> = {json.dumps(caps, ensure_ascii=False)};", "",
+              f"export const TOTAL_FRAMES = {start};", ""]
+    open(TIMING, "w", encoding="utf-8").write("\n".join(lines))
+    print(f"wrote {TIMING}: {start} frames = {start / FPS / 60:.2f} min")
+
+
+def timing():
+    out = []
+    for key, lines in parse().items():
+        audio = load_wav(os.path.join(OUT_DIR, f"{key}.wav"))
+        words = align(lines, audio)
+        out.append((key, len(audio) / 16000, words))
+        print(key, f"{len(audio) / 16000:.1f}s", len(words), "words", flush=True)
+    write_timing(out)
+
+
+def estimate(wps=2.55):
+    out = []
+    for key, lines in parse().items():
+        t, words = 0.0, []
+        for l in lines:
+            if not l:
+                t += GAP_PARA - GAP_LINE
+                continue
+            for s_tok, p_tok in tokens(l):
+                d = max(0.18, len(words_of(p_tok)) / wps) + (0.25 if re.search(r"[.,:;?!]$", s_tok) else 0)
+                words.append((t, t + d * 0.9, s_tok))
+                t += d
+            t += GAP_LINE
+        out.append((key, t, words))
+    write_timing(out)
+
+
+if __name__ == "__main__":
+    {"tts": tts, "timing": timing, "estimate": estimate}[sys.argv[1]]()

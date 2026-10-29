@@ -51,6 +51,9 @@ export type StickmanProps = {
   headFill?: string;
   /** Full expression (overrides the anger-driven face). Use a FACES preset, or blendFace() between two. */
   face?: Face;
+  /** Costume drawn in rig units: `back` behind the body (capes, dresses), `hat` on the head (turns with headTilt). */
+  back?: React.ReactNode;
+  hat?: React.ReactNode;
 };
 
 /**
@@ -137,6 +140,8 @@ export const Stickman: React.FC<StickmanProps> = ({
   stroke = 7,
   headFill = "#FFFFFF",
   face,
+  back,
+  hat,
 }) => {
   const a = Math.max(0, Math.min(1, anger));
 
@@ -171,6 +176,7 @@ export const Stickman: React.FC<StickmanProps> = ({
       strokeDasharray={dashed ? "13 9" : undefined}
     >
       <g transform={`rotate(${lean}, 100, 190)`}>
+        {back}
         {/* torso */}
         <line
           x1={100}
@@ -244,6 +250,7 @@ export const Stickman: React.FC<StickmanProps> = ({
           {!faceless && face ? (
             <FaceMarks f={face} ink={ink} frame={frame} />
           ) : null}
+          {hat}
           {!faceless && !face && (<>
           {knockedOut ? (
             <>

@@ -2,10 +2,14 @@
 # gh workflow run render.yml                      (whole video, fresh Blender shots)
 # gh workflow run render.yml -f blender=false     (skip Blender; drawn fallbacks show)
 # gh workflow run render.yml -f frames=0-1808     (quick slice)
+# gh workflow run render.yml -f comp=Russia -f blender=false   (the Russia episode; it has no Blender shots)
 name: render
 on:
   workflow_dispatch:
     inputs:
+      comp:
+        description: composition to render (Wwgh or Russia)
+        default: Wwgh
       frames:
         description: frame range for a quick test (blank = whole video)
         default: ""
@@ -77,12 +81,12 @@ jobs:
         run: |
           npm ci --no-audit --no-fund
           npx remotion browser ensure
-          npx remotion render Wwgh out/raw.mp4 --concurrency=100% --pixel-format=yuv420p --jpeg-quality=95 ${{ inputs.frames && format('--frames={0}', inputs.frames) || '' }}
+          npx remotion render ${{ inputs.comp }} out/raw.mp4 --concurrency=100% --pixel-format=yuv420p --jpeg-quality=95 ${{ inputs.frames && format('--frames={0}', inputs.frames) || '' }}
       - name: Voice chain, loudness -16 LUFS / -1.5 dBTP, final encode
         run: |
           ffmpeg -hide_banner -loglevel error -i out/raw.mp4 -vf "scale=in_range=full:out_range=tv,format=yuv420p" -c:v libx264 -preset medium -tune animation -crf 18 \
             -colorspace bt709 -color_primaries bt709 -color_trc bt709 -color_range tv \
-            -af "$(cat voice_chain.txt),loudnorm=I=-16:TP=-1.5:LRA=11" -c:a aac -b:a 320k -movflags +faststart out/Wwgh.mp4
-          ffprobe -v error -show_entries format=duration,size -of default=nw=1 out/Wwgh.mp4
+            -af "$(cat voice_chain.txt),loudnorm=I=-16:TP=-1.5:LRA=11" -c:a aac -b:a 320k -movflags +faststart out/${{ inputs.comp }}.mp4
+          ffprobe -v error -show_entries format=duration,size -of default=nw=1 out/${{ inputs.comp }}.mp4
       - uses: actions/upload-artifact@v4
-        with: { name: Wwgh, path: out/Wwgh.mp4, retention-days: 7 }
+        with: { name: "${{ inputs.comp }}", path: "out/${{ inputs.comp }}.mp4", retention-days: 7 }
