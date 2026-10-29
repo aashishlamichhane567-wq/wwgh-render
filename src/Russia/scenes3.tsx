@@ -300,8 +300,8 @@ const Nicholas: React.FC = () => {
             {boats ? [0, 1, 2].map((i) => <Boat key={i} x={1400 + i * 180} y={720 + (i % 2) * 40} f={f} k={0.8} />) : null}
             {f >= fire ? [0, 1, 2].map((i) => <g key={i} transform={`translate(${1400 + i * 180} 640)`}><Boom t={((f - fire - i * 7) % 30) / 18} k={0.7} /></g>) : null}
             <Person who="admiral" x={((300 + sail) % 2600) - 300} ground={600} f={f} s={0.9} face={FACES.angry} armR={-90} op={pop(f, fire - 10)} />
-            <Say x={((300 + sail) % 2600) - 300 + 140} y={300} t={span(f, japanese - 10, reached)} text="JAPANESE!" size={56} tail={-1} />
-            <Say x={1500} y={330} t={span(f, british, reached)} text={"WE'RE\nBRITISH!"} size={50} tail={1} />
+            <Say x={((300 + sail) % 2600) - 300 + 140} y={260} t={span(f, japanese - 10, reached)} text="JAPANESE!" size={56} tail={-1} />
+            <Say x={1640} y={540} t={span(f, british, reached)} text={"WE'RE\nBRITISH!"} size={50} tail={1} />
             <Counter x={960} y={150} f={f} a={sent} b={world + 20} to={33000} suffix=" km" size={80} op={1 - ez(f, north - 6, north)} />
           </View>
         </AbsoluteFill>

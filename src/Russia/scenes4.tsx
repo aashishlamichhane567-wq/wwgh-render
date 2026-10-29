@@ -39,7 +39,7 @@ const ColdWar: React.FC = () => {
   const W = useW("coldwar");
   const superpowers = W("superpowers,"), hated = W("hated"), y1957 = W("1957,"), sputnik = W("Sputnik,"), america = W("America"), panicked = W("panicked."), laika = W("Laika.");
   const y1961 = W("1961,"), gagarin = W("Gagarin"), space = W("space."), rocket = W("rocket"), lifted = W("lifted"), poy = W("\"Poyekhali!\""), go = W("go!\"");
-  const missiles = W("missiles"), cuba = W("Cuba"), nuclear = W("nuclear"), stagnation = W("stagnation,"), shelves = W("shelves,"), afghanistan = W("Afghanistan,"), y1986 = W("1986,"), chernobyl = W("Chernobyl.");
+  const yearLater = W("year"), missiles = W("missiles"), cuba = W("Cuba"), nuclear = W("nuclear"), stagnation = W("stagnation,"), shelves = W("shelves,"), afghanistan = W("Afghanistan,"), y1986 = W("1986,"), chernobyl = W("Chernobyl.");
   if (f < y1957 - 4) {
     const glare = ez(f, hated, hated + 10);
     return (
@@ -78,7 +78,7 @@ const ColdWar: React.FC = () => {
       </AbsoluteFill>
     );
   }
-  if (f < missiles - 4) {
+  if (f < yearLater - 4) {
     const lift = ez(f, lifted, go + 30);
     return (
       <AbsoluteFill>
@@ -111,7 +111,7 @@ const ColdWar: React.FC = () => {
           <T x={960} y={830} size={50} op={pop(f, cuba)}>MISSILES IN CUBA</T>
           {sweat > 0 ? [0, 1].map((i) => <circle key={i} cx={(i ? 1500 : 420) + 40} cy={GROUND - 330 + ((f * 3) % 60)} r={10} fill="#9CC9E8" stroke={C.ink} strokeWidth={3} />) : null}
         </View>
-        <YearBadge f={f} at={missiles - 4} year={1962} />
+        <YearBadge f={f} at={yearLater - 4} year={1962} />
       </AbsoluteFill>
     );
   }
