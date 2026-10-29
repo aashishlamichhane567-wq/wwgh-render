@@ -9,3 +9,6 @@
 - Historical borders: historical-basemaps by André Ourednik, GPL-3.0 — https://github.com/aourednik/historical-basemaps (src/Russia/maps.json is derived from it and stays under GPL-3.0)
 - Coastlines, lakes, rivers: Natural Earth 1:50m, public domain — https://www.naturalearthdata.com
 - Voice: AI-generated (Chatterbox), cloned from this channel's own narrator. All drawings are original.
+
+# Style lab fonts (public/fonts, SIL Open Font License 1.1 — licence texts alongside)
+- Ruslan Display (Denis Masharov), Oswald (Vernon Adams et al.), Kalam (Indian Type Foundry), UnifrakturMaguntia (J. 'Mach' Wust)
