@@ -4,6 +4,7 @@ import { INK, PaperDefs, PaperTexture, torn, usePaperFonts } from "../Puppet/pap
 import { T } from "./kit";
 import { Backdrop, ERA_OF, EraContext } from "./era";
 import { Captions } from "./overlays";
+import { SceneInserts } from "./inserts";
 import { HookPaper } from "./Pilot";
 import { SCENES1 } from "./scenes1";
 import { SCENES2 } from "./scenes2";
@@ -79,6 +80,7 @@ export const RussiaVideo: React.FC = () => {
       {Object.entries(SCENES).map(([key, sc], i) => (
         <Sequence key={key} from={sc.start} durationInFrames={sc.dur} name={key}>
           <SceneFrame k={key} i={i} dur={sc.dur} />
+          <SceneInserts scene={key} />
           <Captions scene={key} paper />
           {has(`vo_russia/${key}.wav`) ? (
             <Sequence from={sc.lead}>
