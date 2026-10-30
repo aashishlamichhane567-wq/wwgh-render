@@ -1,13 +1,13 @@
 # Delivery directions for the narrator (make_vo.py qwen). Each scene has a default after "## key |"; a line that starts with
 # "<start of a script line> |" overrides it for that line. Directions are plain English, passed to Qwen3-TTS as its instruction.
 
-## hook | Intriguing storyteller opening a tale, warm and confident, drawing the listener in, varied pitch.
-In 862{eight sixty-two}, a group | Mysterious and intriguing, slowly setting the scene.
-"Our land is great | Earnest and pleading, quoting ancient people, then a beat of irony.
-They said this to Vikings. | Deadpan, dry comic punchline, slight pause before Vikings.
-Eleven centuries later | Grand and impressive, building scale.
-It has eleven time zones | Brisk, energetic, listing with rising excitement.
-This is the entire history | Excited and punchy, inviting, big energy on Let's go.
+## hook | Captivating movie-trailer storyteller, rich and theatrical, big dynamic range, savouring every word.
+In 862{eight sixty-two}, a group | Hushed and mysterious, leaning in close as if sharing a secret, slow, with suspense building.
+"Our land is great | Theatrical, earnest and pleading, acting out the ancient tribesmen, rising to a big dramatic plea on Come and rule over us.
+They said this to Vikings. | Pause, then bone-dry deadpan punchline, slower, landing hard on Vikings with comic disbelief.
+Eleven centuries later | Grand and awe-struck, swelling with scale and wonder, slow and powerful.
+It has eleven time zones | Punchy and fast, building excitement, hitting each name: Vikings, Mongols, tsars and communists.
+This is the entire history | Big confident trailer voice, exciting and bold, then an energetic, grinning Let's go!
 
 ## rus | Lively, curious storyteller, light and brisk with a smile.
 So the first Russian state | Amused, pointing out an irony with a knowing tone.

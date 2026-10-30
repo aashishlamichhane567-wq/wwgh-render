@@ -267,6 +267,32 @@ def qwen(batch=int(os.environ.get("VO_BATCH", 4))):
 
     todo = sorted({l for ls in scenes.values() for l in ls if l and not os.path.exists(path_of(l))}, key=len)
     print(len(todo), "lines to voice", flush=True)
+    takes = int(os.environ.get("VO_TAKES", 1))
+    if takes > 1:  # several takes of each line in one batch; keep the most expressive one that passes QA
+        import librosa
+        def liveliness(wav, sr):
+            f0, _, _ = librosa.pyin(wav, fmin=50, fmax=300, sr=sr)
+            f0 = f0[~np.isnan(f0)]
+            rms = librosa.feature.rms(y=wav)[0]
+            db = 20 * np.log10(rms[rms > rms.max() * 0.05] + 1e-9)
+            return np.std(12 * np.log2(f0 / np.median(f0))) + 0.3 * db.std()
+        for n, line in enumerate(todo):
+            torch.manual_seed(31 + n)
+            ids = [model._tokenize_texts([model._build_instruct_text(direction[line])])[0]] * takes
+            model.model.generate = lambda *a, **k: generate(*a, **{**k, "instruct_ids": ids})
+            wavs, sr = model.generate_voice_clone(text=[spoken(line).replace('"', "")] * takes, language=["English"] * takes, voice_clone_prompt=[prompt] * takes)
+            scored = []
+            for t, wav in enumerate(wavs):
+                wav = np.asarray(wav, dtype=np.float32)
+                score, rate = check(line, wav, sr)
+                ok = score >= 0.86 and (1.7 <= rate <= 4.2 or len(words_of(spoken(line))) < 4)
+                live = liveliness(wav, sr)
+                print(f"  take{t} {'ok ' if ok else 'BAD'} score={score:.2f} wps={rate:.2f} live={live:.2f} :: {spoken(line)[:60]}", flush=True)
+                scored.append((ok, live, wav))
+            ok, live, wav = max(scored, key=lambda x: (x[0], x[1]))
+            sf.write(path_of(line), wav, sr)
+            print(f"  kept live={live:.2f}", flush=True)
+        todo = []
     for attempt in range(4):
         failed = []
         for i in range(0, len(todo), batch):
