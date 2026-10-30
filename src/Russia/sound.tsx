@@ -118,7 +118,7 @@ export const Soundtrack: React.FC = () => {
         return (
           <Sequence key={`${s.cue}${i}`} from={from} durationInFrames={len}>
             <Audio src={staticFile(`music/${s.cue}.mp3`)} loop
-              volume={(f) => MUSIC_VOL * duckCurve[Math.min(TOTAL_FRAMES, from + f)]! * interpolate(f, [0, i ? XFADE : 1, len - (end ? 60 : XFADE), len], [i ? 0 : 1, 1, 1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })} />
+              volume={(f) => MUSIC_VOL * duckCurve[Math.max(0, Math.min(TOTAL_FRAMES, Math.round(from + f)))]! * interpolate(f, [0, i ? XFADE : 1, len - (end ? 60 : XFADE), len], [i ? 0 : 1, 1, 1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })} />
           </Sequence>
         );
       })}
