@@ -33,7 +33,9 @@ VOICE_REF = os.path.join(ROOT, "episodes/russia/voice_ref.wav")
 VOICE_REF_TEXT = ("In eight sixty-two, the tribes of the north looked around and said: our land is great and rich, but there is no order "
                   "in it. So they did something no country has done before or since. They invited foreigners to come and rule them.")
 LINE_CACHE = os.path.join(ROOT, "episodes/russia/vo_lines")  # one wav per script line (git-ignored); lets a long run resume
-NARR_CHAIN = "highpass=f=60,deesser=i=0.2,acompressor=threshold=-20dB:ratio=2:attack=10:release=150:makeup=1.5"
+NARR_CHAIN = ("highpass=f=60,lowshelf=f=150:g=2,equalizer=f=3000:t=q:w=1.2:g=2,deesser=i=0.2,"
+              "acompressor=threshold=-22dB:ratio=3:attack=8:release=120:makeup=2,loudnorm=I=-16:TP=-1.5:LRA=9")
+DELIVERY = os.path.join(ROOT, "episodes/russia/delivery.txt")  # per-scene and per-line emotion directions
 SR = 24000
 FPS = 30
 GAP_LINE, GAP_PARA = 0.42, 0.9  # seconds of silence between takes
@@ -205,6 +207,36 @@ def design():
     print("wrote", VOICE_REF, f"{len(w[0]) / sr:.1f}s")
 
 
+NUM_WORDS = set("one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen "
+                "nineteen twenty thirty forty fifty sixty seventy eighty ninety hundred thousand million".split())
+
+
+def delivery():
+    """{script line: direction} from DELIVERY (scene default, overridden by a line whose start matches)."""
+    scenes, default, rules, key = parse(), {}, {}, None
+    for raw in open(DELIVERY, encoding="utf-8"):
+        line = raw.strip()
+        if line.startswith("## "):
+            key, d = line[3:].split("|", 1)
+            key = key.strip()
+            default[key] = d.strip()
+            rules[key] = []
+        elif line and not line.startswith("#"):
+            start, d = line.split("|", 1)
+            rules[key].append((start.strip(), d.strip()))
+    out = {}
+    for k, lines in scenes.items():
+        for l in lines:
+            if l:
+                hit = [d for st, d in rules.get(k, []) if l.startswith(st)]
+                assert len(hit) <= 1, (k, l)
+                out[l] = hit[0] if hit else default[k]
+    for k, rs in rules.items():
+        for st, _ in rs:
+            assert any(l.startswith(st) for l in scenes[k] if l), f"delivery rule matches no line: {k}: {st}"
+    return out
+
+
 def qwen(batch=int(os.environ.get("VO_BATCH", 4))):
     """Every script line cloned from VOICE_REF with Qwen3-TTS Base, `batch` lines per call (much faster on CPU), whisper QA."""
     import hashlib, torch, soundfile as sf
@@ -218,17 +250,22 @@ def qwen(batch=int(os.environ.get("VO_BATCH", 4))):
     os.makedirs(LINE_CACHE, exist_ok=True)
     only = set(sys.argv[2:])
     scenes = {k: v for k, v in parse().items() if not only or k in only}
-    path_of = lambda text: os.path.join(LINE_CACHE, hashlib.sha1(text.encode()).hexdigest()[:16] + ".wav")
+    direction = delivery()
+    path_of = lambda line: os.path.join(LINE_CACHE, hashlib.sha1((spoken(line) + "|" + direction[line]).encode()).hexdigest()[:16] + ".wav")
+    # The Base (cloning) model has no public instruction argument, but its generate() accepts instruct_ids like the
+    # VoiceDesign model's; passing the direction there keeps voice A's timbre and changes the delivery.
+    generate = model.model.generate
 
     def check(line, wav, sr):
-        want = [w for sh, sp in tokens(line) if sh == sp for w in words_of(sp)]
+        # whisper writes spelled-out numbers as digits, so number words are left out of the comparison
+        want = [w for sh, sp in tokens(line) if sh == sp for w in words_of(sp) if w not in NUM_WORDS]
         a16 = np.interp(np.linspace(0, len(wav) - 1, int(len(wav) * 16000 / sr)), np.arange(len(wav)), wav).astype(np.float32)
         segs, _ = asr.transcribe(a16, language="en", beam_size=1)
         heard = [w for w in words_of(" ".join(s.text for s in segs)) if not w.isdigit()]
         rate = len(words_of(spoken(line))) / max(len(wav) / sr, 0.1)
         return difflib.SequenceMatcher(None, want, heard).ratio(), rate
 
-    todo = sorted({l for ls in scenes.values() for l in ls if l and not os.path.exists(path_of(spoken(l)))}, key=len)
+    todo = sorted({l for ls in scenes.values() for l in ls if l and not os.path.exists(path_of(l))}, key=len)
     print(len(todo), "lines to voice", flush=True)
     for attempt in range(4):
         failed = []
@@ -236,14 +273,16 @@ def qwen(batch=int(os.environ.get("VO_BATCH", 4))):
             group = todo[i:i + batch]
             torch.manual_seed(7 + attempt * 1000 + i)
             texts = [spoken(l).replace('"', "") for l in group]
+            ids = [model._tokenize_texts([model._build_instruct_text(direction[l])])[0] for l in group]
+            model.model.generate = lambda *a, **k: generate(*a, **{**k, "instruct_ids": ids})
             wavs, sr = model.generate_voice_clone(text=texts, language=["English"] * len(group), voice_clone_prompt=[prompt] * len(group))
             for line, wav in zip(group, wavs):
                 wav = np.asarray(wav, dtype=np.float32)
                 score, rate = check(line, wav, sr)
-                ok = score >= 0.86 and 1.7 <= rate <= 4.0
+                ok = score >= 0.86 and (1.7 <= rate <= 4.2 or len(words_of(spoken(line))) < 4)
                 print(f"  try{attempt} {'ok ' if ok else 'BAD'} score={score:.2f} wps={rate:.2f} :: {spoken(line)[:70]}", flush=True)
                 if ok or attempt == 3:
-                    sf.write(path_of(spoken(line)), wav, sr)
+                    sf.write(path_of(line), wav, sr)
                 else:
                     failed.append(line)
         todo = failed
@@ -256,7 +295,7 @@ def qwen(batch=int(os.environ.get("VO_BATCH", 4))):
             if line == "":
                 parts.append(np.zeros(int(SR * (GAP_PARA - GAP_LINE)), dtype=np.float32))
                 continue
-            wav, sr = sf.read(path_of(spoken(line)), dtype="float32")
+            wav, sr = sf.read(path_of(line), dtype="float32")
             assert sr == SR, sr
             parts += [trim(wav), np.zeros(int(SR * GAP_LINE), dtype=np.float32)]
         raw = os.path.join(OUT_DIR, f"{key}.raw.wav")

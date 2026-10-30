@@ -1,0 +1,156 @@
+# Delivery directions for the narrator (make_vo.py qwen). Each scene has a default after "## key |"; a line that starts with
+# "<start of a script line> |" overrides it for that line. Directions are plain English, passed to Qwen3-TTS as its instruction.
+
+## hook | Intriguing storyteller opening a tale, warm and confident, drawing the listener in, varied pitch.
+In 862{eight sixty-two}, a group | Mysterious and intriguing, slowly setting the scene.
+"Our land is great | Earnest and pleading, quoting ancient people, then a beat of irony.
+They said this to Vikings. | Deadpan, dry comic punchline, slight pause before Vikings.
+Eleven centuries later | Grand and impressive, building scale.
+It has eleven time zones | Brisk, energetic, listing with rising excitement.
+This is the entire history | Excited and punchy, inviting, big energy on Let's go.
+
+## rus | Lively, curious storyteller, light and brisk with a smile.
+So the first Russian state | Amused, pointing out an irony with a knowing tone.
+which the Vikings simply | Playful, wry, quoting a nickname.
+
+## faith | Playful and amused, comic storytelling with good timing.
+Around 986{nine eighty-six} | Comic, light, a smile on went shopping.
+Islam looked good | Deadpan comic timing, dry punchline.
+According to the chronicle | Mock-solemn quoting, then amused, hearty on joy of the Rus.
+Then his envoys saw | Awed and wondering, softer, full of amazement.
+So in 988{nine eighty-eight} | Decisive and grand, a turning point.
+
+## mongols | Serious and tense, foreboding storyteller, building dread.
+That was a mistake | Ominous, dramatic, slow and heavy on the Mongols arrived.
+Batu Khan | Dark and intense, urgent, describing destruction.
+For the next two hundred | Grave and heavy, slow.
+To rule their own cities | Dry, sardonic, amused on permission slip.
+
+## moscow | Wry, clever storyteller, enjoying the cunning of it.
+And this is where | Sly and amused, building to a brilliant idea, smiling.
+One prince was nicknamed | Amused, chuckling, mocking nickname.
+In 1480{fourteen eighty} | Bold and defiant, a dramatic turn.
+The Mongol army came | Tense, suspenseful, slow.
+Then both went home. | Deadpan, flat comic punchline.
+And that's how the Mongol yoke | Amused, ironic, savouring the absurdity.
+Ivan married the niece | Grand, proud and stately, rising ambition.
+
+## terrible | Dark, ominous storyteller, unsettling and dramatic.
+His grandson | Stately and grand, a coronation.
+He conquered Kazan | Triumphant and proud.
+Then his beloved wife died | Sad, slowing, darkening, heavy on Ivan the Terrible.
+His secret police | Sinister and creepy, low, with dark relish.
+In a rage | Shocked, intense and grave.
+Ivan died a few years later | Dry, darkly ironic, deadpan.
+
+## siberia | Adventurous and energetic, sense of exploration and scale.
+After that, Russians chased | Excited, sweeping, fast and impressive.
+
+## troubles | Chaotic, incredulous storyteller, building disbelief.
+Ivan's surviving son | Grave and solemn, an ending.
+What followed is literally | Wry, dry humour on Time of Troubles.
+First a terrible famine | Bewildered, incredulous, rising.
+With Polish help | Incredulous, then abrupt and grim.
+Legend says his ashes | Amazed, darkly amused, telling a wild legend.
+Then a second False Dmitry | Exasperated, comic disbelief, faster.
+In 1612{sixteen twelve} | Heroic and rousing.
+And in 1613{sixteen thirteen} | Hopeful, fresh start, warm.
+His family would rule | Weighty and dramatic, foreshadowing.
+
+## peter | Energetic, amused storyteller, admiring and comic.
+His grandson, Peter | Admiring, playful, comic on Holland.
+He toured Western Europe | Comic, mocking, timed punchline on two meters tall.
+He worked in a Dutch | Brisk, comic, incredulous.
+Anyone who wanted | Deadpan, amused.
+Then he fought Sweden | Determined and rousing, triumphant on Poltava.
+On a swamp he took | Proud and grand.
+In 1721{seventeen twenty-one} | Majestic and triumphant.
+Peter also had his own son | Dark, grave and quiet.
+That is the second ruler | Dark humour, conspiratorial, wry aside.
+
+## catherine | Gossipy, scandalous storyteller, sly and dramatic.
+Fast forward to 1762{seventeen sixty-two} | Brisk, exasperated at a foolish emperor.
+His wife, a German princess | Sly and knowing, a hint of menace.
+Six months in | Dramatic, quick and decisive.
+A week later he was dead | Sarcastic, deadpan, mock-official on haemorrhoidal colic.
+She became Catherine | Grand and admiring.
+She took Crimea | Bold, sweeping and powerful.
+Then a Cossack named | Incredulous storytelling.
+Because in Russia | Dry comic aside, amused.
+
+## napoleon | Epic, cinematic and dramatic narrator, rising tension.
+In 1812{eighteen twelve} | Epic and imposing, emphasising scale.
+The Russians kept retreating | Tense and grim.
+At Borodino | Grave and solemn, heavy.
+Napoleon took Moscow | Ominous, then dramatic on Then Moscow burned.
+He waited five weeks | Suspenseful, then flat and bleak.
+So he marched home | Bleak and cold, slow.
+Only a fraction | Grim, then a satisfied, amused twist on Paris.
+
+## reform | Engaging, lively storyteller with ironic humour.
+But most Russians | Serious and sympathetic.
+After a humiliating defeat | Weighty, then hopeful, a big moment.
+Six years later | Amused, building a bargain joke.
+Americans mocked it | Mocking, then excited reveal, comic timing.
+Oops. | Sheepish comic punchline, short.
+Alexander survived | Tense, then grim and abrupt on killed him.
+
+## nicholas | Darkly comic storyteller, mounting disaster.
+The last Tsar | Ominous, slightly mocking.
+He sent his Baltic fleet | Incredulous.
+On the way | Bewildered, comic disbelief.
+When the fleet | Deadpan, grim comedy.
+Back home | Serious and grave.
+Then came World War One | Grim and heavy.
+At court | Mysterious and intriguing, slightly creepy.
+Nobles murdered him | Abrupt and matter-of-fact.
+Legend says he survived | Telling a wild legend with relish, then dry deadpan correction.
+
+## revolution | Urgent, dramatic and fast-moving, revolutionary energy.
+Three hundred and four years | Dramatic, astonished, weighty.
+Then Germany shipped | Sly and conspiratorial.
+He did. | Short, heavy, ominous punchline.
+His Bolsheviks seized | Energetic, then amused at the calendar irony.
+A brutal civil war | Grim and urgent.
+In 1918{nineteen eighteen} | Very grave, quiet and sombre.
+The Reds won | Firm, decisive, momentous.
+Lenin died | Dry, slightly macabre amusement.
+
+## stalin | Grave, heavy and sombre narrator, slow and serious.
+The next leader | Cold and ominous.
+In 1939{nineteen thirty-nine} | Tense, building dread, alarmed.
+Leningrad was under siege | Sombre, enduring.
+At Stalingrad | Rising, determined, heroic.
+The Soviet Union lost | Heavy with sorrow, slow.
+In May 1945{nineteen forty-five} | Triumphant, proud and emotional.
+
+## coldwar | Energetic and tense, space-race excitement.
+Now there were two | Dramatic, tense rivalry, slightly wry.
+In 1957{nineteen fifty-seven} | Excited, then amused on America panicked.
+Then a dog named Laika. | Warm, light and amused.
+And in 1961{nineteen sixty-one} | Awed, inspiring, building wonder.
+As the rocket lifted off | Thrilled and exhilarated, big energy on Let's go.
+A year later | Tense, grave and alarming.
+Then came long years | Weary, gloomy, slowing down.
+
+## collapse | Dramatic, momentous storyteller, things falling apart.
+The new leader | Hopeful and earnest.
+But once people | Wry, ironic.
+In 1989{nineteen eighty-nine} | Triumphant and stirring.
+In 1991{nineteen ninety-one} | Urgent, dramatic, heroic on tank.
+On Christmas Day | Momentous and solemn.
+Six years later | Amused, comic punchline, light.
+
+## modern | Serious, measured and tense documentary narrator.
+The nineteen-nineties | Chaotic, fast, exasperated.
+On New Year's Eve | Dramatic reveal, weighty.
+Putin has led | Measured and serious.
+In 2014{twenty fourteen} | Grave and firm.
+And in 2022{twenty twenty-two} | Very grave and sombre.
+
+## end | Warm, wrapping up, fond and amused storyteller.
+So that's Russia. | Warm, amused sigh.
+Invited Vikings | Lively, rhythmic, amused list, building.
+a revolution in the wrong month | Rising fun, comic on pizza commercial.
+And it all started | Warm, coming full circle, softer.
+Which country should we do next | Friendly and inviting, upbeat.
