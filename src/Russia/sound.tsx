@@ -1,7 +1,7 @@
 import React from "react";
 import { Audio, Sequence, interpolate, staticFile } from "remotion";
 import { w } from "./overlays";
-import { SCENES } from "./timing";
+import { CAPS, SCENES, TOTAL_FRAMES } from "./timing";
 
 /**
  * Music and effects. The score (public/music, episodes/music/compose.py) changes cue with the era and sits well under
@@ -69,8 +69,31 @@ const MUSIC: Record<string, string> = {
   peter: "empire", catherine: "empire", napoleon: "napoleon", reform: "empire", nicholas: "empire", revolution: "soviet", stalin: "elegy", coldwar: "space",
   collapse: "modern", modern: "modern", end: "finale",
 };
-const MUSIC_VOL = 0.13;
+const MUSIC_VOL = 0.1;
+const DUCK = 0.5; // music gain while the narrator speaks
+const SFX_GAIN = 0.7;
 const XFADE = 36;
+
+/** Music gain per global frame: DUCK under speech (gaps under 15 frames count as speech), easing down fast and up slowly. */
+const duckCurve = (() => {
+  const speech = new Uint8Array(TOTAL_FRAMES + 1);
+  for (const [k, sc] of Object.entries(SCENES)) {
+    let prev = -1e9;
+    for (const [a, b] of CAPS[k] ?? []) {
+      const from = a - prev < 15 ? prev : a;
+      for (let f = sc.start + from; f <= Math.min(TOTAL_FRAMES, sc.start + b); f++) speech[f] = 1;
+      prev = b;
+    }
+  }
+  const g = new Float32Array(TOTAL_FRAMES + 1);
+  let cur = 1;
+  for (let f = 0; f <= TOTAL_FRAMES; f++) {
+    const look = speech[Math.min(TOTAL_FRAMES, f + 4)] ? DUCK : 1; // start ducking just before the voice
+    cur += (look - cur) * (look < cur ? 0.25 : 0.05);
+    g[f] = cur;
+  }
+  return g;
+})();
 
 const segments = () => {
   const out: { cue: string; from: number; to: number }[] = [];
@@ -95,18 +118,18 @@ export const Soundtrack: React.FC = () => {
         return (
           <Sequence key={`${s.cue}${i}`} from={from} durationInFrames={len}>
             <Audio src={staticFile(`music/${s.cue}.mp3`)} loop
-              volume={(f) => MUSIC_VOL * interpolate(f, [0, i ? XFADE : 1, len - (end ? 60 : XFADE), len], [i ? 0 : 1, 1, 1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })} />
+              volume={(f) => MUSIC_VOL * duckCurve[Math.min(TOTAL_FRAMES, from + f)]! * interpolate(f, [0, i ? XFADE : 1, len - (end ? 60 : XFADE), len], [i ? 0 : 1, 1, 1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })} />
           </Sequence>
         );
       })}
       {Object.entries(SCENES).map(([k, sc], i) => (
         <React.Fragment key={k}>
           {i > 0 ? (
-            <Sequence from={sc.start - 4} durationInFrames={30}><Audio src={staticFile("sfx/paper.wav")} volume={0.28} /></Sequence>
+            <Sequence from={sc.start - 4} durationInFrames={30}><Audio src={staticFile("sfx/paper.wav")} volume={0.28 * SFX_GAIN} /></Sequence>
           ) : null}
           {(CUES[k] ?? []).map(([word, n, fx, vol, off = 0], j) => (
             <Sequence key={j} from={Math.max(0, sc.start + w(k, word, n) + off)} durationInFrames={200}>
-              <Audio src={staticFile(`sfx/${fx}.wav`)} volume={vol} />
+              <Audio src={staticFile(`sfx/${fx}.wav`)} volume={vol * SFX_GAIN} />
             </Sequence>
           ))}
         </React.Fragment>
