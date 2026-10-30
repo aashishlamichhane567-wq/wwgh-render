@@ -1,13 +1,17 @@
 """Voiceover + word timings for the Russia episode.
 
+  python make_vo.py design   # Qwen3-TTS VoiceDesign: makes the narrator's reference clip from NARRATOR_DESIGN
+  python make_vo.py qwen     # Qwen3-TTS Base cloning that clip, batched, QA'd -> public/vo_russia/<scene>.wav
   python make_vo.py deep     # Kokoro am_onyx (deep documentary voice), one take per line, QA'd -> public/vo_russia/<scene>.wav
   python make_vo.py tts      # Chatterbox, one take per script line, QA'd by faster-whisper -> public/vo_russia/<scene>.wav
   python make_vo.py timing   # faster-whisper word times aligned to the script -> src/Russia/timing.ts
   python make_vo.py estimate # no audio: timing.ts from word counts, for blocking out scenes before the VO exists
 
-Voice (current): Kokoro-82M voice am_onyx (Apache-2.0, synthetic: no real person cloned) at 0.9x speed, then
-DEEP_CHAIN baked into each file (warmth, de-ess, gentle compression) so music and SFX can be mixed under it.
-Earlier cut: Chatterbox cloned from the channel's own narrator (public/vo_wwgh/*.wav), exaggeration 0.45, cfg 0.3.
+Voice (current): a synthetic British documentary narrator. Qwen3-TTS VoiceDesign (Apache-2.0) generated the reference
+clip episodes/russia/voice_ref.wav from the text description NARRATOR_DESIGN (no real person cloned); Qwen3-TTS Base then
+clones that clip for every line, so the voice stays identical across the episode. NARR_CHAIN is baked into each file.
+Run qwen/design with a Python that has qwen-tts and faster-whisper installed (CPU is fine: about 7x real time).
+Earlier cuts: Kokoro-82M am_onyx at 0.8x with DEEP_CHAIN (deep()); Chatterbox cloned from the channel's own narrator (public/vo_wwgh/*.wav), exaggeration 0.45, cfg 0.3.
 Script syntax (episodes/russia/script.txt): "## key" starts a scene, one line = one TTS take, a blank line = longer
 pause, and shown{spoken} captions "shown" while the narrator says "spoken" (years, mostly).
 """
@@ -23,6 +27,13 @@ KOKORO_DIR = os.environ.get("KOKORO_DIR", "")  # holds kokoro-v1.0.onnx and voic
 DEEP_VOICE, DEEP_SPEED = "am_onyx", 0.8
 DEEP_CHAIN = ("highpass=f=55,lowshelf=f=140:g=2.5,equalizer=f=320:t=q:w=1.1:g=-2,equalizer=f=3200:t=q:w=1.2:g=1.5,"
               "deesser=i=0.25,acompressor=threshold=-21dB:ratio=2.5:attack=8:release=120:makeup=2")
+NARRATOR_DESIGN = ("A deep, warm, middle-aged British male documentary narrator. Rich low voice, calm authority, a hint of dry wit, "
+                   "unhurried storytelling pace with natural pauses.")
+VOICE_REF = os.path.join(ROOT, "episodes/russia/voice_ref.wav")
+VOICE_REF_TEXT = ("In eight sixty-two, the tribes of the north looked around and said: our land is great and rich, but there is no order "
+                  "in it. So they did something no country has done before or since. They invited foreigners to come and rule them.")
+LINE_CACHE = os.path.join(ROOT, "episodes/russia/vo_lines")  # one wav per script line (git-ignored); lets a long run resume
+NARR_CHAIN = "highpass=f=60,deesser=i=0.2,acompressor=threshold=-20dB:ratio=2:attack=10:release=150:makeup=1.5"
 SR = 24000
 FPS = 30
 GAP_LINE, GAP_PARA = 0.42, 0.9  # seconds of silence between takes
@@ -184,6 +195,77 @@ def deep():
         print("wrote", key, f"{len(audio) / SR:.1f}s", flush=True)
 
 
+def design():
+    import torch, soundfile as sf
+    from qwen_tts import Qwen3TTSModel
+    torch.set_num_threads(os.cpu_count() or 4)
+    m = Qwen3TTSModel.from_pretrained("Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign", device_map="cpu", dtype=torch.float32)
+    w, sr = m.generate_voice_design(text=VOICE_REF_TEXT, language="English", instruct=NARRATOR_DESIGN)
+    sf.write(VOICE_REF, w[0], sr)
+    print("wrote", VOICE_REF, f"{len(w[0]) / sr:.1f}s")
+
+
+def qwen(batch=4):
+    """Every script line cloned from VOICE_REF with Qwen3-TTS Base, `batch` lines per call (much faster on CPU), whisper QA."""
+    import hashlib, torch, soundfile as sf
+    from qwen_tts import Qwen3TTSModel
+    from faster_whisper import WhisperModel
+    torch.set_num_threads(os.cpu_count() or 4)
+    model = Qwen3TTSModel.from_pretrained("Qwen/Qwen3-TTS-12Hz-1.7B-Base", device_map="cpu", dtype=torch.float32)
+    prompt = model.create_voice_clone_prompt(ref_audio=VOICE_REF, ref_text=VOICE_REF_TEXT)
+    prompt = prompt[0] if isinstance(prompt, list) else prompt
+    asr = WhisperModel("base.en", device="cpu", compute_type="int8")
+    os.makedirs(LINE_CACHE, exist_ok=True)
+    only = set(sys.argv[2:])
+    scenes = {k: v for k, v in parse().items() if not only or k in only}
+    path_of = lambda text: os.path.join(LINE_CACHE, hashlib.sha1(text.encode()).hexdigest()[:16] + ".wav")
+
+    def check(line, wav, sr):
+        want = [w for sh, sp in tokens(line) if sh == sp for w in words_of(sp)]
+        a16 = np.interp(np.linspace(0, len(wav) - 1, int(len(wav) * 16000 / sr)), np.arange(len(wav)), wav).astype(np.float32)
+        segs, _ = asr.transcribe(a16, language="en", beam_size=1)
+        heard = [w for w in words_of(" ".join(s.text for s in segs)) if not w.isdigit()]
+        rate = len(words_of(spoken(line))) / max(len(wav) / sr, 0.1)
+        return difflib.SequenceMatcher(None, want, heard).ratio(), rate
+
+    todo = sorted({l for ls in scenes.values() for l in ls if l and not os.path.exists(path_of(spoken(l)))}, key=len)
+    print(len(todo), "lines to voice", flush=True)
+    for attempt in range(4):
+        failed = []
+        for i in range(0, len(todo), batch):
+            group = todo[i:i + batch]
+            torch.manual_seed(7 + attempt * 1000 + i)
+            texts = [spoken(l).replace('"', "") for l in group]
+            wavs, sr = model.generate_voice_clone(text=texts, language=["English"] * len(group), voice_clone_prompt=[prompt] * len(group))
+            for line, wav in zip(group, wavs):
+                wav = np.asarray(wav, dtype=np.float32)
+                score, rate = check(line, wav, sr)
+                ok = score >= 0.86 and 1.7 <= rate <= 4.0
+                print(f"  try{attempt} {'ok ' if ok else 'BAD'} score={score:.2f} wps={rate:.2f} :: {spoken(line)[:70]}", flush=True)
+                if ok or attempt == 3:
+                    sf.write(path_of(spoken(line)), wav, sr)
+                else:
+                    failed.append(line)
+        todo = failed
+        if not todo:
+            break
+
+    for key, lines in scenes.items():
+        parts = []
+        for line in lines:
+            if line == "":
+                parts.append(np.zeros(int(SR * (GAP_PARA - GAP_LINE)), dtype=np.float32))
+                continue
+            wav, sr = sf.read(path_of(spoken(line)), dtype="float32")
+            assert sr == SR, sr
+            parts += [trim(wav), np.zeros(int(SR * GAP_LINE), dtype=np.float32)]
+        raw = os.path.join(OUT_DIR, f"{key}.raw.wav")
+        sf.write(raw, np.concatenate(parts[:-1]), SR)
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", raw, "-af", NARR_CHAIN, "-ar", str(SR), "-ac", "1", os.path.join(OUT_DIR, f"{key}.wav")], check=True)
+        os.remove(raw)
+        print("wrote", key, flush=True)
+
+
 def resample(wav):
     """24 kHz -> 16 kHz for whisper."""
     n = int(len(wav) * 16000 / SR)
@@ -243,7 +325,7 @@ def align(lines, audio16):
 
 
 def write_timing(scenes_t):
-    lines = ["// GENERATED by episodes/russia/make_vo.py (Chatterbox, cloned channel voice: exaggeration 0.45, cfg 0.3) — do not edit by hand.",
+    lines = ["// GENERATED by episodes/russia/make_vo.py (Qwen3-TTS narrator; see the module docstring) — do not edit by hand.",
              "// Scene-relative frames; word times from faster-whisper aligned to the script.", "", "export const SCENES = {"]
     start = 0
     caps = {}
@@ -288,4 +370,4 @@ def estimate(wps=2.55):
 
 
 if __name__ == "__main__":
-    {"tts": tts, "deep": deep, "timing": timing, "estimate": estimate}[sys.argv[1]]()
+    {"tts": tts, "deep": deep, "design": design, "qwen": qwen, "timing": timing, "estimate": estimate}[sys.argv[1]]()
