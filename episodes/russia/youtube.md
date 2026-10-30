@@ -1,6 +1,6 @@
 # The Entire History of Russia in 12 Minutes
 
-**Length:** 12:55
+**Length:** 11:27
 
 ## Description
 
@@ -8,27 +8,27 @@ Vikings who were invited in, Mongols who outsourced their tax collection, tsars 
 a revolution in the wrong month, the first human in space… and a pizza commercial. This is the entire history of Russia.
 
 0:00 Come and rule over us
-0:30 Vikings and Kievan Rus
-0:57 Vladimir picks a religion
-1:31 The Mongols
-2:06 Moscow, the tax collector
-2:51 Ivan the Terrible
-3:29 Siberia
-3:49 The Time of Troubles
-4:42 Peter the Great
-5:41 Catherine the Great
-6:29 Napoleon
-7:10 Serfs, Alaska and a bomb
-7:49 Nicholas II and Rasputin
-8:45 1917
-9:38 Stalin and World War II
-10:34 The Cold War and space
-11:15 The collapse
-11:50 Russia since 1991
-12:28 So that's Russia
+0:27 Vikings and Kievan Rus
+0:50 Vladimir picks a religion
+1:21 The Mongols
+1:52 Moscow, the tax collector
+2:32 Ivan the Terrible
+3:06 Siberia
+3:24 The Time of Troubles
+4:10 Peter the Great
+5:02 Catherine the Great
+5:44 Napoleon
+6:20 Serfs, Alaska and a bomb
+6:56 Nicholas II and Rasputin
+7:45 1917
+8:33 Stalin and World War II
+9:20 The Cold War and space
+9:57 The collapse
+10:29 Russia since 1991
+11:01 So that's Russia
 
 Maps: satellite imagery NASA Blue Marble (public domain); historical borders from historical-basemaps by André Ourednik (GPL-3.0); coastlines from Natural Earth (public domain).
-Narration is AI-generated (Kokoro). Music and sound effects are composed in code; "Korobeiniki" is a public-domain folk song. Dates and figures are rounded for time; estimates such as war deaths are the commonly cited ones.
+Narration is AI-generated (Qwen3-TTS). Music and sound effects are composed in code; "Korobeiniki" is a public-domain folk song. Dates and figures are rounded for time; estimates such as war deaths are the commonly cited ones.
 
 Which country should we do next? Tell me in the comments.
 

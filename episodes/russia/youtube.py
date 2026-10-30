@@ -28,7 +28,7 @@ a revolution in the wrong month, the first human in space… and a pizza commerc
 {chapters}
 
 Maps: satellite imagery NASA Blue Marble (public domain); historical borders from historical-basemaps by André Ourednik (GPL-3.0); coastlines from Natural Earth (public domain).
-Narration is AI-generated (Kokoro). Music and sound effects are composed in code; \"Korobeiniki\" is a public-domain folk song. Dates and figures are rounded for time; estimates such as war deaths are the commonly cited ones.
+Narration is AI-generated (Qwen3-TTS). Music and sound effects are composed in code; \"Korobeiniki\" is a public-domain folk song. Dates and figures are rounded for time; estimates such as war deaths are the commonly cited ones.
 
 Which country should we do next? Tell me in the comments.
 
