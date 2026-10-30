@@ -1,9 +1,9 @@
 import React from "react";
 import { AbsoluteFill, useCurrentFrame } from "remotion";
-import { View } from "../Hangry2/kit";
-import { Calendar, NameCard } from "../Hangry2/props2";
+import { View } from "./view";
+import { Calendar } from "../Hangry2/props2";
 import { blendFace, FACES, Person } from "./cast";
-import { C, Counter, GROUND, Ground, Punch, R, T, YearBadge, ez, glide, mix, pop, span, wob } from "./kit";
+import { C, Counter, GROUND, Ground, Punch, R, T, YearBadge, ez, glide, mix, pop, span, wob, NameCard } from "./kit";
 import { Label, MapArrow, MapView, Pin, at, reg } from "./map";
 import { Globe, Kremlin, Laika, Longship, Month, MoneyBag, Pizza, Reactor, Rocket, Say, Shelves, Snow, Sputnik, Tag, Tank, TVSet, Wall, Water, Factory } from "./props";
 import { Over, RUSSIA_CAM, TitleCardInline, useW } from "./scenes1";
@@ -64,9 +64,9 @@ const ColdWar: React.FC = () => {
           {Array.from({ length: 40 }, (_, i) => <circle key={i} cx={(i * 397) % 1920} cy={(i * 211) % 1080} r={2 + (i % 3)} fill="#FFFFFF" opacity={0.7} />)}
           <Globe x={960} y={560} r={220} spin={f / 200} />
           <Sputnik x={960 + Math.cos(a) * 420} y={560 + Math.sin(a) * 240} k={0.6} t={pop(f, sputnik - 4)} rot={a * 30} />
-          {f >= sputnik ? <T x={960 + Math.cos(a) * 420} y={560 + Math.sin(a) * 240 - 90} size={40} color="#FFFFFF" op={Math.floor(f / 10) % 2 ? 1 : 0}>BEEP</T> : null}
+          {f >= sputnik ? <T x={960 + Math.cos(a) * 420} y={560 + Math.sin(a) * 240 - 90} size={40} color="#FFFFFF" stroke="#1B2547" op={Math.floor(f / 10) % 2 ? 1 : 0}>BEEP</T> : null}
           <Laika x={1500} y={300} k={0.9} t={pop(f, laika - 6)} f={f} />
-          <T x={1500} y={460} size={44} color="#FFFFFF" op={pop(f, laika)}>LAIKA</T>
+          <T x={1500} y={460} size={44} color="#FFFFFF" stroke="#1B2547" op={pop(f, laika)}>LAIKA</T>
         </View>
         <Over>
           <g opacity={span(f, america - 6, laika - 6)}>

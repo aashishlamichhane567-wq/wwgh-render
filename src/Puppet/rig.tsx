@@ -13,7 +13,8 @@ export { blendFace } from "../Hangry/Stickman";
  */
 
 export type Garment = "tunic" | "mail" | "robe" | "deel" | "coat" | "suit" | "dress";
-export type Hat = "none" | "fur" | "helm" | "crown" | "monomakh" | "mongol" | "cap" | "ushanka" | "tricorn" | "bicorne" | "papakha" | "peaked" | "tall";
+export type Hat = "none" | "fur" | "helm" | "crown" | "monomakh" | "mongol" | "cap" | "ushanka" | "tricorn" | "bicorne" | "papakha" | "peaked" | "tall"
+  | "top" | "budenovka" | "soviet" | "german" | "space" | "bigcrown";
 export type Hair = "none" | "short" | "long" | "bald" | "bun" | "swept";
 export type Beard = "none" | "full" | "long" | "pointed" | "goatee" | "short";
 export type Tache = "none" | "thin" | "thick" | "walrus";
@@ -22,6 +23,8 @@ export type Look = {
   skin: string; garment: Garment; color: string; trim?: string; belt?: string;
   hat?: Hat; hatColor?: string; hair?: Hair; hairColor?: string; beard?: Beard; beardColor?: string; tache?: Tache;
   legs?: string; mark?: boolean; /** Gorbachev's birthmark */
+  glasses?: boolean; /** the disguise: round glasses (impostors, Peter "Mikhailov") */
+  hatTilt?: number;
 };
 
 export type PuppetProps = {
@@ -83,6 +86,26 @@ const HatShape: React.FC<{ h: Hat; c: string }> = ({ h, c }) => {
       return <><path d="M-42 -290 Q-40 -326 0 -330 Q40 -326 42 -290 Z" fill={c} {...SH} /><path d="M-44 -290 Q0 -280 50 -290 L60 -280 Q0 -270 -44 -280 Z" fill={INK} /><circle cx={0} cy={-306} r={6} fill="#C8281E" /></>;
     case "tall":
       return <path d="M-38 -286 L-34 -370 L34 -370 L38 -286 Z" fill={c} {...SH} />;
+    case "top":
+      return <><rect x={-32} y={-372} width={64} height={84} fill={c} {...SH} /><rect x={-52} y={-296} width={104} height={12} rx={4} fill={c} {...SH} /><rect x={-32} y={-312} width={64} height={10} fill="#B8352A" /></>;
+    case "budenovka":
+      return <><path d="M-44 -270 Q-44 -330 0 -372 Q44 -330 44 -270 Z" fill={c} {...SH} /><path d="M0 -330 l5 11 l12 0 l-10 7 l4 12 l-11 -7 l-11 7 l4 -12 l-10 -7 l12 0 Z" fill="#C8281E" /></>;
+    case "soviet":
+      return <><path d="M-48 -270 Q-48 -340 0 -342 Q48 -340 48 -270 Z" fill={c} {...SH} /><path d="M0 -322 l4 9 l10 0 l-8 6 l3 10 l-9 -6 l-9 6 l3 -10 l-8 -6 l10 0 Z" fill="#C8281E" /></>;
+    case "german":
+      return <path d="M-46 -268 Q-46 -340 0 -342 Q46 -340 46 -268 L58 -258 L-58 -258 Z" fill={c} {...SH} />;
+    case "space":
+      return (
+        <>
+          <circle cx={0} cy={-256} r={70} fill="#BFE3F5" opacity={0.22} />
+          <circle cx={0} cy={-256} r={70} fill="none" stroke="#FFFFFF" strokeWidth={14} />
+          <circle cx={0} cy={-256} r={78} fill="none" stroke={INK} strokeWidth={4} />
+          <path d="M-40 -296 Q-20 -318 10 -318" stroke="#FFFFFF" strokeWidth={8} fill="none" strokeLinecap="round" opacity={0.8} />
+          <text x={0} y={-336} textAnchor="middle" fontFamily="Oswald" fontWeight={700} fontSize={26} fill="#C8281E">СССР</text>
+        </>
+      );
+    case "bigcrown":
+      return <path d="M-46 -262 L-48 -324 L-24 -294 L0 -334 L24 -294 L48 -324 L46 -262 Z" fill="#E3B341" {...SH} />;
     default:
       return null;
   }
@@ -214,7 +237,10 @@ export const Puppet: React.FC<PuppetProps> = ({
           <FaceMarks fc={face} f={f + Math.floor(rnd(seed) * 60)} talk={talk} />
           <TacheShape t={look.tache ?? "none"} c={look.beardColor ?? look.hairColor ?? INK} />
           {look.hair && look.hair !== "long" ? <HairShape h={look.hair} c={look.hairColor ?? "#5A3A22"} /> : null}
-          <HatShape h={look.hat ?? "none"} c={look.hatColor ?? "#6B4A2B"} />
+          {look.glasses ? (
+            <g fill="none" stroke={INK} strokeWidth={3}><circle cx={-15} cy={-262} r={13} /><circle cx={15} cy={-262} r={13} /><path d="M-2 -262 L2 -262 M-28 -264 L-40 -268 M28 -264 L40 -268" /></g>
+          ) : null}
+          <g transform={look.hatTilt ? `rotate(${look.hatTilt} 0 -290)` : undefined}><HatShape h={look.hat ?? "none"} c={look.hatColor ?? "#6B4A2B"} /></g>
         </g>
       </g>
     </g>

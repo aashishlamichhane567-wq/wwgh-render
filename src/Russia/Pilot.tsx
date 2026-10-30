@@ -261,14 +261,21 @@ const Title: React.FC = () => {
   );
 };
 
+/** The opening in the paper style (used by the full video as the hook scene). */
+export const HookPaper: React.FC = () => {
+  const f = useCurrentFrame();
+  const eleven = W("Eleven"), entire = W("entire");
+  return f < eleven - 4 ? <Village /> : f < entire - 6 ? <MapShot /> : <Title />;
+};
+
 export const RussiaPilot: React.FC = () => {
   usePaperFonts();
   const f = useCurrentFrame();
   const sc = SCENES.hook;
-  const eleven = W("Eleven"), entire = W("entire");
+  const eleven = W("Eleven");
   return (
     <AbsoluteFill style={{ background: "#CFE0DF" }}>
-      {f < eleven - 4 ? <Village /> : f < entire - 6 ? <MapShot /> : <Title />}
+      <HookPaper />
       <PaperTexture op={f < eleven - 4 ? 0.32 : 0.18} />
       <Captions scene="hook" paper />
       <Sequence from={sc.lead}><Audio src={staticFile("vo_russia/hook.wav")} /></Sequence>

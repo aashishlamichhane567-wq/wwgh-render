@@ -1,6 +1,6 @@
 # The Entire History of Russia in 12 Minutes
 
-**Length:** 12:26
+**Length:** 12:55
 
 ## Description
 
@@ -9,26 +9,26 @@ a revolution in the wrong month, the first human in space… and a pizza commerc
 
 0:00 Come and rule over us
 0:30 Vikings and Kievan Rus
-0:56 Vladimir picks a religion
-1:28 The Mongols
-2:02 Moscow, the tax collector
-2:43 Ivan the Terrible
-3:19 Siberia
-3:38 The Time of Troubles
-4:30 Peter the Great
-5:28 Catherine the Great
-6:14 Napoleon
-6:53 Serfs, Alaska and a bomb
-7:33 Nicholas II and Rasputin
-8:26 1917
-9:14 Stalin and World War II
-10:08 The Cold War and space
-10:49 The collapse
-11:22 Russia since 1991
-11:57 So that's Russia
+0:57 Vladimir picks a religion
+1:31 The Mongols
+2:06 Moscow, the tax collector
+2:51 Ivan the Terrible
+3:29 Siberia
+3:49 The Time of Troubles
+4:42 Peter the Great
+5:41 Catherine the Great
+6:29 Napoleon
+7:10 Serfs, Alaska and a bomb
+7:49 Nicholas II and Rasputin
+8:45 1917
+9:38 Stalin and World War II
+10:34 The Cold War and space
+11:15 The collapse
+11:50 Russia since 1991
+12:28 So that's Russia
 
 Maps: satellite imagery NASA Blue Marble (public domain); historical borders from historical-basemaps by André Ourednik (GPL-3.0); coastlines from Natural Earth (public domain).
-Narration is AI-generated. Dates and figures are rounded for time; estimates such as war deaths are the commonly cited ones.
+Narration is AI-generated (Kokoro). Music and sound effects are composed in code; "Korobeiniki" is a public-domain folk song. Dates and figures are rounded for time; estimates such as war deaths are the commonly cited ones.
 
 Which country should we do next? Tell me in the comments.
 

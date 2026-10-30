@@ -9,7 +9,10 @@
 - Historical borders: historical-basemaps by André Ourednik, GPL-3.0 — https://github.com/aourednik/historical-basemaps (src/Russia/maps.json is derived from it and stays under GPL-3.0)
 - Satellite imagery: NASA Earth Observatory, Blue Marble Next Generation (July 2004), public domain — https://visibleearth.nasa.gov/collection/1484/blue-marble (tiles in public/sat, built by episodes/russia/build_sat.py)
 - Coastlines, lakes, rivers: Natural Earth 1:50m, public domain — https://www.naturalearthdata.com
-- Voice: AI-generated (Chatterbox), cloned from this channel's own narrator. All drawings are original.
+- Voice: AI-generated with Kokoro-82M (Apache-2.0, https://github.com/hexgrad/kokoro), voice am_onyx, via kokoro-onnx (MIT). Built by episodes/russia/make_vo.py.
+- Music: composed in code (episodes/music/compose.py) and rendered with FluidSynth using the FluidR3_GM soundfont (MIT). All melodies are original except "Korobeiniki", a 19th-century Russian folk song in the public domain.
+- Sound effects: synthesized in code (episodes/sfx/make_sfx.py).
+- All drawings, puppets and paper textures are original and made in code.
 
 # Style lab fonts (public/fonts, SIL Open Font License 1.1 — licence texts alongside)
 - Ruslan Display (Denis Masharov), Oswald (Vernon Adams et al.), Kalam (Indian Type Foundry), UnifrakturMaguntia (J. 'Mach' Wust)

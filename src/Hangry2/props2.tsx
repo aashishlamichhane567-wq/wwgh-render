@@ -10,11 +10,11 @@ import { C, FONT, INK } from "./kit";
 /** Text with a paper outline so it reads over line art. */
 export const T: React.FC<{
   x: number; y: number; size?: number; color?: string; weight?: number; anchor?: "start" | "middle" | "end";
-  op?: number; rot?: number; children: React.ReactNode;
-}> = ({ x, y, size = 48, color = C.ink, weight = 900, anchor = "middle", op = 1, rot = 0, children }) =>
+  op?: number; rot?: number; stroke?: string; children: React.ReactNode;
+}> = ({ x, y, size = 48, color = C.ink, weight = 900, anchor = "middle", op = 1, rot = 0, stroke = C.bg, children }) =>
   op <= 0 ? null : (
     <text x={x} y={y} fontFamily={FONT} fontWeight={weight} fontSize={size} fill={color} textAnchor={anchor} opacity={op}
-      stroke={C.bg} strokeWidth={size * 0.14} paintOrder="stroke" strokeLinejoin="round"
+      stroke={stroke} strokeWidth={size * 0.14} paintOrder="stroke" strokeLinejoin="round"
       transform={rot ? `rotate(${rot} ${x} ${y})` : undefined}>
       {children}
     </text>

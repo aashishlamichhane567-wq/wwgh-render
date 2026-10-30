@@ -1,5 +1,6 @@
 import React from "react";
 import { C, FONT, R, T, mix } from "./kit";
+import { rnd, torn } from "../Puppet/paper";
 
 /**
  * Set pieces for the Russia episode, in world units of a 1920x1080 View.
@@ -657,19 +658,22 @@ export const Barbed: React.FC<{ x0: number; x1: number; ground: number; h?: numb
   </g>
 );
 
-/** A simple "speech" line of text in a bubble, sized to the text. */
+/** Torn-paper speech bubble with hand lettering; `tail` -1 points down-left, 1 down-right. */
 export const Say: React.FC<{ x: number; y: number; t: number; text: string; size?: number; tail?: number; color?: string }> = ({ x, y, t, text, size = 46, tail = -1, color = C.ink }) => {
   if (t <= 0) return null;
   const lines = text.split("\n");
-  const w = Math.max(...lines.map((l) => l.length)) * size * 0.6 + 70;
-  const h = lines.length * size * 1.2 + 44;
+  const w = Math.max(...lines.map((l) => l.length)) * size * 0.58 + 80;
+  const h = lines.length * size * 1.15 + 50;
+  const seed = text.length * 7 + Math.round(x);
   return (
-    <g transform={`translate(${x} ${y}) scale(${t})`}>
-      <path d={`M${tail * w * 0.08} ${h / 2 - 6} L${tail * w * 0.3} ${h / 2 + 50} L${tail * w * 0.26} ${h / 2 - 6}`} fill={C.bg} stroke={C.ink} strokeWidth={6} strokeLinejoin="round" />
-      <rect x={-w / 2} y={-h / 2} width={w} height={h} rx={26} fill={C.bg} stroke={C.ink} strokeWidth={6} />
-      <line x1={tail * w * 0.08 + tail * 4} y1={h / 2} x2={tail * w * 0.26 - tail * 4} y2={h / 2} stroke={C.bg} strokeWidth={9} />
+    <g transform={`translate(${x} ${y}) rotate(${(rnd(seed) - 0.5) * 5}) scale(${t})`}>
+      <g filter="url(#cut)">
+        <path d={torn(-w / 2, -h / 2, w, h, seed, 5, 18)} fill="#FBF4E2" stroke="#2A1E14" strokeWidth={3} />
+        <path d={`M${tail * w * 0.1} ${h / 2 - 8} L${tail * w * 0.3} ${h / 2 + 56} L${tail * w * 0.3} ${h / 2 - 8} Z`} fill="#FBF4E2" stroke="#2A1E14" strokeWidth={3} strokeLinejoin="round" />
+      </g>
+      <rect x={Math.min(tail * w * 0.1, tail * w * 0.3) + 3} y={h / 2 - 14} width={Math.abs(w * 0.2) - 6} height={12} fill="#FBF4E2" />
       {lines.map((l, i) => (
-        <text key={i} x={0} y={-h / 2 + 22 + size * 0.95 + i * size * 1.2} textAnchor="middle" fontFamily={FONT} fontWeight={900} fontSize={size} fill={color}>{l}</text>
+        <text key={i} x={0} y={-h / 2 + 22 + size * 0.95 + i * size * 1.15} textAnchor="middle" fontFamily="Kalam" fontSize={size * 1.05} fill={color === C.ink ? "#2A1E14" : color}>{l}</text>
       ))}
     </g>
   );

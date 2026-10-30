@@ -1,10 +1,13 @@
 """Voiceover + word timings for the Russia episode.
 
+  python make_vo.py deep     # Kokoro am_onyx (deep documentary voice), one take per line, QA'd -> public/vo_russia/<scene>.wav
   python make_vo.py tts      # Chatterbox, one take per script line, QA'd by faster-whisper -> public/vo_russia/<scene>.wav
   python make_vo.py timing   # faster-whisper word times aligned to the script -> src/Russia/timing.ts
   python make_vo.py estimate # no audio: timing.ts from word counts, for blocking out scenes before the VO exists
 
-Voice: Chatterbox cloned from the channel's own narrator (public/vo_wwgh/*.wav), exaggeration 0.45, cfg 0.3.
+Voice (current): Kokoro-82M voice am_onyx (Apache-2.0, synthetic: no real person cloned) at 0.9x speed, then
+DEEP_CHAIN baked into each file (warmth, de-ess, gentle compression) so music and SFX can be mixed under it.
+Earlier cut: Chatterbox cloned from the channel's own narrator (public/vo_wwgh/*.wav), exaggeration 0.45, cfg 0.3.
 Script syntax (episodes/russia/script.txt): "## key" starts a scene, one line = one TTS take, a blank line = longer
 pause, and shown{spoken} captions "shown" while the narrator says "spoken" (years, mostly).
 """
@@ -16,9 +19,13 @@ SCRIPT = os.path.join(ROOT, "episodes/russia/script.txt")
 OUT_DIR = os.path.join(ROOT, "public/vo_russia")
 TIMING = os.path.join(ROOT, "src/Russia/timing.ts")
 REF = os.path.join(ROOT, "public/vo_wwgh/end.wav")
+KOKORO_DIR = os.environ.get("KOKORO_DIR", "")  # holds kokoro-v1.0.onnx and voices-v1.0.bin (github.com/thewh1teagle/kokoro-onnx releases)
+DEEP_VOICE, DEEP_SPEED = "am_onyx", 0.8
+DEEP_CHAIN = ("highpass=f=55,lowshelf=f=140:g=2.5,equalizer=f=320:t=q:w=1.1:g=-2,equalizer=f=3200:t=q:w=1.2:g=1.5,"
+              "deesser=i=0.25,acompressor=threshold=-21dB:ratio=2.5:attack=8:release=120:makeup=2")
 SR = 24000
 FPS = 30
-GAP_LINE, GAP_PARA = 0.32, 0.75  # seconds of silence between takes
+GAP_LINE, GAP_PARA = 0.42, 0.9  # seconds of silence between takes
 LEAD, TAIL = 12, 16  # frames before / after the voice in each scene
 FIRST_LEAD = 24
 
@@ -136,6 +143,47 @@ def tts():
         print("LOW SCORE", r, flush=True)
 
 
+def deep():
+    """Kokoro am_onyx for every line, whisper QA like tts(), DEEP_CHAIN baked in."""
+    from kokoro_onnx import Kokoro
+    from faster_whisper import WhisperModel
+    kok = Kokoro(os.path.join(KOKORO_DIR, "kokoro-v1.0.onnx"), os.path.join(KOKORO_DIR, "voices-v1.0.bin"))
+    asr = WhisperModel("base.en", device="cpu", compute_type="int8")
+    os.makedirs(OUT_DIR, exist_ok=True)
+    only = set(sys.argv[2:])
+    for key, lines in parse().items():
+        if only and key not in only:
+            continue
+        parts = []
+        for line in lines:
+            if line == "":
+                parts.append(np.zeros(int(SR * (GAP_PARA - GAP_LINE)), dtype=np.float32))
+                continue
+            text = spoken(line).replace('"', "")
+            want = [w for sh, sp in tokens(line) if sh == sp for w in words_of(sp)]
+            best = None
+            for attempt, speed in enumerate([DEEP_SPEED, DEEP_SPEED - 0.03, DEEP_SPEED + 0.03]):
+                a, sr = kok.create(text, voice=DEEP_VOICE, speed=speed, lang="en-us")
+                a = trim(np.asarray(a, dtype=np.float32))
+                segs, _ = asr.transcribe(resample(a), language="en", beam_size=1)
+                heard = [w for w in words_of(" ".join(s.text for s in segs)) if not w.isdigit()]
+                score = difflib.SequenceMatcher(None, want, heard).ratio()
+                print(f"  {key} try{attempt} score={score:.2f} {len(a) / SR:.1f}s :: {text[:60]}", flush=True)
+                if best is None or score > best[0]:
+                    best = (score, a)
+                if score >= 0.86:
+                    break
+            parts.append(best[1])
+            parts.append(np.zeros(int(SR * GAP_LINE), dtype=np.float32))
+        audio = np.concatenate(parts[:-1])
+        raw = os.path.join(OUT_DIR, f"{key}.raw.wav")
+        import soundfile as sf
+        sf.write(raw, audio, SR)
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", raw, "-af", DEEP_CHAIN, "-ar", str(SR), "-ac", "1", os.path.join(OUT_DIR, f"{key}.wav")], check=True)
+        os.remove(raw)
+        print("wrote", key, f"{len(audio) / SR:.1f}s", flush=True)
+
+
 def resample(wav):
     """24 kHz -> 16 kHz for whisper."""
     n = int(len(wav) * 16000 / SR)
@@ -240,4 +288,4 @@ def estimate(wps=2.55):
 
 
 if __name__ == "__main__":
-    {"tts": tts, "timing": timing, "estimate": estimate}[sys.argv[1]]()
+    {"tts": tts, "deep": deep, "timing": timing, "estimate": estimate}[sys.argv[1]]()

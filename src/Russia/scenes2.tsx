@@ -1,10 +1,9 @@
 import React from "react";
 import { AbsoluteFill, useCurrentFrame } from "remotion";
-import { View } from "../Hangry2/kit";
-import { NameCard } from "../Hangry2/props2";
+import { View } from "./view";
 import { Signpost } from "../Wwgh/props";
 import { blendFace, FACES, Person, type Who } from "./cast";
-import { C, Counter, GROUND, Ground, Punch, R, T, Tally, TitleCard, YearBadge, ez, glide, mix, pop, shots, span, wob } from "./kit";
+import { C, Counter, GROUND, Ground, Punch, R, T, Tally, TitleCard, YearBadge, ez, glide, mix, pop, shots, span, wob, NameCard } from "./kit";
 import { Boom, Label, MapArrow, MapView, Pin, at, reg } from "./map";
 import {
   Bars, Cannon, Chess, Eagle, Fur, Grave, Heart, MoneyBag, Petersburg, Photo, Puff, Ruler, Say, Scissors, Scroll, Ship, StBasil, Swamp, Tag, Wheat, Windmill,

@@ -1,9 +1,8 @@
 import React from "react";
 import { AbsoluteFill, useCurrentFrame } from "remotion";
-import { View } from "../Hangry2/kit";
-import { NameCard } from "../Hangry2/props2";
+import { View } from "./view";
 import { blendFace, FACES, Person } from "./cast";
-import { C, Counter, GROUND, Ground, Punch, R, T, TitleCard, YearBadge, ez, glide, mix, pop, span, wob } from "./kit";
+import { C, Counter, GROUND, Ground, Punch, R, T, TitleCard, YearBadge, ez, glide, mix, pop, span, wob, NameCard } from "./kit";
 import { Boom, Flame, Label, MapArrow, MapView, MW, Pin, at, proj, reg } from "./map";
 import {
   Barbed, Bomb, Boat, Bread, Chain, ClockFace, Derrick, GlassCase, Grave, Kremlin, Mailbox, Month, Nugget, Photo, Say, Scroll, Ship, Snow, Tag, Train, Water, Wheat,
@@ -499,7 +498,7 @@ const Revolution: React.FC = () => {
           {[0, 1, 2, 3, 4, 5, 6].map((i) => <Person key={i} who={i === 0 ? "nicholas" : i === 1 ? "catherine" : "plain"} x={560 + i * 140} ground={GROUND} f={f + i * 5} s={i < 2 ? 1.3 : 1.0} face={FACES.worried} op={1 - dark} />)}
           <rect x={1650} y={GROUND - 120} width={30} height={80} fill="#F3E9D2" stroke={C.ink} strokeWidth={3} />
           <path d={`M1665 ${GROUND - 120} q-10 -20 0 -40 q10 20 0 40`} fill={R.amber} opacity={1 - dark} />
-          <T x={960} y={200} size={46} color="#F3E9D2">YEKATERINBURG, JULY 1918</T>
+          <T x={960} y={200} size={46} color="#F3E9D2" stroke="#1E1A16">YEKATERINBURG, JULY 1918</T>
         </View>
       </AbsoluteFill>
     );

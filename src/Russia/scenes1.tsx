@@ -1,14 +1,15 @@
 import React from "react";
 import { AbsoluteFill, useCurrentFrame } from "remotion";
-import { View } from "../Hangry2/kit";
-import { Bulb, Calendar, NameCard } from "../Hangry2/props2";
+import { View } from "./view";
+import { Bulb, Calendar } from "../Hangry2/props2";
 import { blendFace, FACES, Person } from "./cast";
-import { C, GROUND, Ground, Punch, R, T, TitleCard, YearBadge, ez, glide, mix, pop, shots, span, wob, type Cam } from "./kit";
+import { C, GROUND, Ground, Punch, R, T, TitleCard, YearBadge, ez, glide, mix, pop, shots, span, wob, type Cam, NameCard } from "./kit";
 import { Flame, Label, MapArrow, MapView, P, Pin, at, along, reg } from "./map";
 import {
   Church, Coin, Column, Eagle, Fur, Heart, HoneyPot, Hut, Longship, Menu, MoneyBag, Mug, NoSign, Pine, Say, Scroll, Throne, Water, Yurt, Chain,
 } from "./props";
 import { w } from "./overlays";
+import { torn } from "../Puppet/paper";
 
 export const useW = (key: string) => (x: string, n = 0) => w(key, x, n);
 /** Screen-space stage for figures over a map (identity camera); a white outline keeps them readable on the imagery. */
@@ -186,15 +187,16 @@ const Rus: React.FC = () => {
   );
 };
 
-/** Small label card under the year badge. */
+/** Red torn-paper banner, top centre. */
 const TitleCardInline: React.FC<{ f: number; at: number; until: number; text: string }> = ({ f, at: a, until, text }) => {
   const t = span(f, a, until);
   if (t <= 0) return null;
+  const wd = text.length * 44 + 90;
   return (
     <svg viewBox="0 0 1920 1080" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
-      <g transform={`translate(960 150) scale(${t})`}>
-        <rect x={-text.length * 26 - 40} y={-62} width={text.length * 52 + 80} height={100} rx={12} fill={C.red} stroke={C.ink} strokeWidth={6} />
-        <text x={0} y={16} textAnchor="middle" fontFamily="'Segoe UI', Arial, sans-serif" fontWeight={900} fontSize={70} fill="#FFFFFF">{text}</text>
+      <g transform={`translate(960 150) rotate(-2) scale(${t})`} filter="url(#cut)">
+        <path d={torn(-wd / 2, -60, wd, 112, text.length * 7, 6, 18)} fill="#B8352A" stroke="#2A1E14" strokeWidth={2} />
+        <text x={0} y={22} textAnchor="middle" fontFamily="Oswald" fontWeight={700} fontSize={70} fill="#FBF4E2">{text}</text>
       </g>
     </svg>
   );
