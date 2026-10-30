@@ -9,20 +9,20 @@ a revolution in the wrong month, the first human in space… and a pizza commerc
 
 0:00 Come and rule over us
 0:27 Vikings and Kievan Rus
-0:49 Vladimir picks a religion
+0:50 Vladimir picks a religion
 1:20 The Mongols
 1:51 Moscow, the tax collector
 2:31 Ivan the Terrible
-3:05 Siberia
+3:06 Siberia
 3:23 The Time of Troubles
 4:11 Peter the Great
 5:03 Catherine the Great
-5:43 Napoleon
-6:18 Serfs, Alaska and a bomb
+5:44 Napoleon
+6:19 Serfs, Alaska and a bomb
 6:54 Nicholas II and Rasputin
 7:45 1917
 8:31 Stalin and World War II
-9:20 The Cold War and space
+9:21 The Cold War and space
 9:59 The collapse
 10:31 Russia since 1991
 11:03 So that's Russia

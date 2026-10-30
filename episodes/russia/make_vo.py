@@ -344,10 +344,19 @@ def load_wav(path):
 
 # ─────────────── Timing ───────────────
 
+_ASR = []
+
+
+def whisper():
+    if not _ASR:
+        from faster_whisper import WhisperModel
+        _ASR.append(WhisperModel("small.en", device="cpu", compute_type="int8"))
+    return _ASR[0]
+
+
 def align(lines, audio16):
     """[(start_s, end_s, shown)] for every shown token, from whisper word times matched to the spoken script."""
-    from faster_whisper import WhisperModel
-    asr = WhisperModel("small.en", device="cpu", compute_type="int8")
+    asr = whisper()
     prompt = " ".join(spoken(l) for l in lines if l)
     segs, _ = asr.transcribe(audio16, language="en", word_timestamps=True, initial_prompt=prompt[:800], beam_size=5)
     heard = [(w.start, w.end, norm(w.word)) for s in segs for w in s.words if norm(w.word)]
@@ -408,6 +417,34 @@ def write_timing(scenes_t):
 
 
 def timing():
+    """Word times per scene. With the Qwen line cache present, each line is aligned on its own and offset by its known
+    position in the assembled scene (exactly how qwen() concatenates them), which is far more robust than aligning a
+    whole scene at once: whisper can lose its place in a long file and drift every later word."""
+    import hashlib, soundfile as sf
+    direction = delivery()
+    path_of = lambda line: os.path.join(LINE_CACHE, hashlib.sha1((spoken(line) + "|" + direction[line]).encode()).hexdigest()[:16] + ".wav")
+    out = []
+    for key, lines in parse().items():
+        if not all(os.path.exists(path_of(l)) for l in lines if l):
+            break
+        t, words = 0.0, []
+        for l in lines:
+            if not l:
+                t += GAP_PARA - GAP_LINE
+                continue
+            wav, sr = sf.read(path_of(l), dtype="float32")
+            wav = trim(wav)
+            for s0, s1, tok in align([l], resample(wav)):
+                words.append((t + s0, t + s1, tok))
+            t += len(wav) / SR + GAP_LINE
+        total = len(load_wav(os.path.join(OUT_DIR, f"{key}.wav"))) / 16000
+        assert abs(total - (t - GAP_LINE)) < 0.05, (key, total, t - GAP_LINE)
+        out.append((key, total, words))
+        print(key, f"{total:.1f}s", len(words), "words (per line)", flush=True)
+    else:
+        write_timing(out)
+        return
+    print("line cache incomplete; aligning whole scenes", flush=True)
     out = []
     for key, lines in parse().items():
         audio = load_wav(os.path.join(OUT_DIR, f"{key}.wav"))

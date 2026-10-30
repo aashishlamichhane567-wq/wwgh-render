@@ -125,7 +125,10 @@ export const Soundtrack: React.FC = () => {
       {Object.entries(SCENES).map(([k, sc], i) => (
         <React.Fragment key={k}>
           {i > 0 ? (
-            <Sequence from={sc.start - 4} durationInFrames={30}><Audio src={staticFile("sfx/paper.wav")} volume={0.28 * SFX_GAIN} /></Sequence>
+            <>
+              <Sequence from={sc.start - 9} durationInFrames={30}><Audio src={staticFile("sfx/whoosh.wav")} volume={0.22 * SFX_GAIN} /></Sequence>
+              <Sequence from={sc.start - 4} durationInFrames={30}><Audio src={staticFile("sfx/paper.wav")} volume={0.28 * SFX_GAIN} /></Sequence>
+            </>
           ) : null}
           {(CUES[k] ?? []).map(([word, n, fx, vol, off = 0], j) => (
             <Sequence key={j} from={Math.max(0, sc.start + w(k, word, n) + off)} durationInFrames={200}>
