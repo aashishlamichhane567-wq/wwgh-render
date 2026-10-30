@@ -205,7 +205,7 @@ def design():
     print("wrote", VOICE_REF, f"{len(w[0]) / sr:.1f}s")
 
 
-def qwen(batch=4):
+def qwen(batch=int(os.environ.get("VO_BATCH", 4))):
     """Every script line cloned from VOICE_REF with Qwen3-TTS Base, `batch` lines per call (much faster on CPU), whisper QA."""
     import hashlib, torch, soundfile as sf
     from qwen_tts import Qwen3TTSModel
