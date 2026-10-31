@@ -3,7 +3,7 @@
 Copy each block into YouTube Studio as written.
 
 ## File
-`The_Entire_History_of_Russia.mp4`: 11:29, 1920×1080, 30 fps, H.264 + AAC 48 kHz, mastered to −16 LUFS.
+`Russia_4k.mp4`: 11:31, 3840×2160 (4K), 30 fps, H.264 level 5.1 + AAC 48 kHz 320k, mastered to −16 LUFS. Uploading in 4K makes YouTube use its higher-quality encode for every viewer, including at 1080p.
 
 ## Title (pick one; A/B them later if you like)
 1. The Entire History of Russia in 12 Minutes
@@ -21,24 +21,24 @@ Vikings who were invited in, Mongols who outsourced their tax collection, tsars 
 a revolution in the wrong month, the first human in space… and a pizza commercial. This is the entire history of Russia.
 
 0:00 Come and rule over us
-0:27 Vikings and Kievan Rus
+0:28 Vikings and Kievan Rus
 0:50 Vladimir picks a religion
-1:20 The Mongols
-1:51 Moscow, the tax collector
-2:31 Ivan the Terrible
-3:06 Siberia
-3:23 The Time of Troubles
-4:11 Peter the Great
-5:03 Catherine the Great
-5:44 Napoleon
-6:19 Serfs, Alaska and a bomb
-6:54 Nicholas II and Rasputin
-7:45 1917
-8:31 Stalin and World War II
-9:21 The Cold War and space
-9:59 The collapse
-10:31 Russia since 1991
-11:03 So that's Russia
+1:22 The Mongols
+1:52 Moscow, the tax collector
+2:32 Ivan the Terrible
+3:07 Siberia
+3:25 The Time of Troubles
+4:13 Peter the Great
+5:06 Catherine the Great
+5:47 Napoleon
+6:23 Serfs, Alaska and a bomb
+6:57 Nicholas II and Rasputin
+7:47 1917
+8:34 Stalin and World War II
+9:23 The Cold War and space
+10:00 The collapse
+10:32 Russia since 1991
+11:05 So that's Russia
 
 Maps: satellite imagery NASA Blue Marble (public domain); historical borders from historical-basemaps by André Ourednik (GPL-3.0); coastlines from Natural Earth (public domain).
 Narration is AI-generated (Qwen3-TTS); five short illustrated clips were generated with Google Flow. Music and sound effects are composed in code; "Korobeiniki" is a public-domain folk song. Dates and figures are rounded for time; estimates such as war deaths are the commonly cited ones.

@@ -53,7 +53,7 @@ follow. After any script or voice change run the cue checker (`episodes/<slug>/c
    timestamps from `timing.ts`). The user generates them in Google Flow / Gemini on their own plan (a Google AI
    subscription gives no API access; the API is separate and paid) and shares a Drive folder — it must be
    "Anyone with the link" (download with `gdown <folder-url>`). Put clips in `public/gemini/`, list them in `inserts.tsx`.
-8. **Render** (~60–110 min, run in background):
+8. **Render** (~60–110 min, run in background; or run everything in 4K on free runners: `gh workflow run history.yml --ref <branch>`):
    `npx remotion render <Comp> out/raw.mp4 --browser-executable=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell --concurrency=4 --pixel-format=yuv420p --jpeg-quality=95`
    Test a short range first after any audio-code change: add `--frames=1300-1500`.
 9. **Master + QA** — `bash .claude/skills/history-video/scripts/master.sh out/raw.mp4 out/<Name>_final.mp4`

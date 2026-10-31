@@ -184,3 +184,19 @@ npx remotion still RussiaThumbB out/thumb.png --browser-executable=...   # thumb
    helps retention.
 5. **Next episode:** the skill makes the next one mostly mechanical. The slow steps are the script, new puppets and
    props for the new country, and new era backdrops.
+
+---
+
+## 8. Upgrade, 1 November 2026 (branch `claude/russia-quality-upgrade`)
+
+- **Voice:** all 126 lines re-voiced as best-of-3 takes (before, only the hook was), keeping the liveliest take that passes
+  QA. A line where no take passes now gets retried, where before it was silently kept. Lines ending mid-sentence ("said:")
+  pause 0.22 s instead of 0.42 s. Same voice A. Two lines never "passed": "Then a dog named Laika." and the Alaska price line.
+  Both scored the same on every try, so it's whisper mis-spelling Laika and "7.2", not a bad take. Listen to both anyway.
+- **Picture:** rendered at 4K (`--scale=2`), so vector art stays sharp. H.264 level 5.1, standard range, bt709.
+  It's 1.44 GB and 11:31.
+- **Checks:** 0 cue problems; every first caption at 0.00 s; 1.7 % of words start in silence, all soft; −16.0 LUFS, −2.1 dBTP;
+  no freezes of 2.5 s or longer.
+- **How:** `.github/workflows/history.yml` runs the whole pipeline on free public-repo runners: 9 voice shards → timing,
+  committed → 10 render shards + an audio-only render → concat and loudnorm. It took 2 h 42 m. Run it with
+  `gh workflow run history.yml --ref <branch>`, or add `-f voice=false` to render only.
