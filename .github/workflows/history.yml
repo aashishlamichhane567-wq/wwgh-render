@@ -1,0 +1,145 @@
+# History episode end to end on free runners: best-of-N narration (sharded by scene) -> per-line timing, committed ->
+# 4K render (sharded by frame range, muted) + audio-only render -> concat, two-pass loudnorm -16 LUFS / -1.5 dBTP.
+# gh workflow run history.yml --ref <branch>                  (re-voice everything, then 4K render)
+# gh workflow run history.yml --ref <branch> -f voice=false   (render only, from the committed voice + timing)
+name: history
+on:
+  workflow_dispatch:
+    inputs:
+      slug: { description: episode folder under episodes/, default: russia }
+      comp: { description: Remotion composition, default: Russia }
+      voice: { description: re-voice before rendering, default: "true" }
+      takes: { description: takes per line (the liveliest passing take is kept), default: "3" }
+      shards:
+        description: JSON list of space-separated scene groups, one runner each
+        default: '["peter rus siberia", "nicholas mongols", "stalin faith", "troubles modern", "revolution collapse", "catherine reform", "moscow terrible", "coldwar napoleon", "hook end"]'
+      scale: { description: render scale (2 = 3840x2160), default: "2" }
+
+permissions:
+  contents: write
+
+jobs:
+  voice:
+    if: inputs.voice == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        scenes: ${{ fromJSON(inputs.shards) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Qwen3-TTS (CPU torch) + faster-whisper
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg sox
+          pip install -q --no-cache-dir torch torchaudio --index-url https://download.pytorch.org/whl/cpu
+          pip install -q --no-cache-dir qwen-tts==0.1.1 faster-whisper librosa soundfile
+      - name: Voice ${{ matrix.scenes }}
+        run: |
+          rm -f public/vo_${{ inputs.slug }}/*.wav   # only this shard's fresh scenes may be uploaded
+          VO_BATCH=2 VO_TAKES=${{ inputs.takes }} python episodes/${{ inputs.slug }}/make_vo.py qwen ${{ matrix.scenes }}
+          for s in ${{ matrix.scenes }}; do test -f public/vo_${{ inputs.slug }}/$s.wav; done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vo-${{ strategy.job-index }}
+          path: |
+            public/vo_${{ inputs.slug }}/*.wav
+            episodes/${{ inputs.slug }}/vo_lines/*.wav
+          retention-days: 30
+
+  timing:
+    needs: voice
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: rm -f public/vo_${{ inputs.slug }}/*.wav
+      - uses: actions/download-artifact@v4
+        with: { pattern: "vo-*", path: ., merge-multiple: true }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Timing, sync and cue checks, chapters
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+          pip install -q faster-whisper soundfile numpy
+          want=$(grep -c '^## ' episodes/${{ inputs.slug }}/script.txt); got=$(ls public/vo_${{ inputs.slug }}/*.wav | wc -l)
+          echo "scenes: $got of $want"; test "$got" = "$want"
+          python episodes/${{ inputs.slug }}/make_vo.py timing
+          python .claude/skills/history-video/scripts/check_sync.py ${{ inputs.slug }} ${{ inputs.comp }}
+          python episodes/${{ inputs.slug }}/check_cues.py
+          python episodes/${{ inputs.slug }}/youtube.py
+      - name: Commit voice + timing
+        run: |
+          git config user.name "github-actions"; git config user.email "actions@github.com"
+          git add public/vo_${{ inputs.slug }} src/${{ inputs.comp }}/timing.ts episodes/${{ inputs.slug }}/youtube.md
+          git commit -m "${{ inputs.comp }}: re-voiced best-of-${{ inputs.takes }}, retimed (CI)" && git push
+
+  render:
+    needs: timing
+    if: always() && (needs.timing.result == 'success' || needs.timing.result == 'skipped')
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        part: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: "${{ github.ref_name }}" }   # the commit the timing job just pushed
+      - uses: actions/setup-node@v4
+        with: { node-version: 24, cache: npm }
+      - name: Chrome libraries
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-liberation ffmpeg libnss3 libdbus-1-3 libatk1.0-0 libasound2t64 libxrandr2 \
+            libxkbcommon-dev libxfixes3 libxcomposite1 libxdamage1 libgbm-dev libcups2 libcairo2 libpango-1.0-0 libatk-bridge2.0-0
+          npm ci --no-audit --no-fund && npx remotion browser ensure
+      - name: Render part ${{ matrix.part }} of 10
+        run: |
+          N=10; P=${{ matrix.part }}
+          T=$(grep -oP 'TOTAL_FRAMES = \K\d+' src/${{ inputs.comp }}/timing.ts)
+          A=$(( T * P / N )); Z=$(( T * (P + 1) / N - 1 ))
+          npx remotion render ${{ inputs.comp }} out/part_$(printf %02d $P).mp4 --frames=$A-$Z --scale=${{ inputs.scale }} --muted \
+            --concurrency=100% --pixel-format=yuv420p --color-space=bt709 --jpeg-quality=95 --crf=16 --x264-preset=medium
+      - uses: actions/upload-artifact@v4
+        with: { name: "part-${{ matrix.part }}", path: out/part_*.mp4, retention-days: 7 }
+
+  master:
+    needs: render
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: "${{ github.ref_name }}" }
+      - uses: actions/download-artifact@v4
+        with: { pattern: "part-*", path: parts, merge-multiple: true }
+      - uses: actions/setup-node@v4
+        with: { node-version: 24, cache: npm }
+      - name: Audio-only render
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-liberation ffmpeg libnss3 libdbus-1-3 libatk1.0-0 libasound2t64 libxrandr2 \
+            libxkbcommon-dev libxfixes3 libxcomposite1 libxdamage1 libgbm-dev libcups2 libcairo2 libpango-1.0-0 libatk-bridge2.0-0
+          npm ci --no-audit --no-fund && npx remotion browser ensure
+          npx remotion render ${{ inputs.comp }} out/audio.wav --codec=wav
+      - name: Concat, loudness, checks
+        run: |
+          ls parts/*.mp4 | sort | sed "s|^|file '$PWD/|;s|$|'|" > list.txt; cat list.txt
+          J=$(ffmpeg -hide_banner -i out/audio.wav -af loudnorm=I=-16:TP=-1.5:LRA=11:print_format=json -f null - 2>&1 | sed -n '/^{/,/^}/p')
+          g() { echo "$J" | python3 -c "import json,sys;print(json.load(sys.stdin)['$1'])"; }
+          F=out/${{ inputs.comp }}_4k.mp4
+          ffmpeg -v error -y -f concat -safe 0 -i list.txt -i out/audio.wav -map 0:v -map 1:a -c:v copy \
+            -af "loudnorm=I=-16:TP=-1.5:LRA=11:measured_I=$(g input_i):measured_TP=$(g input_tp):measured_LRA=$(g input_lra):measured_thresh=$(g input_thresh):offset=$(g target_offset):linear=true,aresample=48000" \
+            -c:a aac -b:a 320k -shortest -movflags +faststart $F
+          ffprobe -v error -show_entries stream=codec_name,width,height,level,pix_fmt,color_range,color_space,r_frame_rate:format=duration,size -of default=nw=1 $F
+          L=$(ffprobe -v error -select_streams v -show_entries stream=level -of csv=p=0 $F); echo "level $L"; test "$L" -le 51   # Windows players stop at 5.1
+          ffmpeg -hide_banner -i $F -af loudnorm=print_format=summary -f null - 2>&1 | grep -E "Input Integrated|Input True Peak"
+          echo "freezes >= 2.5 s:"; ffmpeg -hide_banner -i $F -vf "scale=480:-1,freezedetect=n=0.003:d=2.5" -map 0:v -f null - 2>&1 | grep -oE "freeze_(start|duration): [0-9.]+" | paste - - || true
+          ffmpeg -v error -y -i $F -vf "fps=1/43,scale=480:-1,tile=4x4:padding=4:color=white" -frames:v 1 out/sheet.jpg
+          ffmpeg -v error -y -ss 60 -i $F -frames:v 1 out/still_4k.png
+      - uses: actions/upload-artifact@v4
+        with: { name: "${{ inputs.comp }}-4k", path: "out/${{ inputs.comp }}_4k.mp4", retention-days: 7 }
+      - uses: actions/upload-artifact@v4
+        with: { name: "${{ inputs.comp }}-checks", path: "out/*.jpg\nout/*.png", retention-days: 7 }
+
