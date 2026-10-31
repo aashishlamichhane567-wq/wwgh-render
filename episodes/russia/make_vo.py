@@ -41,6 +41,8 @@ FPS = 30
 GAP_LINE, GAP_PARA = 0.42, 0.9  # seconds of silence between takes
 LEAD, TAIL = 12, 16  # frames before / after the voice in each scene
 FIRST_LEAD = 24
+GAP_MID = 0.22  # a line that ends mid-sentence ("said:", "to Constantinople,") runs on instead of pausing like a full stop
+gap = lambda line: GAP_MID if line.rstrip('"').endswith((",", ":", ";")) else GAP_LINE
 
 
 def parse():
@@ -276,6 +278,7 @@ def qwen(batch=int(os.environ.get("VO_BATCH", 4))):
             rms = librosa.feature.rms(y=wav)[0]
             db = 20 * np.log10(rms[rms > rms.max() * 0.05] + 1e-9)
             return np.std(12 * np.log2(f0 / np.median(f0))) + 0.3 * db.std()
+        failed = []
         for n, line in enumerate(todo):
             torch.manual_seed(31 + n)
             ids = [model._tokenize_texts([model._build_instruct_text(direction[line])])[0]] * takes
@@ -290,9 +293,12 @@ def qwen(batch=int(os.environ.get("VO_BATCH", 4))):
                 print(f"  take{t} {'ok ' if ok else 'BAD'} score={score:.2f} wps={rate:.2f} live={live:.2f} :: {spoken(line)[:60]}", flush=True)
                 scored.append((ok, live, wav))
             ok, live, wav = max(scored, key=lambda x: (x[0], x[1]))
-            sf.write(path_of(line), wav, sr)
-            print(f"  kept live={live:.2f}", flush=True)
-        todo = []
+            if ok:
+                sf.write(path_of(line), wav, sr)
+                print(f"  kept live={live:.2f}", flush=True)
+            else:  # no take passed QA: let the single-take retry loop below have it
+                failed.append(line)
+        todo = failed
     for attempt in range(4):
         failed = []
         for i in range(0, len(todo), batch):
@@ -323,7 +329,7 @@ def qwen(batch=int(os.environ.get("VO_BATCH", 4))):
                 continue
             wav, sr = sf.read(path_of(line), dtype="float32")
             assert sr == SR, sr
-            parts += [trim(wav), np.zeros(int(SR * GAP_LINE), dtype=np.float32)]
+            parts += [trim(wav), np.zeros(int(SR * gap(line)), dtype=np.float32)]
         raw = os.path.join(OUT_DIR, f"{key}.raw.wav")
         sf.write(raw, np.concatenate(parts[:-1]), SR)
         subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", raw, "-af", NARR_CHAIN, "-ar", str(SR), "-ac", "1", os.path.join(OUT_DIR, f"{key}.wav")], check=True)
@@ -436,9 +442,10 @@ def timing():
             wav = trim(wav)
             for s0, s1, tok in align([l], resample(wav)):
                 words.append((t + s0, t + s1, tok))
-            t += len(wav) / SR + GAP_LINE
+            t += len(wav) / SR + gap(l)
+        t -= gap(lines[-1])  # qwen() drops the gap after the last line
         total = len(load_wav(os.path.join(OUT_DIR, f"{key}.wav"))) / 16000
-        assert abs(total - (t - GAP_LINE)) < 0.05, (key, total, t - GAP_LINE)
+        assert abs(total - t) < 0.05, (key, total, t)
         out.append((key, total, words))
         print(key, f"{total:.1f}s", len(words), "words (per line)", flush=True)
     else:
