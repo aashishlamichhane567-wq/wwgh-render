@@ -16,5 +16,7 @@ export const RemotionRoot: React.FC = () => (
     <Composition id="RussiaPilot" component={RussiaPilot} durationInFrames={PILOT_FRAMES} fps={30} width={1920} height={1080} />
     <Composition id="StyleLab" component={StyleLab} durationInFrames={4} fps={30} width={1920} height={1080} />
     <Composition id="RussiaThumb" component={Thumb} durationInFrames={1} fps={30} width={1280} height={720} />
+    <Composition id="RussiaThumbB" component={() => <Thumb v="B" />} durationInFrames={1} fps={30} width={1280} height={720} />
+    <Composition id="RussiaThumbC" component={() => <Thumb v="C" />} durationInFrames={1} fps={30} width={1280} height={720} />
   </>
 );
