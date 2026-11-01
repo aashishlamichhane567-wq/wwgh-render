@@ -1,2 +1,3 @@
-"""Style test only: no upload metadata. Kept because history.yml runs it."""
-print("disc: style test, no youtube.md")
+"""Style test only: history.yml commits youtube.md, so write a placeholder."""
+import os
+open(os.path.join(os.path.dirname(__file__), "youtube.md"), "w").write("# Discipline hook style test (no upload metadata)\n")
