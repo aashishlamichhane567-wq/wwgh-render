@@ -264,7 +264,7 @@ const ShotAsleep: React.FC<P> = ({ L, f, W }) => {
   const a = W("forty", 1);
   return (
     <g>
-      <g transform={`translate(700 640) scale(${mix(1.3, 1.42, ez(f, a, a + 400))}) translate(-700 -640)`}>
+      <g transform={`translate(640 640) scale(${mix(1.45, 1.55, ez(f, a, a + 400))}) translate(-640 -640)`}>
         <Bedroom L={L} f={f} ring={0} arm={null} eyes={0} />
       </g>
       <rect width={1920} height={1080} fill="#050818" opacity={0.38} />
@@ -275,7 +275,7 @@ const ShotAsleep: React.FC<P> = ({ L, f, W }) => {
         );
       })}
       <Tag L={L} x={1320} y={220} t={pop(f, W("fight"), 9)} text="ROUND 1" size={70} />
-      <g opacity={f >= W("awake") ? 1 : 0} transform={`translate(1420 300) rotate(-12) scale(${mix(2.2, 1, ez(f, W("awake"), W("awake") + 5))})`}>
+      <g opacity={f >= W("awake") ? 1 : 0} transform={`translate(1380 400) rotate(-12) scale(${mix(2.2, 1, ez(f, W("awake"), W("awake") + 5))})`}>
         <rect x={-150} y={-62} width={300} height={124} rx={10} fill="none" stroke={COL.red} strokeWidth={10} />
         <text y={34} textAnchor="middle" fontFamily="Oswald" fontWeight={700} fontSize={96} fill={COL.red}>LOST</text>
       </g>
@@ -303,7 +303,7 @@ const Hook: React.FC<{ scene: string }> = ({ scene }) => {
         <g filter={L.clay ? "url(#clay)" : undefined}>{shot}</g>
         <Tag L={L} x={250} y={80} t={span(raw, 6, 110)} text={L.clay ? "B  ·  CLAY" : "A  ·  PAPER THEATRE"} size={40} rot={-2} />
       </svg>
-      {L.clay ? null : <PaperTexture op={0.35} />}
+      {L.clay ? null : <PaperTexture op={0.5} />}
     </AbsoluteFill>
   );
 };
