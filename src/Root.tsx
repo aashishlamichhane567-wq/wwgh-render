@@ -19,6 +19,9 @@ export const RemotionRoot: React.FC = () => (
     <Composition id="RussiaThumb" component={Thumb} durationInFrames={1} fps={30} width={1280} height={720} />
     <Composition id="RussiaThumbB" component={() => <Thumb v="B" />} durationInFrames={1} fps={30} width={1280} height={720} />
     <Composition id="RussiaThumbC" component={() => <Thumb v="C" />} durationInFrames={1} fps={30} width={1280} height={720} />
+    <Composition id="RussiaThumbD" component={() => <Thumb v="D" />} durationInFrames={1} fps={30} width={1280} height={720} />
+    <Composition id="RussiaThumbE" component={() => <Thumb v="E" />} durationInFrames={1} fps={30} width={1280} height={720} />
+    <Composition id="RussiaThumbF" component={() => <Thumb v="F" />} durationInFrames={1} fps={30} width={1280} height={720} />
     <Composition id="ChannelBanner" component={Banner} durationInFrames={1} fps={30} width={2560} height={1440} />
     <Composition id="ChannelAvatarA" component={() => <Avatar v="A" />} durationInFrames={1} fps={30} width={800} height={800} />
     <Composition id="ChannelAvatarB" component={() => <Avatar v="B" />} durationInFrames={1} fps={30} width={800} height={800} />

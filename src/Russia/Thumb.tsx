@@ -1,5 +1,5 @@
 import React from "react";
-import { AbsoluteFill } from "remotion";
+import { AbsoluteFill, Img, staticFile } from "remotion";
 import { FACES, Person } from "./cast";
 import { C } from "./kit";
 import { INK, PaperDefs, PaperLabel, PaperTexture, torn, usePaperFonts } from "../Puppet/paper";
@@ -31,14 +31,15 @@ const Vignette: React.FC = () => (
 );
 
 /** Big headline: cream or yellow display letters with a thick ink outline, on an optional torn red strip. */
-const Headline: React.FC<{ x: number; y: number; text: string; size: number; rot?: number; strip?: boolean; color?: string; w?: number }> = ({
-  x, y, text, size, rot = -3, strip = true, color = CREAM, w,
+const Headline: React.FC<{ x: number; y: number; text: string; size: number; rot?: number; strip?: boolean; color?: string; w?: number; oswald?: boolean }> = ({
+  x, y, text, size, rot = -3, strip = true, color = CREAM, w, oswald,
 }) => {
-  const width = w ?? text.length * size * 0.62 + 80;
+  const width = w ?? text.length * size * (oswald ? 0.5 : 0.62) + 80;
   return (
     <g transform={`translate(${x} ${y}) rotate(${rot})`}>
       {strip ? <path d={torn(-width / 2, -size * 0.72, width, size * 1.2, 21, 8, 22)} fill={C.red} stroke={INK} strokeWidth={4} filter="url(#cut)" /> : null}
-      <text x={0} y={size * 0.3} textAnchor="middle" fontFamily="Ruslan" fontSize={size} fill={color} stroke={INK} strokeWidth={strip ? 0 : size * 0.12}
+      <text x={0} y={size * (oswald ? 0.36 : 0.3)} textAnchor="middle" fontFamily={oswald ? "Oswald" : "Ruslan"} fontWeight={oswald ? 700 : undefined}
+        fontSize={size} fill={color} stroke={INK} strokeWidth={strip ? 0 : size * 0.12}
         paintOrder="stroke" strokeLinejoin="round">{text}</text>
     </g>
   );
@@ -103,7 +104,57 @@ const ThumbC: React.FC = () => (
   </>
 );
 
-const VARIANTS = { A: ThumbA, B: ThumbB, C: ThumbC };
+/**
+ * v2 (after a viewer-eye review: B's "this" was unreadable, the puppets read as a kids' show, Ruslan's Y looks like a
+ * typo). D and E put the episode's best-looking frames, the Flow paper-craft shots, full bleed under one odd fact.
+ * F redoes A's "small became huge" on ONE map scale, so the contrast is real.
+ */
+const Frame: React.FC<{ src: string }> = ({ src }) => (
+  <>
+    <Img src={staticFile(src)} style={{ position: "absolute", inset: 0, width: 1280, height: 720 }} />
+    <AbsoluteFill style={{ background: "linear-gradient(180deg, rgba(10,6,4,0.55) 0%, rgba(10,6,4,0) 45%)" }} />
+  </>
+);
+
+const ThumbD: React.FC = () => (
+  <>
+    <Frame src="thumbsrc/vikings.png" />
+    <svg viewBox="0 0 1280 720" style={{ position: "absolute", inset: 0 }}>
+      <PaperDefs />
+      <Headline x={330} y={105} text="THEY INVITED" size={84} rot={-3} oswald />
+      <Headline x={340} y={260} text="VIKINGS?!" size={150} rot={-3} strip={false} color={YELLOW} oswald />
+    </svg>
+  </>
+);
+
+const ThumbE: React.FC = () => (
+  <>
+    <Frame src="thumbsrc/moscow_fire.png" />
+    <svg viewBox="0 0 1280 720" style={{ position: "absolute", inset: 0 }}>
+      <PaperDefs />
+      <Headline x={640} y={95} text="RUSSIA BURNED" size={84} rot={-2} oswald />
+      <Headline x={640} y={245} text="MOSCOW?!" size={150} rot={-2} strip={false} color={YELLOW} oswald />
+    </svg>
+  </>
+);
+
+const ThumbF: React.FC = () => (
+  <>
+    <MapCrop left={0} w={1280}>
+      <MapView cam={at([90, 57], 0.62)} year="1994" regions={[reg(1994, "Russia", "#8A2A1E"), reg(900, "Kyivan Rus", YELLOW)]} />
+    </MapCrop>
+    <Vignette />
+    <svg viewBox="0 0 1280 720" style={{ position: "absolute", inset: 0 }}>
+      <PaperDefs />
+      <PaperLabel x={190} y={250} t={1} text="862" size={70} rot={-4} seed={3} />
+      <path d="M215 300 L 300 370" stroke={YELLOW} strokeWidth={16} strokeLinecap="round" filter="url(#cut)" />
+      <PaperLabel x={830} y={150} t={1} text="TODAY" size={70} rot={3} seed={8} />
+      <Headline x={300} y={610} text="HOW?!" size={150} rot={-4} oswald />
+    </svg>
+  </>
+);
+
+const VARIANTS = { A: ThumbA, B: ThumbB, C: ThumbC, D: ThumbD, E: ThumbE, F: ThumbF };
 
 export const Thumb: React.FC<{ v?: keyof typeof VARIANTS }> = ({ v = "A" }) => {
   usePaperFonts();
