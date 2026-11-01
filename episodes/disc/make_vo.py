@@ -27,11 +27,11 @@ KOKORO_DIR = os.environ.get("KOKORO_DIR", "")  # holds kokoro-v1.0.onnx and voic
 DEEP_VOICE, DEEP_SPEED = "am_onyx", 0.8
 DEEP_CHAIN = ("highpass=f=55,lowshelf=f=140:g=2.5,equalizer=f=320:t=q:w=1.1:g=-2,equalizer=f=3200:t=q:w=1.2:g=1.5,"
               "deesser=i=0.25,acompressor=threshold=-21dB:ratio=2.5:attack=8:release=120:makeup=2")
-NARRATOR_DESIGN = ("A deep, warm, middle-aged British male documentary narrator. Rich low voice, calm authority, a hint of dry wit, "
-                   "unhurried storytelling pace with natural pauses.")
+NARRATOR_DESIGN = ("A deep, warm American male narrator in his thirties. Low, smooth, slightly breathy voice with calm confidence, "
+                   "clear articulation and a steady, unhurried pace: the classic calm YouTube explainer narrator.")
 VOICE_REF = os.path.join(ROOT, "episodes/disc/voice_ref.wav")
-VOICE_REF_TEXT = ("In eight sixty-two, the tribes of the north looked around and said: our land is great and rich, but there is no order "
-                  "in it. So they did something no country has done before or since. They invited foreigners to come and rule them.")
+VOICE_REF_TEXT = ("Most people think discipline is about forcing yourself. But the people who seem to have it figured out are rarely "
+                  "fighting at all. Here is what is actually going on, and why it matters more than you think.")
 LINE_CACHE = os.path.join(ROOT, "episodes/disc/vo_lines")  # one wav per script line (git-ignored); lets a long run resume
 NARR_CHAIN = ("highpass=f=60,lowshelf=f=150:g=2,equalizer=f=3000:t=q:w=1.2:g=2,deesser=i=0.2,"
               "acompressor=threshold=-22dB:ratio=3:attack=8:release=120:makeup=2,loudnorm=I=-16:TP=-1.5:LRA=9")
@@ -242,6 +242,9 @@ def delivery():
 
 def qwen(batch=int(os.environ.get("VO_BATCH", 4))):
     """Every script line cloned from VOICE_REF with Qwen3-TTS Base, `batch` lines per call (much faster on CPU), whisper QA."""
+    if not os.path.exists(VOICE_REF):  # new narrator: design it once from NARRATOR_DESIGN, then clone it for every line
+        design()
+        import gc; gc.collect()
     import hashlib, torch, soundfile as sf
     from qwen_tts import Qwen3TTSModel
     from faster_whisper import WhisperModel

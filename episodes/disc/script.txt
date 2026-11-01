@@ -1,4 +1,4 @@
-# Discipline hook, style test: the same narration twice, animated in two looks (paper theatre, then clay).
+# Discipline hook, style test: the same narration twice, animated in two looks (paper theatre, then a hand-drawn ink look).
 # One line = one TTS take. Blank line = longer pause.
 
 ## paper
@@ -11,7 +11,7 @@ Your hand reaches out. The alarm goes quiet. You tell yourself you'll make up fo
 
 Forty seconds after that, you're asleep again... having lost a fight you were never even awake for.
 
-## clay
+## ink
 There are about forty seconds every morning... that quietly decide your entire day.
 Your alarm goes off. Your eyes open in the dark.
 And before you have a single conscious thought, some older part of your brain has already run the numbers.

@@ -47,6 +47,7 @@ jobs:
           path: |
             public/vo_${{ inputs.slug }}/*.wav
             episodes/${{ inputs.slug }}/vo_lines/*.wav
+            episodes/${{ inputs.slug }}/voice_ref.wav
           retention-days: 30
 
   timing:
@@ -72,7 +73,7 @@ jobs:
       - name: Commit voice + timing
         run: |
           git config user.name "github-actions"; git config user.email "actions@github.com"
-          git add public/vo_${{ inputs.slug }} src/${{ inputs.comp }}/timing.ts episodes/${{ inputs.slug }}/youtube.md
+          git add public/vo_${{ inputs.slug }} episodes/${{ inputs.slug }}/voice_ref.wav src/${{ inputs.comp }}/timing.ts episodes/${{ inputs.slug }}/youtube.md
           git commit -m "${{ inputs.comp }}: re-voiced best-of-${{ inputs.takes }}, retimed (CI)" && git push
 
   render:
