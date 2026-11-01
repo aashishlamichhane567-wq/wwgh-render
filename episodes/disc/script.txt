@@ -1,7 +1,6 @@
-# Discipline hook, style test: the same narration twice, animated in two looks (paper theatre, then a hand-drawn ink look).
-# One line = one TTS take. Blank line = longer pause.
+# "You Were Trained Wrong" (discipline), full narration. One "## key" per section, one line = one TTS take, blank line = longer pause.
 
-## paper
+## hook
 There are about forty seconds every morning... that quietly decide your entire day.
 Your alarm goes off. Your eyes open in the dark.
 And before you have a single conscious thought, some older part of your brain has already run the numbers.
@@ -11,12 +10,96 @@ Your hand reaches out. The alarm goes quiet. You tell yourself you'll make up fo
 
 Forty seconds after that, you're asleep again... having lost a fight you were never even awake for.
 
-## ink
-There are about forty seconds every morning... that quietly decide your entire day.
-Your alarm goes off. Your eyes open in the dark.
-And before you have a single conscious thought, some older part of your brain has already run the numbers.
-The cold floor. The long day. That project you swore you'd finally start.
-It makes the decision for you.
-Your hand reaches out. The alarm goes quiet. You tell yourself you'll make up for it later.
+## guilt
+Then, around noon, the guilt shows up.
+You open a new tab. You watch another video about self-discipline.
+You write a new plan, in neater handwriting than the last one.
+For three days, it works. Then it doesn't.
+And you end up in the exact same place, thinking the exact same sentence: what is wrong with me?
 
-Forty seconds after that, you're asleep again... having lost a fight you were never even awake for.
+Most people will tell you the answer is willpower.
+That you're soft. That you need to want it more, stop making excuses, and just push through.
+But here's the part almost nobody tells you.
+The most disciplined people aren't better at forcing themselves. They barely force themselves at all.
+
+## sensation
+In 2012{twenty twelve}, a team led by psychologist Wilhelm Hofmann buzzed people's phones at random moments through the day,
+and asked: what do you want right now... and are you fighting it?
+The people with the most self-control weren't winning more of those fights.
+They reported fewer temptations, and less conflict. They were barely in the fight.
+
+So what are they doing differently?
+Twenty years earlier, Robert Eisenberger had a name for it: learned industriousness.
+Here's the idea. Effort isn't just a decision. It's a sensation.
+It has a texture in your body. The weight in your chest before a hard task. The tightness behind your eyes.
+And anything your body can feel... can be conditioned.
+When effort keeps getting followed by reward, the feeling of effort itself starts to carry some of that reward.
+
+## prediction
+It's why people pay to run marathons, and climb mountains there are helicopters for.
+Researchers call it the effort paradox: effort doesn't only cost us value. Sometimes it adds it.
+So how does that switch get flipped? Dopamine.
+In the nineties, neuroscientist Wolfram Schultz recorded dopamine cells in monkeys.
+At first, they fired when the reward arrived, a drop of juice.
+But once the animal learned that a light always came first... the burst moved.
+It stopped firing at the juice, and started firing at the light.
+The signal walks backward in time, to whatever predicts the good thing.
+
+Now think about your phone. Your brain doesn't wait for the funny video.
+It fires the moment your hand reaches for the glass, because that phone has predicted something good about ten thousand times.
+So here's the ugly question. What does opening your notebook predict?
+For most of us... strain, and a voice telling us we're behind. So the brain flinches.
+You don't have a discipline problem. You have a prediction problem.
+
+## flinch
+So where did your prediction get written in the first place?
+This has nothing to do with you being lazy.
+Think about what you were actually rewarded for growing up.
+The A on the report card. The trophy. The finished project. Everyone celebrated the outcome.
+But the effort? The three weeks of ugly, boring work that produced it? Nobody threw a party for that.
+So your nervous system learned a reasonable lesson: effort is the tax you pay at the gate.
+You were trained out of industriousness, by a system that only ever clapped at the finish line.
+
+And now, every time you white-knuckle through two hours of work, how does it end?
+You shut the laptop thinking, "That was awful. I'm so far behind."
+The last thing your brain files next to effort... is punishment.
+You're conditioning yourself backward. The harder you force... the deeper you carve the flinch.
+
+## rewires
+You're not going to think your way into liking discipline. Motivation is weather.
+What you're building is an association. Here are five ways to rewire it.
+
+One. Pay the effort, not the outcome.
+The second a session ends, mark it. Tick a box. Say it out loud: I showed up.
+It has to land within seconds of the effort, or it doesn't count.
+
+Two. Move the reward to the doorway.
+Put something good at the entrance of the hard thing.
+The coffee you only drink at that desk. The album you only play while training.
+It only works if you never get it anywhere else.
+
+Three. Shrink the entry until refusing is absurd.
+"Write the chapter" triggers the flinch. "Write one sentence" doesn't.
+
+Four. Design the room, not your resolve.
+Every choice you make about your space while you're calm is a fight your tired, late-night self never has to win.
+Put the phone in another room.
+
+Five. Never end on failure.
+Your brain remembers how things end far more than how they went.
+So finish on something small you can complete, while it still feels good.
+Make the last thing a win... every single time.
+
+## quiet
+Do this long enough, and something quietly strange happens.
+The work doesn't get easy. Hard things stay hard. Heavy stays heavy.
+What disappears... isn't the difficulty. It's the argument.
+That forty-second negotiation at the alarm. That daily vote on whether you're the kind of person who does this.
+That is what goes quiet.
+
+The whole point is to get the automatic part of you working on the same side as the part of you that wants a different life.
+That's all discipline ever was. A nervous system that's been given a reason to expect something good.
+
+Tell me in the comments which of the five is your missing piece.
+You were never broken. You were just trained wrong... and training can be redone.
+Thanks for watching Cognalyst. See you next time.

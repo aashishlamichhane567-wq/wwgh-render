@@ -1,15 +1,60 @@
 # Delivery directions (make_vo.py qwen): "## key | default", then "<start of line> | override".
 
-## paper | Intimate and quiet, close to the microphone, a little tired, unhurried, like telling a friend something true at dawn.
+## hook | Intimate and quiet, close to the microphone, a little tired, unhurried, like telling a friend something true at dawn.
 There are about | Soft and hushed, leaning in, a slow pause on the dots, gentle weight on entire day.
 Your alarm goes off | Quiet, slow, sleepy, each short sentence its own small moment.
 The cold floor | Slow and heavy, listing three dreaded things, a little sigh in the voice.
 It makes the decision | Firm and quiet, a beat of realisation, landing on for you.
 Forty seconds after | Slow and soft, a wry sad smile, letting the last line land gently on awake.
 
-## ink | Intimate and quiet, close to the microphone, a little tired, unhurried, like telling a friend something true at dawn.
-There are about | Soft and hushed, leaning in, a slow pause on the dots, gentle weight on entire day.
-Your alarm goes off | Quiet, slow, sleepy, each short sentence its own small moment.
-The cold floor | Slow and heavy, listing three dreaded things, a little sigh in the voice.
-It makes the decision | Firm and quiet, a beat of realisation, landing on for you.
-Forty seconds after | Slow and soft, a wry sad smile, letting the last line land gently on awake.
+## guilt | Empathetic and conversational, a little frustrated on the listener's behalf, natural pace.
+Then, around noon | A tired sigh, then plain and honest.
+For three days | Light, a small wry beat between works and doesn't.
+And you end up | Slower, sympathetic, quoting the inner voice quietly on what is wrong with me.
+That you're soft | Mock-tough, impersonating a loud coach, a touch sarcastic.
+But here's the part | Leaning in, lower, building intrigue.
+The most disciplined people | Firm, revelatory, clear emphasis on barely.
+
+## sensation | Clear, curious and a little awe-struck, a good teacher explaining something surprising, articulate.
+They reported fewer | Pointed, savouring the twist, slower on barely in the fight.
+So what are they doing | Curious, a genuine question.
+Here's the idea | Deliberate, weight on sensation.
+It has a texture | Slow, physical, describing a feeling in the body.
+And anything your body | Quiet, a small reveal, a pause on the dots.
+When effort keeps | Warm and hopeful, building.
+
+## prediction | Intriguing and building tension, slightly urgent, talking straight to the listener.
+It's why people pay | Amused and light.
+So how does that switch | Punchy, landing on dopamine.
+But once the animal | Suspense, slowing down, a pause on the dots, hitting moved.
+The signal walks | Slow and awed.
+Now think about your phone | Direct, a little pointed.
+So here's the ugly question | Lower and serious, a real question.
+For most of us | Gentle, honest, a little sad.
+You don't have a discipline | Firm and clear, a reframe that lands, weight on prediction.
+
+## flinch | Slow, warm and deeply empathetic, absolving, like a kind mentor; this is the emotional core.
+This has nothing | Firm reassurance.
+The A on the report card | Bright, then a touch ironic on celebrated.
+But the effort | Softer, a little sad, slower.
+So your nervous system | Calm and understanding.
+You shut the laptop | Quoting a tired, defeated inner voice, quiet.
+The last thing your brain | Slow, grave, weight on punishment.
+You're conditioning | Gentle but serious, slowing down at the end.
+
+## rewires | Confident, warm authority, instructional energy, punchy on the numbers.
+You're not going to think | Plain and grounded.
+One. Pay | Punchy, the number clear and separate.
+Two. Move | Punchy, the number clear and separate.
+Three. Shrink | Punchy, the number clear and separate.
+Four. Design | Punchy, the number clear and separate.
+Five. Never | Punchy, the number clear and separate.
+Make the last thing | Warm, a small smile, slow on every single time.
+
+## quiet | Grounded, honest and warm, slower, letting the thoughts land.
+What disappears | Slow, a pause on the dots, landing on argument.
+That is what goes quiet | Very soft.
+That's all discipline | Warm and certain.
+Tell me in the comments | Friendly and direct.
+You were never broken | Warm and reassuring, slow, a gentle smile on can be redone.
+Thanks for watching | Friendly sign-off.
