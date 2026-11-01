@@ -141,14 +141,14 @@ const ThumbE: React.FC = () => (
 const ThumbF: React.FC = () => (
   <>
     <MapCrop left={0} w={1280}>
-      <MapView cam={at([90, 57], 0.62)} year="1994" regions={[reg(1994, "Russia", "#8A2A1E"), reg(900, "Kyivan Rus", YELLOW)]} />
+      <MapView cam={at([95, 57], 0.95)} year="1994" regions={[reg(1994, "Russia", "#8A2A1E"), reg(900, "Kyivan Rus", YELLOW)]} />
     </MapCrop>
     <Vignette />
     <svg viewBox="0 0 1280 720" style={{ position: "absolute", inset: 0 }}>
       <PaperDefs />
-      <PaperLabel x={190} y={250} t={1} text="862" size={70} rot={-4} seed={3} />
-      <path d="M215 300 L 300 370" stroke={YELLOW} strokeWidth={16} strokeLinecap="round" filter="url(#cut)" />
-      <PaperLabel x={830} y={150} t={1} text="TODAY" size={70} rot={3} seed={8} />
+      <PaperLabel x={120} y={190} t={1} text="862" size={70} rot={-4} seed={3} />
+      <path d="M135 240 L 190 330" stroke={YELLOW} strokeWidth={16} strokeLinecap="round" filter="url(#cut)" />
+      <PaperLabel x={760} y={150} t={1} text="TODAY" size={70} rot={3} seed={8} />
       <Headline x={300} y={610} text="HOW?!" size={150} rot={-4} oswald />
     </svg>
   </>
