@@ -10,9 +10,12 @@ Copy each block into YouTube Studio as written.
 2. How a Viking Invitation Became the Biggest Country on Earth
 3. Russia's Entire History… and It Started with Vikings
 
-## Thumbnails (Test & Compare: upload all three)
-`thumbnails/1_B_vikings_did_this.jpg` (recommended first), `2_A_how.jpg`, `3_C_lineup.jpg`.
-All are 1280×720 and under 2 MB.
+## Thumbnails (Test & Compare: upload all three, v2)
+In `Downloads\Russia_4k	humbs_v2\`:
+1. `1_D_they_invited_vikings.jpg` (recommended first): the Flow longships frame, "THEY INVITED VIKINGS?!". It matches the hook and title 2.
+2. `2_E_russia_burned_moscow.jpg`: the Moscow-fire frame, "RUSSIA BURNED MOSCOW?!"
+3. `3_F_862_vs_today.jpg`: the 862 state vs today's Russia on one map scale, "HOW?!"
+All are 1280×720 and under 200 KB. They replace v1 (B/A/C), which read as a kids' cartoon and didn't show their payoff at phone size.
 
 ## Description (chapters included; the first chapter must stay at 0:00)
 ```
