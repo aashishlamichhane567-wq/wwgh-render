@@ -23,25 +23,26 @@ const Title: React.FC<{ x: number; y: number; size: number }> = ({ x, y, size })
   return (
     <g transform={`translate(${x} ${y}) rotate(-2)`}>
       <path d={torn(-w / 2, -size * 0.74, w, size * 1.22, 17, 9, 24)} fill={C.red} stroke={INK} strokeWidth={5} filter="url(#cut)" />
-      <text x={0} y={size * 0.3} textAnchor="middle" fontFamily="Ruslan" fontSize={size} fill={CREAM}>COGNALYST</text>
+      {/* Oswald, not Ruslan: Ruslan's Y reads as a Cyrillic letter, and the channel name must read at a glance */}
+      <text x={0} y={size * 0.36} textAnchor="middle" fontFamily="Oswald" fontWeight={700} letterSpacing={size * 0.06} fontSize={size} fill={CREAM}>COGNALYST</text>
     </g>
   );
 };
 
-const CAST: [Who, keyof typeof FACES, number][] = [["viking", "smug", 640], ["khan", "angry", 790], ["napoleon", "annoyed", 1810], ["gagarin", "happy", 1950]];
+const CAST: [Who, keyof typeof FACES, number][] = [["viking", "smug", 590], ["khan", "angry", 705], ["napoleon", "annoyed", 1855], ["gagarin", "happy", 1970]];
 
 export const Banner: React.FC = () => {
   usePaperFonts();
   return (
     <AbsoluteFill style={{ background: INK }}>
       <div style={{ position: "absolute", width: 1920, height: 1080, transform: "scale(1.3333)", transformOrigin: "0 0" }}>
-        <MapView cam={at([92, 50], 0.78)} year="1994" regions={NATIONS.map(([n, c]) => reg(1994, n, c))} />
+        <MapView cam={at([92, 47], 0.92)} year="1994" regions={NATIONS.map(([n, c]) => reg(1994, n, c))} />
       </div>
       <AbsoluteFill style={{ background: "radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0.15) 30%, rgba(10,6,4,0.7) 100%)" }} />
       <svg viewBox="0 0 2560 1440" style={{ position: "absolute", inset: 0 }}>
         <PaperDefs />
         {CAST.map(([who, face, x], i) => (
-          <Person key={who} who={who} x={x} ground={1030} f={0} s={1.75} face={FACES[face]} flip={i >= 2} />
+          <Person key={who} who={who} x={x} ground={922} f={0} s={1.3} face={FACES[face]} flip={i >= 2} />
         ))}
         <Title x={1280} y={655} size={130} />
         <PaperLabel x={1280} y={800} t={1} text="THE ENTIRE HISTORY OF EVERY COUNTRY" size={50} rot={1} seed={5} />
@@ -60,7 +61,7 @@ export const Avatar: React.FC<{ v?: "A" | "B" }> = ({ v = "A" }) => {
       <svg viewBox="0 0 800 800" style={{ position: "absolute", inset: 0 }}>
         <PaperDefs />
         {v === "A" ? (
-          <Person who="viking" x={400} ground={1590} f={0} s={5.2} face={FACES.shocked} />
+          <Person who="viking" x={400} ground={1700} f={0} s={8} face={FACES.shocked} />
         ) : (
           <>
             <path d={torn(110, 110, 580, 580, 23, 10, 26)} fill={C.red} stroke={INK} strokeWidth={8} filter="url(#cut)" />
