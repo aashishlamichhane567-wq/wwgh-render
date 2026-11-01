@@ -36,6 +36,7 @@ LINE_CACHE = os.path.join(ROOT, "episodes/disc/vo_lines")  # one wav per script 
 NARR_CHAIN = ("highpass=f=60,lowshelf=f=150:g=2,equalizer=f=3000:t=q:w=1.2:g=2,deesser=i=0.2,"
               "acompressor=threshold=-22dB:ratio=3:attack=8:release=120:makeup=2,loudnorm=I=-16:TP=-1.5:LRA=9")
 DELIVERY = os.path.join(ROOT, "episodes/disc/delivery.txt")  # per-scene and per-line emotion directions
+os.makedirs(OUT_DIR, exist_ok=True)
 SR = 24000
 FPS = 30
 GAP_LINE, GAP_PARA = 0.42, 0.9  # seconds of silence between takes
