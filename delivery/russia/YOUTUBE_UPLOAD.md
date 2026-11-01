@@ -11,7 +11,7 @@ Copy each block into YouTube Studio as written.
 3. Russia's Entire History… and It Started with Vikings
 
 ## Thumbnails (Test & Compare: upload all three, v2)
-In `Downloads\Russia_4k	humbs_v2\`:
+In `Downloads\Russia_4k\thumbs_v2\`:
 1. `1_D_they_invited_vikings.jpg` (recommended first): the Flow longships frame, "THEY INVITED VIKINGS?!". It matches the hook and title 2.
 2. `2_E_russia_burned_moscow.jpg`: the Moscow-fire frame, "RUSSIA BURNED MOSCOW?!"
 3. `3_F_862_vs_today.jpg`: the 862 state vs today's Russia on one map scale, "HOW?!"
