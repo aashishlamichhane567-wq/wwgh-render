@@ -107,6 +107,7 @@ jobs:
 
   master:
     needs: render
+    if: always() && needs.render.result == 'success'   # still runs when voice=false skipped the timing job
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
