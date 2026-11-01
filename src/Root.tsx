@@ -8,12 +8,15 @@ import { PILOT_FRAMES, RussiaPilot } from "./Russia/Pilot";
 import { RussiaVideo } from "./Russia/RussiaVideo";
 import { Avatar, Banner } from "./Channel/Brand";
 import { TOTAL_FRAMES as RUSSIA_FRAMES } from "./Russia/timing";
+import { DiscVideo } from "./Disc/DiscVideo";
+import { TOTAL_FRAMES as DISC_FRAMES } from "./Disc/timing";
 
 // Render-only copy of one episode from the private channel repo (free Actions minutes need a public repo).
 export const RemotionRoot: React.FC = () => (
   <>
     <Composition id="Wwgh" component={WwghVideo} durationInFrames={TOTAL_FRAMES} fps={30} width={1920} height={1080} />
     <Composition id="Russia" component={RussiaVideo} durationInFrames={RUSSIA_FRAMES} fps={30} width={1920} height={1080} />
+    <Composition id="Disc" component={DiscVideo} durationInFrames={DISC_FRAMES} fps={30} width={1920} height={1080} />
     <Composition id="RussiaPilot" component={RussiaPilot} durationInFrames={PILOT_FRAMES} fps={30} width={1920} height={1080} />
     <Composition id="StyleLab" component={StyleLab} durationInFrames={4} fps={30} width={1920} height={1080} />
     <Composition id="RussiaThumb" component={Thumb} durationInFrames={1} fps={30} width={1280} height={720} />

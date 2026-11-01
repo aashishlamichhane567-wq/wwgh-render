@@ -1,0 +1,22 @@
+# Discipline hook, style test: the same narration twice, animated in two looks (paper theatre, then clay).
+# One line = one TTS take. Blank line = longer pause.
+
+## paper
+There are about forty seconds every morning... that quietly decide your entire day.
+Your alarm goes off. Your eyes open in the dark.
+And before you have a single conscious thought, some older part of your brain has already run the numbers.
+The cold floor. The long day. That project you swore you'd finally start.
+It makes the decision for you.
+Your hand reaches out. The alarm goes quiet. You tell yourself you'll make up for it later.
+
+Forty seconds after that, you're asleep again... having lost a fight you were never even awake for.
+
+## clay
+There are about forty seconds every morning... that quietly decide your entire day.
+Your alarm goes off. Your eyes open in the dark.
+And before you have a single conscious thought, some older part of your brain has already run the numbers.
+The cold floor. The long day. That project you swore you'd finally start.
+It makes the decision for you.
+Your hand reaches out. The alarm goes quiet. You tell yourself you'll make up for it later.
+
+Forty seconds after that, you're asleep again... having lost a fight you were never even awake for.

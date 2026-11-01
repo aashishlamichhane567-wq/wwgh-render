@@ -3,3 +3,4 @@ out
 __pycache__
 episodes/russia/vo_lines/
 delivery/**/*.mp4
+episodes/disc/vo_lines/
