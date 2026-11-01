@@ -138,8 +138,12 @@ jobs:
           echo "freezes >= 2.5 s:"; ffmpeg -hide_banner -i $F -vf "scale=480:-1,freezedetect=n=0.003:d=2.5" -map 0:v -f null - 2>&1 | grep -oE "freeze_(start|duration): [0-9.]+" | paste - - || true
           ffmpeg -v error -y -i $F -vf "fps=1/43,scale=480:-1,tile=4x4:padding=4:color=white" -frames:v 1 out/sheet.jpg
           ffmpeg -v error -y -ss 60 -i $F -frames:v 1 out/still_4k.png
+          ffmpeg -v error -y -i $F -vf scale=1280:-2 -c:v libx264 -preset slow -crf 26 -c:a aac -b:a 128k -movflags +faststart out/${{ inputs.comp }}_preview.mp4   # small copy for quick review
+          ls -la out/*_preview.mp4
       - uses: actions/upload-artifact@v4
         with: { name: "${{ inputs.comp }}-4k", path: "out/${{ inputs.comp }}_4k.mp4", retention-days: 7 }
+      - uses: actions/upload-artifact@v4
+        with: { name: "${{ inputs.comp }}-preview", path: "out/${{ inputs.comp }}_preview.mp4", retention-days: 7 }
       - uses: actions/upload-artifact@v4
         with: { name: "${{ inputs.comp }}-checks", path: "out/*.jpg\nout/*.png", retention-days: 7 }
 
