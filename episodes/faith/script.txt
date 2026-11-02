@@ -1,0 +1,22 @@
+# "Look at the Lilies" (faith reel, ~18 s, storybook dialogue). Scene key = speaker + turn: b = the young man, j = Jesus.
+# One line = one TTS take. Paraphrases Matthew 6:28-29 and 6:34 in our own words.
+
+## b1
+What if everything falls apart tomorrow?
+
+## j1
+Look at these lilies.
+
+## b2
+...Flowers?
+
+## j2
+They don't work. They don't worry.
+And still, not even a king ever dressed like one of them.
+
+## b3
+So what am I supposed to do?
+
+## j3
+Let tomorrow worry about itself.
+Today, I've got you.

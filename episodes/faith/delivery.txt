@@ -1,0 +1,8 @@
+# Delivery directions (make_vo.py qwen): "## key | default", then "<start of line> | override".
+
+## b1 | Quiet, anxious and tired, almost a whisper, voice catching a little.
+## j1 | Warm, gentle and calm, a soft smile in the voice, unhurried.
+## b2 | Confused and soft, a small puzzled question.
+## j2 | Gentle and amused, tender, slow, letting each short sentence breathe.
+## b3 | Sincere and vulnerable, quiet, really asking.
+## j3 | Very warm and reassuring, slow and soft, close to the microphone, landing gently on I've got you.
