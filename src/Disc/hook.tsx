@@ -82,22 +82,57 @@ export const Clock: React.FC<{ L: Look; x: number; y: number; k?: number; f: num
   </g>
 );
 
-/* ─────────── shot 0: cold open — the brain, hand already up, slams ABORT on "decide" ─────────── */
-const ShotTeaser: React.FC<P> = ({ L, f, W }) => {
-  const slam = W("decide"), down = ez(f, slam - 4, slam);
-  const hand: [number, number] = [mix(330 + Math.sin(f / 3) * 6, 410, down), mix(-90 + Math.sin(f / 2) * 8, 175, down)];
-  const press = f >= slam ? 1 - ez(f, slam + 6, slam + 16) : 0;
-  const flash = f >= slam ? 1 - ez(f, slam, slam + 12) : 0;
+/* ─────────── shot 0: cold open — a tiny "40s" domino tips over a row of ever-bigger ones, ending on YOUR DAY ─────────── */
+const DOMINOES = (() => {
+  const labels = [["40s"], ["8 AM"], ["WORK"], ["GYM"], ["PROJECT"], ["YOUR", "DAY"]];
+  let x = 300;
+  return labels.map((lines, i) => {
+    const h = 120 * 1.38 ** i, d = { x, h, w: 0.34 * h, lines };
+    x += 0.7 * h;
+    return d;
+  });
+})();
+const ShotDominoes: React.FC<P> = ({ L, f, W }) => {
+  const tap = W("quietly"), go = W("decide"), G = 800;
+  // slow pull-back while the row is still standing, then a fast pull-out that rides the cascade
+  const back = ez(f, 0, go), out = ez(f, go, go + 40);
+  const z = mix(mix(2.4, 1.6, back), 1, out), cx = mix(mix(330, 600, back), 960, out), cy = mix(mix(720, 640, back), 540, out);
+  const reach = ez(f, tap - 8, tap + 6) * (1 - ez(f, go + 10, go + 24));
+  const d0 = DOMINOES[0]!;
+  const hand: [number, number] = [mix(-80, d0.x - d0.w / 2 - 16 + 12 * ez(f, go - 3, go), reach), G - d0.h + 22];
+  const last = DOMINOES.length - 1, landed = go + last * 7 + 12;
   return (
-    <g transform={camera(f, 0, [[0, 760, 600, 1.35], [slam, 960, 540, 1]])}>
-      <rect x={-200} y={-200} width={2320} height={1480} fill={L.col.room} />
-      <rect x={-200} y={820} width={2320} height={460} fill={L.col.floor} />
-      <Sheet L={L} x={800} y={760} w={360} h={200} fill={L.col.clock} seed={9} />
-      <ellipse cx={970} cy={770 + 10 * press} rx={84} ry={34 - 12 * press} fill={L.col.red} {...st(L)} />
-      <text x={980} y={890} textAnchor="middle" fontFamily="Oswald" fontWeight={700} fontSize={48} fill="#FFFFFF">ABORT</text>
-      <Brain L={L} x={560} y={580} tilt={Math.sin(f / 5) * 3} hand={hand} lid={0.55} frown={f >= slam ? 1 : 0.4} />
-      <Tag L={L} x={1150} y={330} t={span(f, W("forty"), W("Your"))} text="40 SECONDS" />
-      <rect x={-200} y={-200} width={2320} height={1480} fill={L.col.red} opacity={flash * 0.35} />
+    <g transform={`translate(960 540) scale(${z}) translate(${-cx} ${-cy})`}>
+      <rect x={-300} y={-300} width={2520} height={1680} fill={L.col.wall} />
+      <circle cx={1000} cy={mix(900, 400, ez(f, W("every"), W("morning") + 30))} r={90} fill="#F2D27A" opacity={0.9} />
+      <rect x={-300} y={G} width={2520} height={600} fill={L.col.floor} {...st(L)} />
+      {DOMINOES.map(({ x, h, w: wd, lines }, i) => {
+        const t0 = go + i * 7, p = Math.max(0, Math.min(1, (f - t0) / (i === last ? 12 : 8)));
+        const next = DOMINOES[i + 1];
+        const lean = next ? (Math.asin(Math.min(1, (next.x - next.w / 2 - (x + wd / 2)) / h)) * 180) / Math.PI : 90;
+        const size = Math.max(18, h * 0.085);
+        return (
+          <g key={i} transform={`rotate(${lean * p * p} ${x + wd / 2} ${G})`} opacity={i === 0 ? 1 : ez(f, i * 6, i * 6 + 14)}>
+            <rect x={x - wd / 2} y={G - h} width={wd} height={h} rx={Math.min(10, wd / 6)} fill={i === last ? L.col.red : L.col.clock} {...st(L)} strokeWidth={3} />
+            {lines.map((l, j) => (
+              <text key={j} x={x} y={G - h * 0.55 + (j - (lines.length - 1) / 2) * size * 1.1 + size * 0.35} textAnchor="middle"
+                fontFamily="Oswald" fontWeight={700} fontSize={size} fill="#FFFFFF">{l}</text>
+            ))}
+          </g>
+        );
+      })}
+      {/* the brain's hand reaches in from the dark and gives the first one a gentle nudge */}
+      {reach > 0 ? (
+        <g>
+          <path d={`M-200 ${G - 300} Q${(hand[0] - 200) / 2} ${hand[1] - 120} ${hand[0]} ${hand[1]}`} stroke={L.col.brainD} strokeWidth={14} fill="none" strokeLinecap="round" />
+          <circle cx={hand[0]} cy={hand[1]} r={14} fill={L.col.brainD} {...st(L)} strokeWidth={3} />
+        </g>
+      ) : null}
+      {f >= landed ? [0, 1, 2].map((k) => {
+        const t = ez(f, landed, landed + 18);
+        return <circle key={k} cx={1890 - k * 90} cy={G - 10 - 30 * t} r={20 + 40 * t} fill={L.col.paper} opacity={0.8 * (1 - t)} />;
+      }) : null}
+      <Tag L={L} x={360} y={560} t={span(f, W("forty"), go + 6)} text="40 SECONDS" size={30} />
     </g>
   );
 };
@@ -329,7 +364,7 @@ export const Hook: React.FC<{ scene: string }> = ({ scene }) => {
   const cutBrain = W("before") + 8;
   const ink = L.ink === true;
   const shot =
-    ink && f < W("Your") - 4 ? <ShotTeaser {...p} />
+    ink && f < W("Your") - 4 ? <ShotDominoes {...p} />
     : f < W("eyes") - 4 ? <ShotClock {...p} />
     : f < cutBrain ? <ShotEyes {...p} />
     : f < W("hand") - 2 ? (

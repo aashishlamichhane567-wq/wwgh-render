@@ -16,7 +16,7 @@ type Fx = "beep" | "thud" | "whoosh" | "whoosh_low" | "pop" | "ding" | "sting" |
 /** [word, occurrence, effect, volume, frame offset] per scene — keyed to the voice like the animation. */
 const CUES: Record<string, [string, number, Fx, number, number?][]> = {
   hook: [["There", 0, "clock", 0.15, -20], ["eyes", 0, "thud", 0.35], ["before", 0, "whoosh_low", 0.45, -4], ["cold", 0, "pop", 0.3], ["long", 0, "pop", 0.3],
-    ["project", 0, "thud", 0.4, 8], ["for", 0, "thud", 0.55], ["for", 0, "sting", 0.3, 2], ["reaches", 0, "whoosh", 0.25], ["alarm", 1, "thud", 0.5],
+    ["project", 0, "thud", 0.4, 8], ["decide", 0, "tick", 0.45], ["entire", 0, "tick", 0.45], ["day", 0, "thud", 0.6], ["for", 0, "thud", 0.55], ["for", 0, "sting", 0.3, 2], ["reaches", 0, "whoosh", 0.25], ["alarm", 1, "thud", 0.5],
     ["later.", 0, "pop", 0.3], ["fight", 0, "ding", 0.45], ["awake", 0, "thud", 0.45]],
   guilt: [["guilt", 0, "whoosh_low", 0.3], ["tab", 0, "typing", 0.3], ["plan", 0, "paper", 0.35], ["three", 0, "tick", 0.35], ["works", 0, "ding", 0.3],
     ["doesn't", 0, "tear", 0.45], ["wrong", 0, "sting", 0.3], ["willpower", 0, "thud", 0.35], ["soft", 0, "boing", 0.25], ["push", 0, "thud", 0.4], ["barely", 0, "ding", 0.3]],
