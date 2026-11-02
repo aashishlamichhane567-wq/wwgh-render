@@ -80,10 +80,10 @@ export const DiscThumb: React.FC<{ v?: "A" | "B" }> = ({ v = "A" }) => {
         ))}
         {/* hand-drawn red arrow at the brain */}
         <g fill="none" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M1150 260 Q1120 420 905 530" stroke={INK} strokeWidth={34} />
-          <path d="M905 530 L960 470 M905 530 L985 545" stroke={INK} strokeWidth={34} />
-          <path d="M1150 260 Q1120 420 905 530" stroke={RED} strokeWidth={22} />
-          <path d="M905 530 L960 470 M905 530 L985 545" stroke={RED} strokeWidth={22} />
+          <path d="M1150 260 Q1110 450 810 590" stroke={INK} strokeWidth={34} />
+          <path d="M810 590 L845 530 M810 590 L879 602" stroke={INK} strokeWidth={34} />
+          <path d="M1150 260 Q1110 450 810 590" stroke={RED} strokeWidth={22} />
+          <path d="M810 590 L845 530 M810 590 L879 602" stroke={RED} strokeWidth={22} />
         </g>
         <rect width={1280} height={720} fill="url(#vig)" />
         <text x={640} y={150} textAnchor="middle" fontFamily="Liberation Sans, Arial, sans-serif" fontWeight={700} fontSize={130}
