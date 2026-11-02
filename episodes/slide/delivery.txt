@@ -1,0 +1,12 @@
+# Delivery directions (make_vo.py qwen): "## key | default", then "<start of line> | override".
+
+## hook | Serious documentary narrator, urgent but controlled, brisk pace, clear weight on the numbers.
+A record | Short, hard and final.
+
+## roads | Investigative and brisk, building tension, like revealing who is responsible.
+The Himalaya was | Calm, then a pointed pause on the dots, landing hard on is us.
+In one district | Slower, firm, stressing doubled.
+
+## quake | Grave and quick, tension rising.
+
+## end | Slow, quiet and final, a heavy beat between the two sentences.

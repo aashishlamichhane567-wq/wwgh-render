@@ -1,0 +1,18 @@
+# "Why Nepal's Hills Keep Falling" (landslide Short, ~35 s). One "## key" per scene, one line = one TTS take, blank line = longer pause.
+
+## hook
+In 2020{twenty twenty}, landslides killed 334{three hundred and thirty-four} people in Nepal.
+A record.
+
+## roads
+The Himalaya was always steep and fragile. What changed... is us.
+In thirty years, Nepal cut almost 60,000{sixty thousand} kilometres of rural roads.
+Many by bulldozer. Most with no drainage.
+In one district, those roads doubled the number of landslides.
+
+## quake
+Then the 2015{twenty fifteen} earthquake cracked the slopes open.
+Now every monsoon hits loosened ground.
+
+## end
+The mountains didn't get weaker. We just keep cutting into them.
