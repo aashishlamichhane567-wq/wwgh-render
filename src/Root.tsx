@@ -10,6 +10,7 @@ import { Avatar, Banner } from "./Channel/Brand";
 import { TOTAL_FRAMES as RUSSIA_FRAMES } from "./Russia/timing";
 import { DiscVideo } from "./Disc/DiscVideo";
 import { TOTAL_FRAMES as DISC_FRAMES } from "./Disc/timing";
+import { DiscThumb } from "./Disc/Thumb";
 
 // Render-only copy of one episode from the private channel repo (free Actions minutes need a public repo).
 export const RemotionRoot: React.FC = () => (
@@ -25,6 +26,8 @@ export const RemotionRoot: React.FC = () => (
     <Composition id="RussiaThumbD" component={() => <Thumb v="D" />} durationInFrames={1} fps={30} width={1280} height={720} />
     <Composition id="RussiaThumbE" component={() => <Thumb v="E" />} durationInFrames={1} fps={30} width={1280} height={720} />
     <Composition id="RussiaThumbF" component={() => <Thumb v="F" />} durationInFrames={1} fps={30} width={1280} height={720} />
+    <Composition id="DiscThumbA" component={() => <DiscThumb v="A" />} durationInFrames={1} fps={30} width={1280} height={720} />
+    <Composition id="DiscThumbB" component={() => <DiscThumb v="B" />} durationInFrames={1} fps={30} width={1280} height={720} />
     <Composition id="ChannelBanner" component={Banner} durationInFrames={1} fps={30} width={2560} height={1440} />
     <Composition id="ChannelAvatarA" component={() => <Avatar v="A" />} durationInFrames={1} fps={30} width={800} height={800} />
     <Composition id="ChannelAvatarB" component={() => <Avatar v="B" />} durationInFrames={1} fps={30} width={800} height={800} />
