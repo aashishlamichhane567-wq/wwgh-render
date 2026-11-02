@@ -315,7 +315,7 @@ const blinkAt = (frame: number) => {
   return p < 4 ? [1, 0.25, 0.1, 0.5][p]! : 1;
 };
 
-const FaceMarks: React.FC<{ f: Face; ink: string; frame: number }> = ({ f, ink, frame }) => {
+export const FaceMarks: React.FC<{ f: Face; ink: string; frame: number; brows?: boolean }> = ({ f, ink, frame, brows = true }) => {
   const w = 4.5;
   const px = f.lookX * 4, py = f.lookY * 3.5;
   const open = f.eyeOpen * (f.eyeSmile > 0.5 ? 1 : blinkAt(frame));
@@ -354,8 +354,8 @@ const FaceMarks: React.FC<{ f: Face; ink: string; frame: number }> = ({ f, ink, 
     <>
       {eye(88)}
       {eye(112)}
-      {brow(88, 1)}
-      {brow(112, -1)}
+      {brows ? brow(88, 1) : null}
+      {brows ? brow(112, -1) : null}
       {mouth}
     </>
   );

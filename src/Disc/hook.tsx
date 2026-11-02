@@ -191,7 +191,7 @@ const ShotBrain: React.FC<P & { t0: number }> = ({ L, f, W, t0 }) => {
           <text x={400} y={70} textAnchor="middle" fontFamily="Oswald" fontWeight={700} fontSize={44} fill={L.col.cyan} letterSpacing={4}>TODAY</text>
           <g transform={`translate(140 300) scale(${pop(f, W("cold"), 9)})`}>
             <rect x={-100} y={-30} width={200} height={34} fill="#CFEFFA" {...st(L)} />
-            {[-80, -40, 0, 40, 80].map((x, i) => <path key={i} d={`M${x - 14} 4 L${x} ${50 + (i % 2) * 26} L${x + 14} 4 Z`} fill="#CFEFFA" />)}
+            {[-80, -40, 0, 40, 80].map((x, i) => <path key={i} d={`M${x - 14} 4 L${x} ${50 + (i % 2) * 26} L${x + 14} 4 Z`} fill="#CFEFFA" {...st(L)} />)}
             <text y={150} textAnchor="middle" fontFamily={L.font} fontWeight={600} fontSize={36} fill={L.col.cyan}>COLD FLOOR</text>
           </g>
           <g transform={`translate(400 300) scale(${pop(f, W("long"), 9)})`}>
@@ -224,20 +224,19 @@ export const Bedroom: React.FC<{ L: Look; f: number; ring: number; arm: [number,
     <Sheet L={L} x={160} y={720} w={1300} h={110} fill={L.col.pillow} seed={23} />
     <Sheet L={L} x={180} y={820} w={1260} h={70} fill={L.col.woodD} seed={24} />
     <ellipse cx={420} cy={690} rx={150} ry={52} fill="#FFFFFF" {...st(L)} />
-    {/* head on the pillow, Ray's colours */}
+    {/* head on the pillow: the same cream head and dot eyes as the figure in sections.tsx */}
     <g transform="translate(450 620) rotate(-78)">
       <circle r={84} fill={L.col.skin} {...st(L)} />
-      <path d="M-84 -10 Q-80 -96 0 -96 Q84 -96 84 -10 Q40 -60 -84 -10 Z" fill={L.col.hair} />
       {[-30, 30].map((ex, i) => (
         eyes > 0.5
-          ? <g key={i}><circle cx={ex} cy={10} r={11} fill="#FFFFFF" /><circle cx={ex} cy={12} r={6} fill="#1A1010" /><line x1={ex - 13} y1={4} x2={ex + 13} y2={4} stroke={L.col.skinD} strokeWidth={6} /></g>
+          ? <circle key={i} cx={ex} cy={10} r={9} fill={INK} />
           : <path key={i} d={`M${ex - 14} 10 Q${ex} 20 ${ex + 14} 10`} stroke={INK} strokeWidth={5} fill="none" strokeLinecap="round" />
       ))}
     </g>
     {arm ? (
       <g>
-        <path d={`M640 690 Q${(640 + arm[0]) / 2} ${Math.min(arm[1], 690) - 90} ${arm[0]} ${arm[1]}`} stroke={L.col.hood} strokeWidth={56} fill="none" strokeLinecap="round" />
-        <circle cx={arm[0]} cy={arm[1]} r={36} fill={L.col.skin} {...st(L)} />
+        <path d={`M640 690 Q${(640 + arm[0]) / 2} ${Math.min(arm[1], 690) - 90} ${arm[0]} ${arm[1]}`} stroke={INK} strokeWidth={8} fill="none" strokeLinecap="round" />
+        <circle cx={arm[0]} cy={arm[1]} r={12} fill={L.col.skin} {...st(L)} />
       </g>
     ) : null}
     <path d="M520 700 Q600 560 820 600 Q1040 540 1200 620 Q1380 600 1450 720 L1450 830 L520 830 Z" fill={L.col.blanket} {...st(L)} />

@@ -1,6 +1,7 @@
 import React from "react";
 import { useCurrentFrame } from "remotion";
-import { FACES, Stickman, blendFace, type Face, type StickmanProps } from "../Hangry/Stickman";
+import { FACES, blendFace, type Face, type StickmanProps } from "../Hangry/Stickman";
+import { Pal } from "./Pal";
 import { strain, walk, walkBob } from "../Hangry/actions";
 import { ez, mix, pop, span } from "../Russia/kit";
 import { w } from "./overlays";
@@ -20,8 +21,11 @@ const useScene = (scene: string) => {
   const W: Wf = (x, n = 0) => w(scene, x, n);
   return { f, W };
 };
-/** The shot whose start is the latest one at or before f. */
-const pick = (f: number, shots: [number, React.ReactNode][]) => shots.filter(([at]) => f >= at).pop()?.[1] ?? shots[0]![1];
+/** The shot whose start is the latest one at or before f, under a slow push-in so no hold is ever fully still. */
+const pick = (f: number, shots: [number, React.ReactNode][]) => {
+  const [at, node] = shots.filter(([a]) => f >= a).pop() ?? shots[0]!;
+  return <g transform={`translate(960 540) scale(${1 + Math.min(0.06, 0.0005 * Math.max(0, f - at))}) translate(-960 -540)`}>{node}</g>;
+};
 
 const Txt: React.FC<{ x: number; y: number; size?: number; color?: string; anchor?: "start" | "middle" | "end"; op?: number; rot?: number; children: React.ReactNode }> = ({
   x, y, size = 56, color = LN, anchor = "middle", op = 1, rot = 0, children,
@@ -64,13 +68,10 @@ const Bubble: React.FC<{ t: number; x: number; y: number; lines: string[]; size?
   );
 };
 
-/** The protagonist (sage shirt) or anyone else: the channel's stickman rig, drawn in ink with a face. */
+/** The protagonist (sage shirt) or anyone else: the PsychToons-style figure with a face. */
 const Guy: React.FC<{ x: number; y: number; s?: number; f: number; face?: Face; shirt?: string; pose?: Partial<StickmanProps> }> = ({
   x, y, s = 1, f, face = FACES.neutral, shirt = C.hood, pose = {},
-}) => (
-  <Stickman x={x} y={y} scale={s} frame={f} color={LN} headFill={C.skin} face={face} stroke={6} bob={1.5}
-    back={<path d="M82 96 Q100 88 118 96 L124 190 L76 190 Z" fill={shirt} stroke={LN} strokeWidth={4} strokeLinejoin="round" />} {...pose} />
-);
+}) => <Pal x={x} y={y} scale={s} frame={f} ink={LN} skin={C.skin} shirt={shirt} face={face} {...pose} />;
 const SIT: Partial<StickmanProps> = { legL: -84, legR: -74, armL: -60, armR: -48 };
 
 const Outside: React.FC<{ g?: number; sky?: string }> = ({ g = 820, sky = SKY }) => (
@@ -230,14 +231,15 @@ export const Guilt: React.FC = () => {
         [W("same") - 6, (
           <g>
             <Outside />
-            <g transform="translate(960 560)">
-              <circle r={230} fill="none" {...sw} strokeWidth={10} strokeDasharray="1300 145" />
-              <path d="M180 -150 l40 -20 l-4 46" fill="none" {...sw} strokeWidth={10} />
-              <g transform={`rotate(${(f - W("same")) * 1.6})`}>
-                <Guy x={0} y={-370} s={0.8} f={f} face={FACES.sad} pose={walk(f, 0.2, 0.8)} />
+            <g transform="translate(860 760)">
+              {/* the loop turns under him: he walks on top and never gets anywhere */}
+              <g transform={`rotate(${-(f - W("same")) * 1.6})`}>
+                <circle r={200} fill="none" {...sw} strokeWidth={10} strokeDasharray="1100 157" />
+                <path d="M150 -132 l40 -20 l-4 46" fill="none" {...sw} strokeWidth={10} />
               </g>
+              <Guy x={0} y={-200 - 140} s={1.3} f={f} face={FACES.sad} pose={walk(f, 0.2, 0.8)} />
             </g>
-            <Card t={pop(f, W("wrong"), 10)} lines={["WHAT IS WRONG", "WITH ME?"]} y={180} size={84} color={C.red} />
+            <Card t={pop(f, W("wrong"), 10)} lines={["WHAT IS WRONG", "WITH ME?"]} x={1480} y={330} size={84} color={C.red} />
           </g>
         )],
         [W("willpower") - 4, (
@@ -253,7 +255,7 @@ export const Guilt: React.FC = () => {
               <rect x={60} y={-12} width={10} height={24} fill={LN} />
               <rect x={-54} y={-22} width={108 * drain} height={44} rx={4} fill={drain > 0.3 ? "#7FA66A" : C.red} />
             </g>
-            <Guy x={330} y={720} s={1.1} f={f} face={FACES.angry} shirt="#5E5A55" pose={{ armR: -100, anger: 0.7 }} />
+            <Guy x={330} y={720} s={1.3} f={f} face={FACES.angry} shirt="#5E5A55" pose={{ armR: -100, anger: 0.7 }} />
             <path d="M400 640 L470 610 L470 680 Z" fill={LN} />
             <Card t={span(f, W("willpower"), W("soft"))} lines={["WILLPOWER"]} y={200} size={110} />
             <Bubble t={span(f, W("soft"), W("more"))} x={560} y={430} lines={["SOFT!"]} size={60} />
@@ -265,10 +267,10 @@ export const Guilt: React.FC = () => {
         [W("nobody") - 4, (
           <g>
             <Outside g={820} />
-            <circle cx={460} cy={680} r={110} fill={GREY} {...sw} />
-            <Guy x={300} y={660} s={1.1} f={f} face={FACES.worried} pose={strain(f, 1)} />
-            <g transform={`translate(${mix(1900, 1150, ez(f, W("disciplined") - 10, W("barely") + 20))} ${640 + walkBob(f)})`}>
-              <Guy x={0} y={0} s={1.1} f={f} face={FACES.happy} shirt={RUST} pose={walk(f)} />
+            <circle cx={500} cy={690} r={130} fill={GREY} {...sw} />
+            <Guy x={310} y={680} s={1.3} f={f} face={FACES.worried} pose={strain(f, 1)} />
+            <g transform={`translate(${mix(1900, 1150, ez(f, W("disciplined") - 10, W("barely") + 20))} ${680 + walkBob(f)})`}>
+              <Guy x={0} y={0} s={1.3} f={f} face={FACES.happy} shirt={RUST} pose={walk(f)} />
               <line x1={-40} y1={20} x2={-160} y2={120} {...sw} strokeWidth={3} />
               <g transform={`translate(-210 ${140 + Math.abs(Math.sin(f * 0.3)) * -8})`}>
                 <ellipse rx={60} ry={28} fill={MUST} {...sw} />
@@ -312,8 +314,8 @@ export const Sensation: React.FC = () => {
               const b = f > W("buzzed") + i * 6 ? 1 : 0;
               return (
                 <g key={i}>
-                  <Guy x={x} y={640} s={0.95} f={f + i * 7} shirt={[C.hood, RUST, MUST, "#7C8F7A", "#A08CB0"][i]} face={b ? FACES.confused : FACES.neutral} pose={{ armR: -40 }} />
-                  <Phone x={x + 70} y={600} k={0.6} buzz={b * (f < W("asked") + 20 ? 1 : 0)} f={f} lit={b} />
+                  <Guy x={x} y={680} s={1.25} f={f + i * 7} shirt={[C.hood, RUST, MUST, "#7C8F7A", "#A08CB0"][i]} face={b ? FACES.confused : FACES.neutral} pose={{ armR: -40 }} />
+                  <Phone x={x + 92} y={672} k={0.55} buzz={b * (f < W("asked") + 20 ? 1 : 0)} f={f} lit={b} />
                 </g>
               );
             })}
@@ -329,7 +331,7 @@ export const Sensation: React.FC = () => {
               return (
                 <g key={side}>
                   <Txt x={cx} y={170} size={46}>{side ? "MOST SELF-CONTROL" : "LEAST SELF-CONTROL"}</Txt>
-                  <Guy x={cx} y={560} s={1.05} f={f} face={side ? blendFace(FACES.neutral, FACES.happy, ez(f, W("barely"), W("barely") + 10)) : FACES.worried}
+                  <Guy x={cx} y={580} s={1.4} f={f} face={side ? blendFace(FACES.neutral, FACES.happy, ez(f, W("barely"), W("barely") + 10)) : FACES.worried}
                     pose={side ? {} : { lean: Math.sin(f / 5) * 6, armL: 40, armR: -40 }} />
                   {lowIcons.map(([dx, dy], i) => {
                     const gone = side && i > 0 ? ez(f, W("fewer") + i * 3, W("fewer") + i * 3 + 8) : 0;
@@ -350,8 +352,17 @@ export const Sensation: React.FC = () => {
         [W("differently") - 4, (
           <g>
             <rect x={-100} y={-100} width={2120} height={1280} fill={C.paper} />
-            <Label t={pop(f, W("eisenberger"), 9)} x={960} y={250} text="ROBERT EISENBERGER · 1992" size={50} />
-            <Card t={pop(f, W("industriousness"), 12)} lines={["LEARNED", "INDUSTRIOUSNESS"]} y={560} size={120} color={C.hood} />
+            {(() => {
+              const aside = ez(f, W("eisenberger") - 6, W("eisenberger") + 10);
+              return (
+                <g>
+                  <Guy x={mix(960, 380, aside)} y={620} s={2} f={f} face={f > W("industriousness") ? FACES.happy : FACES.confused} pose={{ armR: -150, headTilt: 6 }} />
+                  <Txt x={mix(1180, 600, aside)} y={300} size={150} color={C.red} op={1 - aside}>?</Txt>
+                </g>
+              );
+            })()}
+            <Label t={pop(f, W("eisenberger"), 9)} x={1180} y={250} text="ROBERT EISENBERGER · 1992" size={50} />
+            <Card t={pop(f, W("industriousness"), 12)} lines={["LEARNED", "INDUSTRIOUSNESS"]} x={1180} y={560} size={110} color={C.hood} />
           </g>
         )],
         [W("sensation") - 6, (
@@ -428,7 +439,7 @@ export const Prediction: React.FC = () => {
             <path d="M300 900 L1100 220 L1700 900 Z" fill="#B7B19E" {...sw} />
             <path d="M1010 300 L1100 220 L1190 300 Q1100 280 1010 300 Z" fill="#FBF8F0" {...sw} />
             <g transform="translate(860 470) rotate(-35)">
-              <Guy x={0} y={0} s={0.8} f={f} face={FACES.happy} shirt={RUST} pose={{ ...walk(f, 0.12, 0.6), armR: f > W("helicopters") ? -160 + Math.sin(f / 3) * 15 : -30 }} />
+              <Guy x={0} y={0} s={1} f={f} face={FACES.happy} shirt={RUST} pose={{ ...walk(f, 0.12, 0.6), armR: f > W("helicopters") ? -160 + Math.sin(f / 3) * 15 : -30 }} />
             </g>
             <g transform={`translate(${mix(2100, -200, ez(f, W("climb") - 10, W("climb") + 150))} 200)`}>
               <ellipse rx={90} ry={44} fill={MUST} {...sw} />
@@ -523,7 +534,7 @@ export const Flinch: React.FC = () => {
         [0, (
           <g>
             <Room window={false} />
-            <Guy x={960} y={560} s={1.4} f={f} face={FACES.confused} pose={{ armR: -150, headTilt: 8 }} />
+            <Guy x={900} y={626} s={1.8} f={f} face={FACES.confused} pose={{ armR: -150, headTilt: 8 }} />
             <g opacity={pop(f, W("lazy"), 9)}>
               <Txt x={1400} y={300} size={90}>LAZY</Txt>
               <line x1={1270} y1={270} x2={1530} y2={270} stroke={C.red} strokeWidth={12} strokeLinecap="round" />
@@ -557,10 +568,10 @@ export const Flinch: React.FC = () => {
           <g>
             <Room window={false} />
             <rect x={-100} y={-100} width={2120} height={1280} fill="#2B2620" opacity={0.25} />
-            <Desk x={800} y={600} />
-            <Chair x={680} />
-            <Guy x={730} y={600} s={0.85} f={f} face={FACES.sad} shirt={MUST} pose={{ ...SIT, armR: -70 + Math.sin(f / 2) * 14 }} />
-            <rect x={900} y={576} width={200} height={10} fill="#FBF8F0" {...sw} />
+            <Desk x={820} y={600} />
+            <Chair x={640} />
+            <Guy x={700} y={560} s={1.3} f={f} face={FACES.sad} shirt={MUST} pose={{ ...SIT, armR: -70 + Math.sin(f / 2) * 14 }} />
+            <rect x={920} y={576} width={200} height={10} fill="#FBF8F0" {...sw} />
             <Label t={pop(f, W("weeks"), 9)} x={1040} y={300} text="3 WEEKS" size={60} />
             <Label t={pop(f, W("party"), 9)} x={1450} y={420} text="no party" size={50} color={GREY} />
             <rect x={-100} y={-100} width={2120} height={1280} fill={SEPIA} opacity={0.18} />
@@ -575,7 +586,7 @@ export const Flinch: React.FC = () => {
               <rect x={670} y={600} width={620} height={36} fill="#FBF8F0" {...sw} />
               {[0, 1, 2, 3].map((i) => <rect key={i} x={720 + i * 140} y={600} width={60} height={36} fill={C.red} />)}
             </g>
-            <Guy x={mix(360, 1350, ez(f, W("gate") + 8, W("finish")))} y={640} s={1.05} f={f} face={FACES.neutral} pose={f > W("gate") + 8 && f < W("finish") ? walk(f) : {}} />
+            <Guy x={mix(360, 1350, ez(f, W("gate") + 8, W("finish")))} y={680} s={1.3} f={f} face={FACES.neutral} pose={f > W("gate") + 8 && f < W("finish") ? walk(f) : {}} />
             <line x1={1640} y1={520} x2={1640} y2={820} {...sw} strokeWidth={8} />
             <line x1={1820} y1={520} x2={1820} y2={820} {...sw} strokeWidth={8} />
             <path d="M1640 560 Q1730 600 1820 560" fill="none" stroke={C.red} strokeWidth={10} />
@@ -605,7 +616,7 @@ export const Flinch: React.FC = () => {
               <path d="M-150 -100 h110 l20 24 h170 v180 h-300 Z" fill={MUST} {...sw} />
               <Txt x={0} y={30} size={56}>EFFORT</Txt>
             </g>
-            <Stamp f={f} at={W("punishment")} x={860} y={500} text="PUNISHMENT" size={64} />
+            <Stamp f={f} at={W("punishment")} x={900} y={190} text="PUNISHMENT" size={80} />
           </g>
         )],
       ])}
@@ -623,6 +634,12 @@ export const Rewires: React.FC = () => {
         [0, (
           <g>
             <Outside />
+            {f < W("association") ? (
+              <g>
+                <Guy x={960} y={640} s={1.6} f={f} face={f > W("weather") ? FACES.sad : FACES.worried} pose={f > W("weather") ? { armL: 10, armR: -10, headTilt: -6 } : { armR: -150, headTilt: 6 }} />
+                <Bubble t={span(f, 8, W("weather") - 6)} x={1420} y={330} lines={["like discipline...", "LIKE discipline..."]} size={44} tail={-1} />
+              </g>
+            ) : null}
             <g transform={`translate(960 330) scale(${pop(f, W("weather") - 6, 10)})`}>
               {[-80, 0, 80].map((dx, i) => <circle key={i} cx={dx} cy={i === 1 ? -40 : 0} r={80} fill="#FBF8F0" {...sw} />)}
               {Array.from({ length: 5 }, (_, i) => <line key={i} x1={-120 + i * 60} y1={90 + ((f * 6 + i * 30) % 80)} x2={-130 + i * 60} y2={120 + ((f * 6 + i * 30) % 80)} {...sw} stroke="#6B8FB0" />)}
