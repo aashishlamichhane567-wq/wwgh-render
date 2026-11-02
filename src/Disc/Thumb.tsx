@@ -30,6 +30,10 @@ export const DiscThumb: React.FC<{ v?: "A" | "B" }> = ({ v = "A" }) => {
       <svg viewBox="0 0 1280 720" width="100%" height="100%">
         <defs>
           <radialGradient id="glow"><stop offset="0" stopColor={glow} stopOpacity={0.95} /><stop offset="0.45" stopColor={glow} stopOpacity={0.35} /><stop offset="1" stopColor={glow} stopOpacity={0} /></radialGradient>
+          <radialGradient id="eye"><stop offset="0" stopColor="#FFFFFF" /><stop offset="0.35" stopColor={glow} /><stop offset="1" stopColor={glow} stopOpacity={0} /></radialGradient>
+          <linearGradient id="under" x1="0" y1="0" x2="0" y2="1"><stop offset="0.35" stopColor={glow} stopOpacity={0} /><stop offset="1" stopColor={glow} stopOpacity={0.55} /></linearGradient>
+          <radialGradient id="vig" cx="0.5" cy="0.55" r="0.75"><stop offset="0.55" stopColor="#000" stopOpacity={0} /><stop offset="1" stopColor="#000" stopOpacity={0.8} /></radialGradient>
+          <clipPath id="headClip"><ellipse cx={640} cy={300} rx={125} ry={140} /></clipPath>
         </defs>
         <rect width={1280} height={720} fill={INK} />
         {/* torso, neck, head */}
@@ -37,10 +41,14 @@ export const DiscThumb: React.FC<{ v?: "A" | "B" }> = ({ v = "A" }) => {
         <path d="M575 400 L575 470 Q640 495 705 470 L705 400 Z" fill="#E1C893" stroke={INK} strokeWidth={6} />
         {[-1, 1].map((s) => <ellipse key={s} cx={640 + s * 122} cy={315} rx={22} ry={38} fill={SKIN} stroke={INK} strokeWidth={6} />)}
         <ellipse cx={640} cy={300} rx={125} ry={140} fill={SKIN} stroke={INK} strokeWidth={6} />
-        {/* half-lidded, dead-level stare into the lens */}
+        {/* the brain's light hits the face from below */}
+        <rect x={500} y={150} width={280} height={300} fill="url(#under)" clipPath="url(#headClip)" />
+        {/* half-lidded, dead-level stare into the lens, eyes lit from inside */}
         {[-1, 1].map((s) => (
           <g key={s}>
-            <path d={`M${640 + s * 78} 300 Q${640 + s * 50} 284 ${640 + s * 20} 300 Q${640 + s * 50} 312 ${640 + s * 78} 300 Z`} fill={INK} />
+            <circle cx={640 + s * 49} cy={299} r={46} fill="url(#eye)" opacity={0.85} />
+            <path d={`M${640 + s * 78} 300 Q${640 + s * 50} 284 ${640 + s * 20} 300 Q${640 + s * 50} 312 ${640 + s * 78} 300 Z`} fill={glow} stroke={INK} strokeWidth={4} />
+            <circle cx={640 + s * 49} cy={300} r={6} fill="#FFFFFF" />
             <path d={`M${640 + s * 86} 286 Q${640 + s * 52} 276 ${640 + s * 16} 290`} fill="none" stroke={INK} strokeWidth={6} strokeLinecap="round" />
             <path d={`M${640 + s * 90} 262 L${640 + s * 22} 272`} stroke={INK} strokeWidth={7} strokeLinecap="round" />
           </g>
@@ -63,6 +71,21 @@ export const DiscThumb: React.FC<{ v?: "A" | "B" }> = ({ v = "A" }) => {
         })}
         <Fingers m={1} />
         <Fingers m={-1} />
+        {/* lightning cracking off the brain */}
+        {["M520 560 L470 520 L488 505 L430 455", "M760 560 L810 515 L792 502 L850 450", "M560 505 L540 450 L556 445 L535 395", "M720 505 L742 452 L726 446 L748 398"].map((d, i) => (
+          <g key={`z${i}`} fill="none" strokeLinecap="round" strokeLinejoin="round">
+            <path d={d} stroke={glow} strokeWidth={14} opacity={0.6} />
+            <path d={d} stroke="#FFFFFF" strokeWidth={5} />
+          </g>
+        ))}
+        {/* hand-drawn red arrow at the brain */}
+        <g fill="none" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M1150 260 Q1120 420 905 530" stroke={INK} strokeWidth={34} />
+          <path d="M905 530 L960 470 M905 530 L985 545" stroke={INK} strokeWidth={34} />
+          <path d="M1150 260 Q1120 420 905 530" stroke={RED} strokeWidth={22} />
+          <path d="M905 530 L960 470 M905 530 L985 545" stroke={RED} strokeWidth={22} />
+        </g>
+        <rect width={1280} height={720} fill="url(#vig)" />
         <text x={640} y={150} textAnchor="middle" fontFamily="Liberation Sans, Arial, sans-serif" fontWeight={700} fontSize={130}
           textLength={1180} lengthAdjust="spacingAndGlyphs">
           {head.map(([t, red], i) => <tspan key={i} fill={red ? RED : "#FFFFFF"} stroke={red ? RED : "#FFFFFF"} strokeWidth={7} strokeLinejoin="round">{t}</tspan>)}
