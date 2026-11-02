@@ -56,7 +56,7 @@ const Grade: React.FC = () => (
 const pop = (f: number, at: number, fps: number) => spring({ frame: f - at, fps, config: { damping: 11, mass: 0.6 } });
 
 /** A big number that counts up from `at`, with a label and its source under it. */
-const Stat: React.FC<{ at: number; to?: number; value: number; suffix?: string; label: string; source: string; color?: string }> = ({ at, to = 1e9, value, suffix = "", label, source, color = "#fff" }) => {
+const Stat: React.FC<{ at: number; to?: number; value: number; year?: boolean; suffix?: string; label: string; source: string; color?: string }> = ({ at, to = 1e9, value, year, suffix = "", label, source, color = "#fff" }) => {
   const f = useCurrentFrame(), { fps } = useVideoConfig();
   if (f < at || f >= to) return null;
   const s = pop(f, at, fps);
@@ -66,7 +66,7 @@ const Stat: React.FC<{ at: number; to?: number; value: number; suffix?: string; 
     <AbsoluteFill style={{ alignItems: "center", top: 300, opacity: out }}>
       <div style={{ transform: `scale(${0.6 + 0.4 * s})`, textAlign: "center", fontFamily: FONT, fontWeight: 700 }}>
         <div style={{ fontSize: 230, lineHeight: 1, color, WebkitTextStroke: "6px #000", paintOrder: "stroke", textShadow: "0 10px 40px rgba(0,0,0,0.8)" }}>
-          {n.toLocaleString("en-US")}{suffix}
+          {year ? value : n.toLocaleString("en-US")}{suffix}
         </div>
         <div style={{ fontSize: 58, color: "#fff", marginTop: 14, letterSpacing: 2, textShadow: "0 4px 18px #000" }}>{label}</div>
         <div style={{ fontSize: 30, color: "rgba(255,255,255,0.75)", marginTop: 12, fontWeight: 400, textShadow: "0 2px 10px #000" }}>{source}</div>
@@ -94,12 +94,17 @@ const Captions: React.FC<{ scene: string }> = ({ scene }) => {
   const caps = CAPS[scene] ?? [];
   const i = caps.findIndex(([s, e], j) => f >= s && f < (caps[j + 1]?.[0] ?? e + 12));
   if (i < 0) return null;
-  const g = Math.floor(i / 3) * 3;
+  // groups of up to three words that never run across a sentence or clause break
+  let g = 0;
+  for (let j = 1, n = 1; j <= i; j++, n++) if (n === 3 || /[.,?!:…]$/.test(caps[j - 1][2])) { g = j; n = 0; }
+  let e = g + 1;
+  while (e < caps.length && e - g < 3 && !/[.,?!:…]$/.test(caps[e - 1][2])) e++;
   return (
     <AbsoluteFill style={{ top: 1180, alignItems: "center" }}>
-      <div style={{ fontFamily: FONT, fontWeight: 700, fontSize: 92, textAlign: "center", maxWidth: 960, lineHeight: 1.1, textTransform: "uppercase" }}>
-        {caps.slice(g, g + 3).map(([, , t], j) => (
-          <span key={j} style={{ color: g + j === i ? YEL : "#fff", WebkitTextStroke: "14px #000", paintOrder: "stroke", marginRight: 22,
+      <div style={{ fontFamily: FONT, fontWeight: 700, fontSize: 92, maxWidth: 980, lineHeight: 1.15, textTransform: "uppercase",
+        display: "flex", flexWrap: "wrap", justifyContent: "center", columnGap: 30 }}>
+        {caps.slice(g, e).map(([, , t], j) => (
+          <span key={j} style={{ color: g + j === i ? YEL : "#fff", WebkitTextStroke: "14px #000", paintOrder: "stroke",
             display: "inline-block", transform: g + j === i ? "scale(1.08)" : "none" }}>{t}</span>
         ))}
       </div>
@@ -127,7 +132,7 @@ const Cards: React.FC<{ scene: string }> = ({ scene }) => {
     const shake = f >= at ? Math.sin(f * 2.3) * 22 * k : 0;
     return (
       <AbsoluteFill style={{ transform: `translate(${shake}px, ${shake * 0.6}px)` }}>
-        <Stat at={w("quake", "2015")} to={w("quake", "now")} value={2015} label="GORKHA EARTHQUAKE" source="20,000+ landslides · BGS / Durham" />
+        <Stat at={w("quake", "2015")} to={w("quake", "now")} value={2015} year label="GORKHA EARTHQUAKE" source="20,000+ landslides · BGS / Durham" />
       </AbsoluteFill>
     );
   }
