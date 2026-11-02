@@ -29,7 +29,7 @@ const SHOTS: Record<string, [string, string | null, 1 | -1][]> = {
 /** A still with a slow push in (1) or pull out (-1), a soft dissolve in, and a warm glow that breathes. */
 const Still: React.FC<{ still: string; len: number; dir: 1 | -1 }> = ({ still, len, dir }) => {
   const f = useCurrentFrame();
-  const src = `ai/faith/${still}.webp`;
+  const src = `ai/faith/${still}.png`;
   const t = interpolate(f, [0, len], [0, 1]);
   const scale = dir === 1 ? 1.02 + 0.09 * t : 1.11 - 0.09 * t;
   return (

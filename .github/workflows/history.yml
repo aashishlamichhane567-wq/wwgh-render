@@ -138,8 +138,8 @@ jobs:
           L=$(ffprobe -v error -select_streams v -show_entries stream=level -of csv=p=0 $F); echo "level $L"; test "$L" -le 51   # Windows players stop at 5.1
           ffmpeg -hide_banner -i $F -af loudnorm=print_format=summary -f null - 2>&1 | grep -E "Input Integrated|Input True Peak"
           echo "freezes >= 2.5 s:"; ffmpeg -hide_banner -i $F -vf "scale=480:-1,freezedetect=n=0.003:d=2.5" -map 0:v -f null - 2>&1 | grep -oE "freeze_(start|duration): [0-9.]+" | paste - - || true
-          ffmpeg -v error -y -i $F -vf "fps=1/43,scale=480:-1,tile=4x4:padding=4:color=white" -frames:v 1 out/sheet.jpg
-          ffmpeg -v error -y -ss 60 -i $F -frames:v 1 out/still_4k.png
+          D=$(ffprobe -v error -show_entries format=duration -of csv=p=0 $F); ffmpeg -v error -y -i $F -vf "fps=16/$D,scale=480:-1,tile=4x4:padding=4:color=white" -frames:v 1 out/sheet.jpg   # 16 frames whatever the length
+          ffmpeg -v error -y -ss $(python3 -c "print(min(60, $D / 2))") -i $F -frames:v 1 out/still_4k.png
           ffmpeg -v error -y -i $F -vf scale=1280:-2 -c:v libx264 -preset slow -crf 26 -c:a aac -b:a 128k -movflags +faststart out/${{ inputs.comp }}_preview.mp4   # small copy for quick review
           ls -la out/*_preview.mp4
       - uses: actions/upload-artifact@v4
