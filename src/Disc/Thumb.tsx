@@ -38,7 +38,7 @@ export const DiscThumb: React.FC<{ v?: "A" | "B" }> = ({ v = "A" }) => {
             </g>
             {/* the brain behind him, gripping his shirt */}
             <g transform="translate(300 440) scale(0.62)">
-              <Brain L={L} x={0} y={0} tilt={-4} hand={[430, 0]} lid={0.35} frown={1} />
+              <Brain L={L} x={0} y={0} tilt={-4} hand={[520, -10]} lid={0.35} frown={1} />
             </g>
             <Pal x={640} y={480} scale={1.75} face={FACES.worried} armL={-70} armR={-95} legL={24} legR={-28} lean={14} {...fig} />
             {[[880, 300], [905, 345], [880, 390]].map(([x, y], i) => <line key={i} x1={x} y1={y} x2={x! + 40} y2={y! + (i - 1) * 14} stroke={LN} strokeWidth={5} strokeLinecap="round" />)}
@@ -52,7 +52,7 @@ export const DiscThumb: React.FC<{ v?: "A" | "B" }> = ({ v = "A" }) => {
             <g transform="translate(520 470) scale(-1 1) translate(-520 -470)">
               <Pal x={520} y={470} scale={1.75} face={FACES.angry} {...strain(7, 1)} {...fig} />
             </g>
-            {[[420, 260], [380, 310], [600, 240]].map(([x, y], i) => <path key={i} d={`M${x} ${y} q-14 24 0 32 q14 -8 0 -32 Z`} fill="#8FC7E8" stroke={LN} strokeWidth={3} />)}
+            {[[420, 260], [380, 310], [400, 365]].map(([x, y], i) => <path key={i} d={`M${x} ${y} q-14 24 0 32 q14 -8 0 -32 Z`} fill="#8FC7E8" stroke={LN} strokeWidth={3} />)}
           </g>
         )}
       </svg>
