@@ -2,13 +2,13 @@
 // Scene-relative frames; word times from faster-whisper aligned to the script.
 
 export const SCENES = {
-  "hook": { "start": 0, "dur": 230, "lead": 6 },
-  "roads": { "start": 230, "dur": 584, "lead": 4 },
-  "quake": { "start": 814, "dur": 220, "lead": 4 },
-  "end": { "start": 1034, "dur": 165, "lead": 4 },
+  "hook": { "start": 0, "dur": 184, "lead": 6 },
+  "roads": { "start": 184, "dur": 605, "lead": 4 },
+  "quake": { "start": 789, "dur": 191, "lead": 4 },
+  "end": { "start": 980, "dur": 132, "lead": 4 },
 } as const;
 
 /** Per scene: [startFrame, endFrame, token] for every spoken word. */
-export const CAPS: Record<string, [number, number, string][]> = {"hook": [[6, 17, "In"], [18, 46, "2020,"], [49, 59, "landslides"], [61, 71, "killed"], [72, 125, "334"], [131, 142, "people"], [143, 154, "in"], [155, 172, "Nepal."], [182, 193, "A"], [194, 211, "record."]], "roads": [[4, 15, "The"], [16, 26, "Himalaya"], [28, 38, "was"], [39, 50, "always"], [51, 62, "steep"], [63, 73, "and"], [75, 92, "fragile."], [94, 104, "What"], [106, 123, "changed..."], [125, 135, "is"], [137, 154, "us."], [164, 175, "In"], [176, 187, "thirty"], [188, 205, "years,"], [207, 218, "Nepal"], [219, 229, "cut"], [231, 241, "almost"], [242, 264, "60,000"], [266, 277, "kilometres"], [278, 288, "of"], [289, 300, "rural"], [301, 319, "roads."], [329, 339, "Many"], [341, 351, "by"], [352, 370, "bulldozer."], [372, 382, "Most"], [383, 394, "with"], [395, 406, "no"], [407, 424, "drainage."], [435, 445, "In"], [446, 457, "one"], [458, 476, "district,"], [477, 488, "those"], [489, 500, "roads"], [501, 512, "doubled"], [513, 523, "the"], [524, 535, "number"], [536, 547, "of"], [548, 565, "landslides."]], "quake": [[4, 15, "Then"], [16, 26, "the"], [28, 49, "2015"], [51, 62, "earthquake"], [63, 73, "cracked"], [75, 85, "the"], [86, 97, "slopes"], [98, 115, "open."], [126, 136, "Now"], [138, 148, "every"], [149, 160, "monsoon"], [161, 172, "hits"], [173, 183, "loosened"], [185, 202, "ground."]], "end": [[4, 15, "The"], [16, 26, "mountains"], [28, 38, "didn't"], [39, 50, "get"], [51, 68, "weaker."], [70, 81, "We"], [82, 93, "just"], [94, 104, "keep"], [106, 116, "cutting"], [117, 128, "into"], [129, 146, "them."]]};
+export const CAPS: Record<string, [number, number, string][]> = {"hook": [[6, 10, "In"], [10, 34, "2020,"], [41, 61, "landslides"], [61, 69, "killed"], [69, 112, "334"], [112, 122, "people"], [122, 129, "in"], [129, 137, "Nepal."], [155, 160, "A"], [160, 168, "record."]], "roads": [[4, 8, "The"], [8, 24, "Himalaya"], [24, 30, "was"], [30, 42, "always"], [42, 56, "steep"], [56, 63, "and"], [63, 78, "fragile."], [104, 109, "What"], [109, 141, "changed..."], [141, 148, "is"], [148, 154, "us."], [170, 177, "In"], [177, 187, "thirty"], [187, 205, "years,"], [219, 229, "Nepal"], [229, 240, "cut"], [240, 255, "almost"], [255, 286, "60,000"], [286, 306, "kilometres"], [306, 317, "of"], [317, 326, "rural"], [326, 341, "roads."], [356, 366, "Many"], [366, 374, "by"], [374, 403, "bulldozer."], [413, 422, "Most"], [422, 431, "with"], [431, 440, "no"], [440, 451, "drainage."], [469, 474, "In"], [474, 481, "one"], [481, 496, "district,"], [512, 521, "those"], [521, 533, "roads"], [533, 546, "doubled"], [546, 554, "the"], [554, 561, "number"], [561, 568, "of"], [568, 591, "landslides."]], "quake": [[4, 9, "Then"], [9, 14, "the"], [14, 35, "2015"], [35, 51, "earthquake"], [51, 64, "cracked"], [64, 70, "the"], [70, 79, "slopes"], [79, 91, "open."], [105, 111, "Now"], [111, 121, "every"], [121, 139, "monsoon"], [139, 147, "hits"], [147, 163, "loosened"], [163, 175, "ground."]], "end": [[4, 8, "The"], [8, 20, "mountains"], [20, 32, "didn't"], [32, 36, "get"], [36, 48, "weaker."], [72, 79, "We"], [79, 85, "just"], [85, 94, "keep"], [94, 104, "cutting"], [104, 113, "into"], [113, 119, "them."]]};
 
-export const TOTAL_FRAMES = 1199;
+export const TOTAL_FRAMES = 1112;
