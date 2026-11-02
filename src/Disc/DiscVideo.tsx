@@ -28,7 +28,7 @@ const CUES: Record<string, [string, number, Fx, number, number?][]> = {
     ["tax", 0, "coin", 0.35], ["gate", 0, "whoosh", 0.3], ["finish", 0, "crowd", 0.25], ["shut", 0, "thud", 0.45], ["punishment", 0, "thud", 0.5], ["carve", 0, "whoosh_low", 0.35]],
   rewires: [["weather", 0, "wind", 0.2], ["association", 0, "clang", 0.25], ["one", 0, "ding", 0.35], ["tick", 0, "tick", 0.4], ["showed", 0, "sparkle", 0.3],
     ["two", 0, "ding", 0.35], ["coffee", 0, "pop", 0.3], ["three", 0, "ding", 0.35], ["sentence", 0, "boing", 0.3], ["four", 0, "ding", 0.35], ["calm", 0, "clang", 0.25],
-    ["five", 1, "ding", 0.35], ["win", 0, "thud", 0.45], ["win", 0, "sparkle", 0.3, 4]],
+    ["five", 1, "ding", 0.35], ["win", 1, "thud", 0.45], ["win", 1, "sparkle", 0.3, 4]],
   quiet: [["argument", 0, "pop", 0.3], ["quiet", 0, "whoosh_low", 0.3], ["side", 0, "pop", 0.35], ["good", 0, "sparkle", 0.3], ["comments", 0, "ding", 0.3],
     ["cognalyst", 0, "sting", 0.3]],
 };
@@ -65,7 +65,7 @@ const Sfx: React.FC<{ scene: string }> = ({ scene }) => {
         <Sequence key={`b${at}`} from={at} durationInFrames={12}><Audio src={staticFile("sfx/beep.wav")} volume={0.16} /></Sequence>
       ))}
       {(CUES[scene] ?? []).map(([word, n, fx, vol, off = 0], i) => (
-        <Sequence key={i} from={Math.max(0, w(scene, word, n) + off)}><Audio src={staticFile(`sfx/${fx}.wav`)} volume={vol * 0.7} /></Sequence>
+        <Sequence key={i} from={Math.max(0, w(scene, word, n) + off)}><Audio src={staticFile(`sfx/${fx}.wav`)} volume={vol * 0.9} /></Sequence>
       ))}
     </>
   );

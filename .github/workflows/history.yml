@@ -1,5 +1,5 @@
 # History episode end to end on free runners: best-of-N narration (sharded by scene) -> per-line timing, committed ->
-# 4K render (sharded by frame range, muted) + audio-only render -> concat, two-pass loudnorm -16 LUFS / -1.5 dBTP.
+# 4K render (sharded by frame range, muted) + audio-only render -> concat, two-pass loudnorm -14 LUFS / -1.5 dBTP.
 # gh workflow run history.yml --ref <branch>                  (re-voice everything, then 4K render)
 # gh workflow run history.yml --ref <branch> -f voice=false   (render only, from the committed voice + timing)
 name: history
@@ -128,11 +128,11 @@ jobs:
       - name: Concat, loudness, checks
         run: |
           ls parts/*.mp4 | sort | sed "s|^|file '$PWD/|;s|$|'|" > list.txt; cat list.txt
-          J=$(ffmpeg -hide_banner -i out/audio.wav -af loudnorm=I=-16:TP=-1.5:LRA=11:print_format=json -f null - 2>&1 | sed -n '/^{/,/^}/p')
+          J=$(ffmpeg -hide_banner -i out/audio.wav -af loudnorm=I=-14:TP=-1.5:LRA=11:print_format=json -f null - 2>&1 | sed -n '/^{/,/^}/p')
           g() { echo "$J" | python3 -c "import json,sys;print(json.load(sys.stdin)['$1'])"; }
           F=out/${{ inputs.comp }}_4k.mp4
           ffmpeg -v error -y -f concat -safe 0 -i list.txt -i out/audio.wav -map 0:v -map 1:a -c:v copy \
-            -af "loudnorm=I=-16:TP=-1.5:LRA=11:measured_I=$(g input_i):measured_TP=$(g input_tp):measured_LRA=$(g input_lra):measured_thresh=$(g input_thresh):offset=$(g target_offset):linear=true,aresample=48000" \
+            -af "loudnorm=I=-14:TP=-1.5:LRA=11:measured_I=$(g input_i):measured_TP=$(g input_tp):measured_LRA=$(g input_lra):measured_thresh=$(g input_thresh):offset=$(g target_offset):linear=true,aresample=48000" \
             -c:a aac -b:a 320k -shortest -movflags +faststart $F
           ffprobe -v error -show_entries stream=codec_name,width,height,level,pix_fmt,color_range,color_space,r_frame_rate:format=duration,size -of default=nw=1 $F
           L=$(ffprobe -v error -select_streams v -show_entries stream=level -of csv=p=0 $F); echo "level $L"; test "$L" -le 51   # Windows players stop at 5.1

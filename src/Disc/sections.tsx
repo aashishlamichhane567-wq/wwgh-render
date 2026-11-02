@@ -5,7 +5,7 @@ import { Pal } from "./Pal";
 import { strain, walk, walkBob } from "../Hangry/actions";
 import { ez, mix, pop, span } from "../Russia/kit";
 import { w } from "./overlays";
-import { Brain, Clock, INKCOL as C, INKY as L, Ink, Sheet } from "./hook";
+import { Brain, Clock, INKCOL as C, INKY as L, Ink, Sheet, camera, type Cam } from "./hook";
 
 /**
  * Sections 2-7 of "You Were Trained Wrong", in the hand-drawn ink look (muted cream/sage, thin ink, Kalam lettering).
@@ -21,10 +21,10 @@ const useScene = (scene: string) => {
   const W: Wf = (x, n = 0) => w(scene, x, n);
   return { f, W };
 };
-/** The shot whose start is the latest one at or before f, under a slow push-in so no hold is ever fully still. */
-const pick = (f: number, shots: [number, React.ReactNode][]) => {
-  const [at, node] = shots.filter(([a]) => f >= a).pop() ?? shots[0]!;
-  return <g transform={`translate(960 540) scale(${1 + Math.min(0.06, 0.0005 * Math.max(0, f - at))}) translate(-960 -540)`}>{node}</g>;
+/** The shot whose start is the latest one at or before f, cut between its framings (see camera) so no hold runs long. */
+const pick = (f: number, shots: [number, React.ReactNode, Cam[]?][]) => {
+  const [at, node, cams] = shots.filter(([a]) => f >= a).pop() ?? shots[0]!;
+  return <g transform={camera(f, at, cams)}>{node}</g>;
 };
 
 const Txt: React.FC<{ x: number; y: number; size?: number; color?: string; anchor?: "start" | "middle" | "end"; op?: number; rot?: number; children: React.ReactNode }> = ({
@@ -186,7 +186,7 @@ export const Guilt: React.FC = () => {
               <path d="M-120 0 q40 -40 80 0 t80 0 t80 0" fill="none" stroke="#3E3A37" strokeWidth={6} />
             </g>
           </g>
-        )],
+        ), [[W("guilt"), 700, 450, 1.6]]],
         [W("tab") - 4, (
           <g>
             <rect x={-100} y={-100} width={2120} height={1280} fill={C.wall} />
@@ -210,7 +210,7 @@ export const Guilt: React.FC = () => {
             <rect x={-100} y={-100} width={2120} height={1280} fill={C.wood} />
             <Notebook x={960} y={470} k={2} title="NEW PLAN" lines={ez(f, W("plan"), W("handwriting") + 30)} />
           </g>
-        )],
+        ), [[W("neater"), 760, 420, 1.6]]],
         [W("three") - 4, (
           <g>
             <rect x={-100} y={-100} width={2120} height={1280} fill={C.paper} />
@@ -227,7 +227,7 @@ export const Guilt: React.FC = () => {
               );
             })}
           </g>
-        )],
+        ), [[W("doesn't"), 1530, 440, 1.7]]],
         [W("same") - 6, (
           <g>
             <Outside />
@@ -241,7 +241,7 @@ export const Guilt: React.FC = () => {
             </g>
             <Card t={pop(f, W("wrong"), 10)} lines={["WHAT IS WRONG", "WITH ME?"]} x={1480} y={330} size={84} color={C.red} />
           </g>
-        )],
+        ), [[W("thinking"), 860, 470, 1.6], [W("what"), 960, 540, 1]]],
         [W("willpower") - 4, (
           <g>
             <Outside g={900} />
@@ -263,7 +263,7 @@ export const Guilt: React.FC = () => {
             <Bubble t={span(f, W("excuses"), W("push"))} x={600} y={430} lines={["NO EXCUSES!"]} size={56} />
             <Bubble t={span(f, W("push"), W("nobody"))} x={580} y={430} lines={["PUSH!"]} size={70} />
           </g>
-        )],
+        ), [[W("soft"), 450, 520, 1.6], [W("excuses"), 960, 540, 1], [W("push"), 1150, 480, 1.5]]],
         [W("nobody") - 4, (
           <g>
             <Outside g={820} />
@@ -281,7 +281,7 @@ export const Guilt: React.FC = () => {
             </g>
             <Label t={pop(f, W("barely"), 9)} x={1150} y={380} text="NO BOULDER" />
           </g>
-        )],
+        ), [[W("tells"), 400, 560, 1.6], [W("disciplined"), 960, 540, 1], [W("barely"), 1150, 600, 1.5]]],
       ])}
     </Ink>
   );
@@ -298,15 +298,16 @@ export const Sensation: React.FC = () => {
         [0, (
           <g>
             <rect x={-100} y={-100} width={2120} height={1280} fill={C.paper} />
-            <Card t={pop(f, 0, 12)} lines={["2012"]} y={250} size={170} />
-            <g transform={`translate(960 600) scale(${pop(f, W("hofmann"), 10)})`}>
+            <Card t={pop(f, 0, 12)} lines={["2012"]} x={760} y={250} size={170} />
+            <Guy x={1460} y={640} s={1.8} f={f} face={FACES.happy} shirt="#FBF8F0" pose={{ armR: -110, armL: 20 }} />
+            <g transform={`translate(760 600) scale(${pop(f, W("hofmann"), 10)})`}>
               <rect x={-220} y={-170} width={440} height={340} fill="#FBF8F0" {...sw} />
               <rect x={-60} y={-196} width={120} height={46} rx={8} fill={GREY} {...sw} />
               <Txt x={0} y={-90} size={44}>HOFMANN et al.</Txt>
               {[0, 1, 2].map((i) => <line key={i} x1={-170} y1={-20 + i * 50} x2={140} y2={-20 + i * 50} {...sw} strokeWidth={3} />)}
             </g>
           </g>
-        )],
+        ), [[W("led"), 1460, 500, 1.6], [W("buzzed") - 30, 760, 450, 1.4]]],
         [W("buzzed") - 4, (
           <g>
             <Outside />
@@ -321,7 +322,7 @@ export const Sensation: React.FC = () => {
             })}
             <Bubble t={pop(f, W("asked"), 10)} x={960} y={220} lines={["What do you want right now?", "Are you fighting it?"]} size={46} />
           </g>
-        )],
+        ), [[W("asked"), 960, 420, 1.5], [W("fighting"), 960, 600, 2]]],
         [W("most") - 4, (
           <g>
             <rect x={-100} y={-100} width={2120} height={1280} fill={C.paper} />
@@ -348,7 +349,7 @@ export const Sensation: React.FC = () => {
             })}
             <Label t={pop(f, W("barely"), 9)} x={1440} y={860} text="BARELY IN THE FIGHT" size={40} />
           </g>
-        )],
+        ), [[W("weren't"), 480, 520, 1.6], [W("fewer"), 1440, 520, 1.6], [W("barely"), 960, 540, 1]]],
         [W("differently") - 4, (
           <g>
             <rect x={-100} y={-100} width={2120} height={1280} fill={C.paper} />
@@ -364,7 +365,7 @@ export const Sensation: React.FC = () => {
             <Label t={pop(f, W("eisenberger"), 9)} x={1180} y={250} text="ROBERT EISENBERGER · 1992" size={50} />
             <Card t={pop(f, W("industriousness"), 12)} lines={["LEARNED", "INDUSTRIOUSNESS"]} x={1180} y={560} size={110} color={C.hood} />
           </g>
-        )],
+        ), [[W("industriousness"), 1180, 480, 1.45], [W("idea"), 380, 520, 1.6]]],
         [W("sensation") - 6, (
           <g>
             <rect x={-100} y={-100} width={2120} height={1280} fill={C.paper} />
@@ -374,8 +375,10 @@ export const Sensation: React.FC = () => {
                 {f > W("sensation") + 8 ? [-1, 1].map((s) => <path key={s} d={`M${960 + s * 280} 700 l${s * 80} 30 M${960 + s * 300} 650 l${s * 90} -10`} {...sw} opacity={1 - ez(f, W("sensation") + 8, W("sensation") + 24)} />) : null}
               </g>
             )}
+            <Guy x={420} y={700} s={1.7} f={f} face={f > W("sensation") + 6 ? FACES.shocked : FACES.neutral}
+              pose={f > W("sensation") + 6 ? { lean: -10, armL: 60, armR: -60 } : {}} />
           </g>
-        )],
+        ), [[W("texture"), 600, 500, 1.5]]],
         [W("chest") - 4, (
           <g>
             <rect x={-100} y={-100} width={2120} height={1280} fill={C.wall} />
@@ -387,18 +390,20 @@ export const Sensation: React.FC = () => {
             {f > W("eyes") ? [-1, 1].map((s) => <path key={s} d={`M${960 + s * 120} ${150 + Math.sin(f / 2) * 3} l${s * 30} -14 l${s * 6} 22 l${s * 30} -14`} fill="none" {...sw} />) : null}
             <Label t={pop(f, W("texture"), 9)} x={1460} y={260} text="a physical feeling" />
           </g>
-        )],
+        ), [[W("eyes"), 960, 380, 1.8]]],
         [W("conditioned") - 4, (
           <g>
             <rect x={-100} y={-100} width={2120} height={1280} fill={C.paper} />
             <EffortBlock x={960} y={600} k={1.3} warm={ez(f, W("reward"), W("reward", 1))} />
+            <Guy x={1520} y={700} s={1.7} f={f} face={blendFace(FACES.worried, FACES.happy, ez(f, W("reward"), W("reward", 1)))}
+              pose={{ armL: 70, armR: -20 }} />
             {[0, 1, 2, 3].map((i) => {
               const at = W("reward") + i * 18, y = mix(80, 440, ez(f, at, at + 14));
               return f > at && f < at + 16 ? <path key={i} d={`M${900 + i * 40} ${y - 40} q-24 34 0 46 q24 -12 0 -46 Z`} fill={AMBER} {...sw} /> : null;
             })}
             <Label t={pop(f, W("conditioned"), 9)} x={960} y={230} text="CONDITIONED" size={60} />
           </g>
-        )],
+        ), [[W("reward"), 1200, 560, 1.4], [W("feeling"), 960, 540, 1]]],
       ])}
     </Ink>
   );
@@ -448,18 +453,28 @@ export const Prediction: React.FC = () => {
               <line x1={0} y1={-44} x2={0} y2={-60} {...sw} />
             </g>
           </g>
-        )],
+        ), [[W("helicopters"), 860, 470, 1.8]]],
         [W("paradox") - 4, (
           <g>
             <rect x={-100} y={-100} width={2120} height={1280} fill={C.paper} />
-            <Card t={pop(f, W("paradox"), 10)} lines={["THE EFFORT", "PARADOX"]} y={380} size={130} />
-            <Label t={pop(f, W("adds"), 9)} x={960} y={700} text="effort can ADD value" size={56} fill="#D6E2C4" />
+            <Card t={pop(f, W("paradox"), 10)} lines={["THE EFFORT", "PARADOX"]} x={700} y={380} size={130} />
+            <Label t={pop(f, W("adds"), 9)} x={700} y={720} text="effort can ADD value" size={56} fill="#D6E2C4" />
+            {/* he carries the boulder and grins: the cost is the point */}
+            <circle cx={1500} cy={mix(560, 520, 0.5 + 0.5 * Math.sin(f / 10))} r={110} fill={GREY} {...sw} />
+            <Guy x={1500} y={800} s={1.8} f={f} face={f > W("adds") ? FACES.happy : FACES.worried} pose={{ armL: 160, armR: -160 }} />
           </g>
-        )],
+        ), [[W("adds"), 1500, 560, 1.6]]],
         [W("dopamine") - 4, (
           <g>
             <rect x={-100} y={-100} width={2120} height={1280} fill={C.paper} />
-            {f < W("schultz") ? <Card t={pop(f, W("dopamine"), 10)} lines={["DOPAMINE"]} y={460} size={150} color={C.red} /> : (
+            {f < W("schultz") ? (
+              <g>
+                <Card t={pop(f, W("dopamine"), 10)} lines={["DOPAMINE"]} x={760} y={460} size={150} color={C.red} />
+                <g transform="translate(1500 560) scale(-0.8 0.8)">
+                  <Brain L={L} x={0} y={0} tilt={Math.sin(f / 4) * 4} hand={[300, -120 + Math.sin(f / 3) * 20]} lid={0} frown={-0.8} />
+                </g>
+              </g>
+            ) : (
               <g>
                 <Label t={pop(f, W("schultz"), 9)} x={360} y={110} text="WOLFRAM SCHULTZ · 1990s" size={40} />
                 <Monkey x={360} y={420} f={f} happy={f > W("juice") && cycle > 25 && cycle < 50 ? 1 : 0} />
@@ -478,7 +493,7 @@ export const Prediction: React.FC = () => {
               </g>
             )}
           </g>
-        )],
+        ), [[W("monkeys"), 400, 420, 1.6], [W("light"), 960, 540, 1], [W("moved"), 960, 640, 1.3], [W("backward"), 960, 540, 1], [W("predicts"), 660, 480, 1.6]]],
         [W("phone") - 6, (
           <g>
             <rect x={-100} y={-100} width={2120} height={1280} fill={C.wood} />
@@ -493,7 +508,7 @@ export const Prediction: React.FC = () => {
               <Txt x={1580} y={260} size={40}>times</Txt>
             </g>
           </g>
-        )],
+        ), [[W("brain"), 760, 420, 1.5], [W("glass"), 960, 540, 1], [W("ten"), 1450, 300, 1.6], [W("ugly"), 760, 480, 1.4]]],
         [W("notebook") - 6, (
           <g>
             <rect x={-100} y={-100} width={2120} height={1280} fill={C.wood} />
@@ -503,14 +518,17 @@ export const Prediction: React.FC = () => {
             {graph(240, 1700, 820, 700, 0, -ez(f, W("strain"), W("strain") + 10))}
             <Bubble t={pop(f, W("behind"), 9)} x={1500} y={170} lines={["you're behind."]} size={48} />
           </g>
-        )],
+        ), [[W("strain"), 1400, 420, 1.6], [W("flinches"), 960, 540, 1]]],
         [W("discipline") - 4, (
           <g>
             <rect x={-100} y={-100} width={2120} height={1280} fill={C.paper} />
-            <Txt x={960} y={380} size={100}>DISCIPLINE PROBLEM</Txt>
-            <line x1={420} y1={350} x2={1500} y2={350} stroke={C.red} strokeWidth={12} strokeLinecap="round" pathLength={1} strokeDasharray={1}
+            <Txt x={760} y={320} size={90}>DISCIPLINE PROBLEM</Txt>
+            <line x1={290} y1={292} x2={1230} y2={292} stroke={C.red} strokeWidth={12} strokeLinecap="round" pathLength={1} strokeDasharray={1}
               strokeDashoffset={1 - ez(f, W("discipline") + 4, W("discipline") + 14)} />
-            <Card t={pop(f, W("prediction"), 10)} lines={["PREDICTION PROBLEM"]} y={600} size={110} color={C.hood} />
+            <Card t={pop(f, W("prediction"), 10)} lines={["PREDICTION", "PROBLEM"]} x={760} y={620} size={100} color={C.hood} />
+            <g transform="translate(1520 580) scale(-0.75 0.75)">
+              <Brain L={L} x={0} y={0} tilt={0} hand={f > W("prediction") ? [330, -60] : [250, 160]} lid={0.4} frown={f > W("prediction") ? 0 : 0.8} />
+            </g>
           </g>
         )],
       ])}
@@ -540,7 +558,7 @@ export const Flinch: React.FC = () => {
               <line x1={1270} y1={270} x2={1530} y2={270} stroke={C.red} strokeWidth={12} strokeLinecap="round" />
             </g>
           </g>
-        )],
+        ), [[W("lazy"), 1150, 400, 1.4], [W("rewarded"), 900, 380, 2]]],
         [W("report") - 4, (
           <g>
             <Room window={false} />
@@ -563,7 +581,7 @@ export const Flinch: React.FC = () => {
             {conf(W("celebrated"))}
             <rect x={-100} y={-100} width={2120} height={1280} fill={SEPIA} opacity={0.18} />
           </g>
-        )],
+        ), [[W("trophy"), 1300, 680, 1.8], [W("finished"), 620, 620, 1.8], [W("everyone"), 960, 540, 1]]],
         [W("effort") - 4, (
           <g>
             <Room window={false} />
@@ -576,7 +594,7 @@ export const Flinch: React.FC = () => {
             <Label t={pop(f, W("party"), 9)} x={1450} y={420} text="no party" size={50} color={GREY} />
             <rect x={-100} y={-100} width={2120} height={1280} fill={SEPIA} opacity={0.18} />
           </g>
-        )],
+        ), [[W("weeks"), 820, 480, 1.6], [W("party"), 960, 540, 1]]],
         [W("lesson") - 4, (
           <g>
             <Outside />
@@ -592,7 +610,7 @@ export const Flinch: React.FC = () => {
             <path d="M1640 560 Q1730 600 1820 560" fill="none" stroke={C.red} strokeWidth={10} />
             <Txt x={1730} y={500} size={50} op={pop(f, W("finish"), 9)}>clap clap!</Txt>
           </g>
-        )],
+        ), [[W("tax"), 640, 500, 1.6], [W("gate"), 960, 540, 1], [W("clapped"), 1600, 600, 1.5]]],
         [W("hours") - 6, (
           <g>
             <Room />
@@ -603,7 +621,7 @@ export const Flinch: React.FC = () => {
             <Label t={pop(f, W("hours"), 9)} x={1000} y={260} text="2 HOURS" size={56} />
             <Bubble t={pop(f, W("awful"), 9)} x={420} y={240} lines={["That was awful.", "I'm so far behind."]} size={44} tail={1} />
           </g>
-        )],
+        ), [[W("shut"), 850, 500, 1.6], [W("awful"), 560, 420, 1.5], [W("behind"), 960, 540, 1]]],
         [W("punishment") - 6, (
           <g>
             <rect x={-100} y={-100} width={2120} height={1280} fill={C.room} />
@@ -618,7 +636,7 @@ export const Flinch: React.FC = () => {
             </g>
             <Stamp f={f} at={W("punishment")} x={900} y={190} text="PUNISHMENT" size={80} />
           </g>
-        )],
+        ), [[W("backward"), 620, 520, 1.5], [W("harder"), 960, 540, 1]]],
       ])}
     </Ink>
   );
@@ -627,9 +645,12 @@ export const Flinch: React.FC = () => {
 /* ═════════════ 6 · rewires ═════════════ */
 export const Rewires: React.FC = () => {
   const { f, W } = useScene("rewires");
-  const head = (n: string, title: string, at: number) => <Number t={pop(f, at, 8)} n={n} title={title} />;
+  const heads: [string, string, number][] = [["1", "Pay the effort, not the outcome", W("one")], ["2", "Move the reward to the doorway", W("two")],
+    ["3", "Shrink the entry until refusing is absurd", W("three")], ["4", "Design the room, not your resolve", W("four")], ["5", "Never end on failure", W("five", 1)]];
+  const head = heads.filter(([, , at]) => f >= at - 6).pop();
   return (
     <Ink>
+      {head ? <Number t={pop(f, head[2], 8)} n={head[0]} title={head[1]} /> : null}
       {pick(f, [
         [0, (
           <g>
@@ -653,11 +674,10 @@ export const Rewires: React.FC = () => {
             </g>
             <Card t={pop(f, W("five"), 10)} lines={["5 REWIRES"]} y={860} size={90} color={C.hood} />
           </g>
-        )],
+        ), [[W("liking"), 960, 460, 1.6], [W("weather"), 960, 330, 1.6], [W("association"), 960, 540, 1]]],
         [W("one") - 6, (
           <g>
             <Room window={false} />
-            {head("1", "Pay the effort, not the outcome", W("one"))}
             <Desk x={760} y={620} wd={560} />
             <g transform="translate(1040 600)">
               <path d={`M0 0 L${-160 * (1 - ez(f, W("pay"), W("mark")))} -10 L-160 0 Z`} fill="#BFD6E6" {...sw} />
@@ -671,11 +691,10 @@ export const Rewires: React.FC = () => {
             <Bubble t={pop(f, W("showed") - 4, 9)} x={720} y={280} lines={["I showed up."]} size={54} tail={-1} />
             <Label t={pop(f, W("seconds"), 9)} x={1500} y={290} text="within seconds" size={44} />
           </g>
-        )],
+        ), [[W("mark"), 1000, 560, 1.6], [W("tick"), 1500, 420, 1.8], [W("say"), 600, 420, 1.6], [W("seconds"), 1500, 380, 1.5], [W("count"), 960, 540, 1]]],
         [W("two") - 6, (
           <g>
             <Room window={false} />
-            {head("2", "Move the reward to the doorway", W("two"))}
             <rect x={760} y={330} width={400} height={490} fill="#6E6A66" {...sw} />
             <rect x={760} y={330} width={400} height={490} fill="none" {...sw} strokeWidth={14} />
             <Txt x={960} y={600} size={50} color="#EDE7DA">HARD THING</Txt>
@@ -687,11 +706,10 @@ export const Rewires: React.FC = () => {
             <g opacity={pop(f, W("album"), 9)} transform={`translate(1250 ${740 + Math.sin(f / 6) * 10})`}><g><ellipse cx={-20} cy={0} rx={26} ry={20} fill={LN} /><line x1={4} y1={0} x2={4} y2={-110} {...sw} strokeWidth={8} /><path d="M4 -110 q40 10 40 50" fill="none" {...sw} strokeWidth={8} /></g></g>
             <Label t={pop(f, W("anywhere"), 9)} x={960} y={270} text="ONLY HERE" size={54} />
           </g>
-        )],
+        ), [[W("put"), 960, 560, 1.4], [W("coffee"), 700, 720, 1.8], [W("album"), 1250, 660, 1.8], [W("anywhere"), 960, 540, 1]]],
         [W("three") - 6, (
           <g>
             <Outside />
-            {head("3", "Shrink the entry until refusing is absurd", W("three"))}
             {(() => {
               const s = mix(1, 0.14, ez(f, W("sentence"), W("sentence") + 12));
               return (
@@ -706,11 +724,10 @@ export const Rewires: React.FC = () => {
             <Label t={pop(f, W("sentence") + 12, 9)} x={1200} y={640} text="ONE SENTENCE" size={44} />
             <Guy x={560} y={640} s={1.2} f={f} face={f > W("sentence") + 8 ? FACES.smug : FACES.shocked} pose={f > W("sentence") + 8 ? {} : { lean: -12, armL: 40, armR: -40 }} />
           </g>
-        )],
+        ), [[W("chapter"), 1200, 520, 1.4], [W("sentence"), 560, 460, 1.6], [W("doesn't", 1), 960, 540, 1]]],
         [W("four") - 6, (
           <g>
             <Room window={false} />
-            {head("4", "Design the room, not your resolve", W("four"))}
             <line x1={960} y1={260} x2={960} y2={900} {...sw} strokeDasharray="14 14" />
             <Txt x={480} y={320} size={56}>2 PM · calm</Txt>
             <Txt x={1440} y={320} size={56}>11 PM · tired</Txt>
@@ -729,11 +746,10 @@ export const Rewires: React.FC = () => {
             })}
             <Label t={pop(f, W("phone"), 9)} x={960} y={880} text="phone lives in another room" size={44} />
           </g>
-        )],
+        ), [[W("every"), 480, 560, 1.6], [W("tired"), 1440, 560, 1.6], [W("phone"), 960, 540, 1]]],
         [W("five", 1) - 6, (
           <g>
             <Room window={false} />
-            {head("5", "Never end on failure", W("five", 1))}
             {(() => {
               const done = ez(f, W("finish"), W("finish") + 12);
               const lift = done > 0 ? 0 : 0.5 + 0.5 * Math.sin(f / 10);
@@ -746,10 +762,10 @@ export const Rewires: React.FC = () => {
               );
             })()}
             <rect x={1250} y={380} width={300} height={220} fill={MUST} {...sw} />
-            <Stamp f={f} at={W("win")} x={1400} y={490} text="WIN" color="#5E8A4E" size={100} />
+            <Stamp f={f} at={W("win", 1)} x={1400} y={490} text="WIN" color="#5E8A4E" size={100} />
             <Label t={pop(f, W("remembers"), 9)} x={1400} y={300} text="the ending is what's filed" size={40} />
           </g>
-        )],
+        ), [[W("brain"), 640, 480, 1.5], [W("finish"), 960, 540, 1], [W("win", 1), 1400, 480, 1.6], [W("time"), 960, 540, 1]]],
       ])}
     </Ink>
   );
@@ -771,7 +787,7 @@ export const Quiet: React.FC = () => {
             <Label t={pop(f, W("hard"), 9)} x={560} y={260} text="still hard" />
             <Label t={pop(f, W("heavy"), 9)} x={1380} y={260} text="still heavy" />
           </g>
-        )],
+        ), [[W("hard"), 960, 520, 1.6], [W("disappears"), 960, 540, 1], [W("difficulty"), 960, 450, 2]]],
         [W("argument") - 4, (
           <g>
             <Room window={false} />
@@ -789,7 +805,7 @@ export const Quiet: React.FC = () => {
               );
             })()}
           </g>
-        )],
+        ), [[W("negotiation"), 1380, 520, 1.5], [W("vote"), 960, 540, 1], [W("quiet"), 560, 460, 1.6]]],
         [W("automatic") - 6, (
           <g>
             <Outside g={860} />
@@ -814,7 +830,7 @@ export const Quiet: React.FC = () => {
             <Guy x={900} y={580} s={1.3} f={f} face={FACES.happy} pose={{ armL: 160 + Math.sin(f / 8) * 8, armR: -160 - Math.sin(f / 8) * 8 }} />
             <Card t={pop(f, W("good"), 10)} lines={["a reason to expect", "something good"]} y={200} size={70} />
           </g>
-        )],
+        ), [[W("reason"), 900, 440, 1.6]]],
         [W("comments") - 4, (
           <g>
             <rect x={-100} y={-100} width={2120} height={1280} fill={C.paper} />

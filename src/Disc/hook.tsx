@@ -35,7 +35,17 @@ const CLAY: Look = { clay: true, col: COL, font: "Oswald", dim: 1, seam: "rgba(3
 export const INKY: Look = { clay: false, ink: true, col: INKCOL, font: "Kalam", dim: 0.3, seam: "#2B2620", sw: 4, sheet: (x, y, w, h, s) => torn(x, y, w, h, s, 2.5, 34) };
 
 export type P = { L: Look; f: number; W: (word: string, n?: number) => number };
-export const st = (L: Look) => ({ stroke: L.seam, strokeWidth: L.sw, strokeLinejoin: "round" as const, filter: L.fx });
+
+/** Hard-cut reframes inside one shot: [from frame, centre x, centre y, zoom]. Each framing gets a slow push-in, and the
+ *  view is clamped to the 1920x1080 set so a close-up never shows past the backdrop. */
+export type Cam = [number, number, number, number];
+export const camera = (f: number, at: number, cams: Cam[] = []) => {
+  const [from, cx, cy, z] = [[at, 960, 540, 1] as Cam, ...cams].sort((a, b) => a[0] - b[0]).filter(([a]) => f >= a).pop()!;
+  const s = z * (1 + Math.min(0.06, 0.0005 * Math.max(0, f - from)));
+  const hx = 960 / s, hy = 540 / s;
+  return `translate(960 540) scale(${s}) translate(${-Math.min(1920 - hx, Math.max(hx, cx))} ${-Math.min(1080 - hy, Math.max(hy, cy))})`;
+};
+export const st =(L: Look) => ({ stroke: L.seam, strokeWidth: L.sw, strokeLinejoin: "round" as const, filter: L.fx });
 
 export const Sheet: React.FC<{ L: Look; x: number; y: number; w: number; h: number; fill: string; seed?: number }> = ({ L, x, y, w, h, fill, seed = 1 }) => (
   <path d={L.sheet(x, y, w, h, seed)} fill={fill} {...st(L)} />
@@ -71,6 +81,26 @@ export const Clock: React.FC<{ L: Look; x: number; y: number; k?: number; f: num
       style={{ filter: "drop-shadow(0 0 16px rgba(255,60,40,0.85))" }}>6:00</text>
   </g>
 );
+
+/* ─────────── shot 0: cold open — the brain, hand already up, slams ABORT on "decide" ─────────── */
+const ShotTeaser: React.FC<P> = ({ L, f, W }) => {
+  const slam = W("decide"), down = ez(f, slam - 4, slam);
+  const hand: [number, number] = [mix(330 + Math.sin(f / 3) * 6, 410, down), mix(-90 + Math.sin(f / 2) * 8, 175, down)];
+  const press = f >= slam ? 1 - ez(f, slam + 6, slam + 16) : 0;
+  const flash = f >= slam ? 1 - ez(f, slam, slam + 12) : 0;
+  return (
+    <g transform={camera(f, 0, [[0, 760, 600, 1.35], [slam, 960, 540, 1]])}>
+      <rect x={-200} y={-200} width={2320} height={1480} fill={L.col.room} />
+      <rect x={-200} y={820} width={2320} height={460} fill={L.col.floor} />
+      <Sheet L={L} x={800} y={760} w={360} h={200} fill={L.col.clock} seed={9} />
+      <ellipse cx={970} cy={770 + 10 * press} rx={84} ry={34 - 12 * press} fill={L.col.red} {...st(L)} />
+      <text x={980} y={890} textAnchor="middle" fontFamily="Oswald" fontWeight={700} fontSize={48} fill="#FFFFFF">ABORT</text>
+      <Brain L={L} x={560} y={580} tilt={Math.sin(f / 5) * 3} hand={hand} lid={0.55} frown={f >= slam ? 1 : 0.4} />
+      <Tag L={L} x={1400} y={260} t={span(f, W("forty"), W("Your"))} text="40 SECONDS" />
+      <rect x={-200} y={-200} width={2320} height={1480} fill={L.col.red} opacity={flash * 0.35} />
+    </g>
+  );
+};
 
 /* ─────────── shot 1: the clock in the dark ─────────── */
 const ShotClock: React.FC<P> = ({ L, f, W }) => {
@@ -297,11 +327,21 @@ export const Hook: React.FC<{ scene: string }> = ({ scene }) => {
   const W = (word: string, n = 0) => w(scene, word, n);
   const p: P = { L, f, W };
   const cutBrain = W("before") + 8;
+  const ink = L.ink === true;
   const shot =
-    f < W("eyes") - 4 ? <ShotClock {...p} />
+    ink && f < W("Your") - 4 ? <ShotTeaser {...p} />
+    : f < W("eyes") - 4 ? <ShotClock {...p} />
     : f < cutBrain ? <ShotEyes {...p} />
-    : f < W("hand") - 2 ? <ShotBrain {...p} t0={cutBrain} />
-    : f < W("forty", 1) - 4 ? <ShotBed {...p} />
+    : f < W("hand") - 2 ? (
+      <g transform={ink ? camera(f, cutBrain, [[W("brain"), 560, 560, 1.5], [W("cold") - 4, 1440, 420, 1.45], [W("decision"), 760, 600, 1.45], [W("for"), 960, 540, 1]]) : undefined}>
+        <ShotBrain {...p} t0={cutBrain} />
+      </g>
+    )
+    : f < W("forty", 1) - 4 ? (
+      <g transform={ink ? camera(f, W("hand") - 2, [[W("alarm", 1) - 4, 1400, 600, 1.5], [W("tell"), 600, 520, 1.5]]) : undefined}>
+        <ShotBed {...p} />
+      </g>
+    )
     : <ShotAsleep {...p} />;
   return (
     <AbsoluteFill style={{ background: "#000" }}>
