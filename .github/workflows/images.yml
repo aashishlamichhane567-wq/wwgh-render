@@ -1,0 +1,47 @@
+# Stills with FLUX.1-schnell (Apache-2.0, Q4 GGUF from second-state/FLUX.1-schnell-GGUF) on CPU via stable-diffusion.cpp
+# (MIT, built from source at a pinned commit): no GPU and no quota. One runner per shot, each PNG uploaded as an
+# artifact (img-<key>) to review before committing into public/ai/<slug>/. Prompts: episodes/<slug>/shots.txt ("key|description" per line) + episodes/<slug>/style.txt.
+# gh workflow run images.yml --ref <branch> -f slug=faith -f keys='["f1","f2"]'
+name: images
+on:
+  workflow_dispatch:
+    inputs:
+      slug: { description: episode folder under episodes/, default: faith }
+      keys: { description: JSON list of shot keys from shots.txt, default: '["f1"]' }
+      size: { description: WxH (multiples of 64), default: "576x1024" }
+      seed: { description: seed, default: "42" }
+
+permissions:
+  contents: read
+
+jobs:
+  still:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        key: ${{ fromJSON(inputs.keys) }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build stable-diffusion.cpp (pinned)
+        run: |
+          git clone -q https://github.com/leejet/stable-diffusion.cpp sdcpp && cd sdcpp && git checkout -q 290148d && git submodule update -q --init --recursive
+          cmake -B build -DCMAKE_BUILD_TYPE=Release > /dev/null && cmake --build build -j $(nproc) > /dev/null && ls build/bin
+      - name: FLUX.1-schnell Q4 weights
+        run: |
+          mkdir -p m && cd m; H=https://huggingface.co/second-state/FLUX.1-schnell-GGUF/resolve/main
+          for f in flux1-schnell-Q4_0.gguf t5xxl-Q4_0.gguf clip_l.safetensors ae.safetensors; do curl -sfL --retry 3 -o $f $H/$f; done
+          ls -la
+      - name: Render ${{ matrix.key }}
+        run: |
+          SD=$(ls sdcpp/build/bin/sd sdcpp/build/bin/sd-cli 2>/dev/null | head -1)
+          DESC=$(grep "^${{ matrix.key }}|" episodes/${{ inputs.slug }}/shots.txt | cut -d'|' -f2-); test -n "$DESC"
+          STYLE=$(cat episodes/${{ inputs.slug }}/style.txt 2>/dev/null || true)
+          S=${{ inputs.size }}; mkdir -p out
+          $SD --diffusion-model m/flux1-schnell-Q4_0.gguf --t5xxl m/t5xxl-Q4_0.gguf --clip_l m/clip_l.safetensors --vae m/ae.safetensors \
+            -p "$DESC. $STYLE" --cfg-scale 1.0 --sampling-method euler --steps 4 -W ${S%x*} -H ${S#*x} --seed ${{ inputs.seed }} -t $(nproc) \
+            -o out/${{ matrix.key }}.png
+          ls -la out
+      - uses: actions/upload-artifact@v4
+        with: { name: "img-${{ matrix.key }}", path: out/*.png, retention-days: 7 }
