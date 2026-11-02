@@ -765,7 +765,7 @@ export const Quiet: React.FC = () => {
         [0, (
           <g>
             <Outside />
-            <EffortBlock x={960} y={mix(560, 470, 0.5 + 0.5 * Math.sin(f / 12))} k={0.9} />
+            <EffortBlock x={960} y={mix(420, 400, 0.5 + 0.5 * Math.sin(f / 12))} k={0.9} />
             <Guy x={960} y={680} s={1.2} f={f} face={FACES.worried} pose={{ armL: 160, armR: -160 }} />
             {[0, 1].map((i) => <path key={i} d={`M${900 + i * 120} ${380 + ((f * 3 + i * 40) % 80)} q-10 16 0 22 q10 -6 0 -22 Z`} fill="#BFD6E6" {...sw} strokeWidth={2} />)}
             <Label t={pop(f, W("hard"), 9)} x={560} y={260} text="still hard" />
@@ -799,8 +799,8 @@ export const Quiet: React.FC = () => {
               const x = mix(760, 1150, go), y = mix(760, 560, go);
               return (
                 <g>
-                  <Guy x={x - 110} y={y} s={1.05} f={f} face={FACES.happy} pose={go > 0 && go < 1 ? walk(f) : { armR: f > W("side") ? -150 : -20 }} />
-                  <Brain L={L} x={x + 140} y={y - 40} tilt={0} hand={f > W("side") && go === 0 ? [-120, -120] : [250, 160]} lid={0} frown={-0.8} />
+                  <Guy x={x - 300} y={y} s={1.05} f={f} face={FACES.happy} pose={go > 0 && go < 1 ? walk(f) : { armR: f > W("side") ? -150 : -20 }} />
+                  <Brain L={L} x={x + 180} y={y - 40} tilt={0} hand={f > W("side") && go === 0 ? [-120, -120] : [250, 160]} lid={0} frown={-0.8} />
                 </g>
               );
             })()}
