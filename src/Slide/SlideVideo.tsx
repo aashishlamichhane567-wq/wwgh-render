@@ -1,5 +1,5 @@
 import React from "react";
-import { AbsoluteFill, Audio, OffthreadVideo, Sequence, getStaticFiles, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
+import { AbsoluteFill, Audio, Img, OffthreadVideo, Sequence, getStaticFiles, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import { CAPS, SCENES, TOTAL_FRAMES } from "./timing";
 
 /**
@@ -37,6 +37,9 @@ const Shot: React.FC<{ clip: string; len: number }> = ({ clip, len }) => {
         // a 5 s clip stretched (never below half speed) to cover a longer shot
         <OffthreadVideo src={staticFile(src)} muted playbackRate={Math.max(0.5, Math.min(1, 150 / len))}
           style={{ width: "100%", height: "100%", objectFit: "cover", transform: `scale(${scale})` }} />
+      ) : has(`ai/slide/${clip}.webp`) ? (
+        // no Wan clip yet (free GPU quota): the FLUX still with a slow camera push
+        <Img src={staticFile(`ai/slide/${clip}.webp`)} style={{ width: "100%", height: "100%", objectFit: "cover", transform: `scale(${scale * 1.04}) translateY(${interpolate(f, [0, len], [12, -12])}px)` }} />
       ) : (
         <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", color: "#555", fontFamily: FONT, fontSize: 60 }}>{clip}</AbsoluteFill>
       )}
