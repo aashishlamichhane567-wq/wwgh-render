@@ -307,7 +307,7 @@ export const Sensation: React.FC = () => {
               {[0, 1, 2].map((i) => <line key={i} x1={-170} y1={-20 + i * 50} x2={140} y2={-20 + i * 50} {...sw} strokeWidth={3} />)}
             </g>
           </g>
-        ), [[W("led"), 1460, 500, 1.6], [W("buzzed") - 30, 760, 450, 1.4]]],
+        ), [[W("buzzed") - 40, 760, 450, 1.4]]],
         [W("buzzed") - 4, (
           <g>
             <Outside />
@@ -493,7 +493,7 @@ export const Prediction: React.FC = () => {
               </g>
             )}
           </g>
-        ), [[W("monkeys"), 400, 420, 1.6], [W("light"), 960, 540, 1], [W("moved"), 960, 640, 1.3], [W("backward"), 960, 540, 1], [W("predicts"), 660, 480, 1.6]]],
+        ), [[W("monkeys"), 400, 360, 1.6], [W("light"), 960, 540, 1], [W("moved"), 960, 640, 1.3], [W("backward"), 960, 540, 1], [W("predicts"), 660, 480, 1.6]]],
         [W("phone") - 6, (
           <g>
             <rect x={-100} y={-100} width={2120} height={1280} fill={C.wood} />
@@ -765,7 +765,7 @@ export const Rewires: React.FC = () => {
             <Stamp f={f} at={W("win", 1)} x={1400} y={490} text="WIN" color="#5E8A4E" size={100} />
             <Label t={pop(f, W("remembers"), 9)} x={1400} y={300} text="the ending is what's filed" size={40} />
           </g>
-        ), [[W("brain"), 640, 480, 1.5], [W("finish"), 960, 540, 1], [W("win", 1), 1400, 480, 1.6], [W("time"), 960, 540, 1]]],
+        ), [[W("remembers"), 1400, 420, 1.6], [W("finish"), 960, 540, 1], [W("win", 1), 1400, 480, 1.6], [W("time"), 960, 540, 1]]],
       ])}
     </Ink>
   );
@@ -787,7 +787,7 @@ export const Quiet: React.FC = () => {
             <Label t={pop(f, W("hard"), 9)} x={560} y={260} text="still hard" />
             <Label t={pop(f, W("heavy"), 9)} x={1380} y={260} text="still heavy" />
           </g>
-        ), [[W("hard"), 960, 520, 1.6], [W("disappears"), 960, 540, 1], [W("difficulty"), 960, 450, 2]]],
+        ), [[W("hard"), 960, 520, 1.35], [W("disappears"), 960, 540, 1], [W("difficulty"), 960, 450, 2]]],
         [W("argument") - 4, (
           <g>
             <Room window={false} />
@@ -805,7 +805,7 @@ export const Quiet: React.FC = () => {
               );
             })()}
           </g>
-        ), [[W("negotiation"), 1380, 520, 1.5], [W("vote"), 960, 540, 1], [W("quiet"), 560, 460, 1.6]]],
+        ), [[W("negotiation"), 1250, 440, 1.3], [W("vote"), 960, 540, 1], [W("quiet"), 560, 460, 1.6]]],
         [W("automatic") - 6, (
           <g>
             <Outside g={860} />

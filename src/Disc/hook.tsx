@@ -96,7 +96,7 @@ const ShotTeaser: React.FC<P> = ({ L, f, W }) => {
       <ellipse cx={970} cy={770 + 10 * press} rx={84} ry={34 - 12 * press} fill={L.col.red} {...st(L)} />
       <text x={980} y={890} textAnchor="middle" fontFamily="Oswald" fontWeight={700} fontSize={48} fill="#FFFFFF">ABORT</text>
       <Brain L={L} x={560} y={580} tilt={Math.sin(f / 5) * 3} hand={hand} lid={0.55} frown={f >= slam ? 1 : 0.4} />
-      <Tag L={L} x={1400} y={260} t={span(f, W("forty"), W("Your"))} text="40 SECONDS" />
+      <Tag L={L} x={1150} y={330} t={span(f, W("forty"), W("Your"))} text="40 SECONDS" />
       <rect x={-200} y={-200} width={2320} height={1480} fill={L.col.red} opacity={flash * 0.35} />
     </g>
   );
