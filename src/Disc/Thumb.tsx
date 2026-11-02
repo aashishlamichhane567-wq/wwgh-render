@@ -29,7 +29,7 @@ export const DiscThumb: React.FC<{ v?: "A" | "B" }> = ({ v = "A" }) => {
     <AbsoluteFill style={{ background: INK }}>
       <svg viewBox="0 0 1280 720" width="100%" height="100%">
         <defs>
-          <radialGradient id="glow"><stop offset="0" stopColor={glow} stopOpacity={0.75} /><stop offset="1" stopColor={glow} stopOpacity={0} /></radialGradient>
+          <radialGradient id="glow"><stop offset="0" stopColor={glow} stopOpacity={0.95} /><stop offset="0.45" stopColor={glow} stopOpacity={0.35} /><stop offset="1" stopColor={glow} stopOpacity={0} /></radialGradient>
         </defs>
         <rect width={1280} height={720} fill={INK} />
         {/* torso, neck, head */}
@@ -48,18 +48,24 @@ export const DiscThumb: React.FC<{ v?: "A" | "B" }> = ({ v = "A" }) => {
         <path d="M640 312 Q634 344 648 352" fill="none" stroke={INK} strokeWidth={4} strokeLinecap="round" />
         <path d="M610 388 Q640 382 670 388" fill="none" stroke={INK} strokeWidth={5} strokeLinecap="round" />
         {/* the glowing brain, cupped at the chest */}
-        <circle cx={640} cy={600} r={230} fill="url(#glow)" />
+        <circle cx={640} cy={600} r={300} fill="url(#glow)" />
         <ellipse cx={640} cy={600} rx={135} ry={98} fill={lobe} stroke={fold} strokeWidth={6} />
         <line x1={640} y1={508} x2={640} y2={694} stroke={fold} strokeWidth={5} />
         {["M560 560 Q590 530 620 556", "M530 610 Q570 590 600 620 Q620 640 600 670", "M575 655 Q600 640 620 660", "M660 556 Q690 530 720 560",
           "M680 620 Q710 590 750 612", "M665 662 Q700 645 725 668", "M545 585 Q560 600 545 625", "M735 585 Q722 605 738 628"].map((d, i) => (
           <path key={i} d={d} fill="none" stroke={fold} strokeWidth={5} strokeLinecap="round" />
         ))}
+        {/* arms: sleeves from the shoulders down to the wrists, so the torso reads as a body and not a table */}
+        {[1, -1].map((m) => {
+          const X = (x: number) => (m === 1 ? x : 1280 - x);
+          const d = `M${X(230)} 540 Q${X(250)} 660 ${X(420)} 735`;
+          return <g key={m} fill="none" strokeLinecap="round"><path d={d} stroke={INK} strokeWidth={118} /><path d={d} stroke={SHIRT} strokeWidth={106} /></g>;
+        })}
         <Fingers m={1} />
         <Fingers m={-1} />
         <text x={640} y={150} textAnchor="middle" fontFamily="Liberation Sans, Arial, sans-serif" fontWeight={700} fontSize={130}
           textLength={1180} lengthAdjust="spacingAndGlyphs">
-          {head.map(([t, red], i) => <tspan key={i} fill={red ? RED : "#FFFFFF"}>{t}</tspan>)}
+          {head.map(([t, red], i) => <tspan key={i} fill={red ? RED : "#FFFFFF"} stroke={red ? RED : "#FFFFFF"} strokeWidth={7} strokeLinejoin="round">{t}</tspan>)}
         </text>
       </svg>
     </AbsoluteFill>
