@@ -2,15 +2,15 @@
 // Scene-relative frames; word times from faster-whisper aligned to the script.
 
 export const SCENES = {
-  "b1": { "start": 0, "dur": 100, "lead": 6 },
-  "j1": { "start": 100, "dur": 75, "lead": 4 },
-  "b2": { "start": 175, "dur": 40, "lead": 4 },
-  "j2": { "start": 215, "dur": 271, "lead": 4 },
-  "b3": { "start": 486, "dur": 110, "lead": 4 },
-  "j3": { "start": 596, "dur": 157, "lead": 4 },
+  "b1": { "start": 0, "dur": 78, "lead": 6 },
+  "j1": { "start": 78, "dur": 47, "lead": 4 },
+  "b2": { "start": 125, "dur": 34, "lead": 4 },
+  "j2": { "start": 159, "dur": 181, "lead": 4 },
+  "b3": { "start": 340, "dur": 58, "lead": 4 },
+  "j3": { "start": 398, "dur": 126, "lead": 4 },
 } as const;
 
 /** Per scene: [startFrame, endFrame, token] for every spoken word. */
-export const CAPS: Record<string, [number, number, string][]> = {"b1": [[6, 17, "What"], [18, 28, "if"], [30, 40, "everything"], [41, 52, "falls"], [53, 64, "apart"], [65, 82, "tomorrow?"]], "j1": [[4, 15, "Look"], [16, 26, "at"], [28, 38, "these"], [39, 57, "lilies."]], "b2": [[4, 21, "...Flowers?"]], "j2": [[4, 15, "They"], [16, 26, "don't"], [28, 45, "work."], [47, 57, "They"], [59, 69, "don't"], [70, 88, "worry."], [98, 109, "And"], [110, 127, "still,"], [129, 140, "not"], [141, 151, "even"], [153, 163, "a"], [164, 175, "king"], [176, 187, "ever"], [188, 198, "dressed"], [200, 210, "like"], [211, 222, "one"], [223, 234, "of"], [235, 252, "them."]], "b3": [[4, 15, "So"], [16, 26, "what"], [28, 38, "am"], [39, 50, "I"], [51, 62, "supposed"], [63, 73, "to"], [75, 92, "do?"]], "j3": [[4, 15, "Let"], [16, 26, "tomorrow"], [28, 38, "worry"], [39, 50, "about"], [51, 68, "itself."], [79, 96, "Today,"], [98, 109, "I've"], [110, 120, "got"], [122, 139, "you."]]};
+export const CAPS: Record<string, [number, number, string][]> = {"b1": [[6, 18, "What"], [18, 22, "if"], [22, 31, "everything"], [31, 41, "falls"], [41, 50, "apart"], [50, 59, "tomorrow?"]], "j1": [[4, 8, "Look"], [8, 13, "at"], [13, 18, "these"], [18, 30, "lilies."]], "b2": [[4, 18, "...Flowers?"]], "j2": [[4, 8, "They"], [8, 15, "don't"], [15, 22, "work."], [36, 41, "They"], [41, 47, "don't"], [47, 53, "worry."], [68, 73, "And"], [73, 83, "still,"], [101, 109, "not"], [109, 114, "even"], [114, 119, "a"], [119, 125, "king"], [125, 136, "ever"], [136, 146, "dressed"], [146, 154, "like"], [154, 160, "one"], [160, 164, "of"], [164, 168, "them."]], "b3": [[4, 10, "So"], [10, 15, "what"], [15, 18, "am"], [18, 22, "I"], [22, 30, "supposed"], [30, 38, "to"], [38, 43, "do?"]], "j3": [[4, 9, "Let"], [9, 18, "tomorrow"], [18, 30, "worry"], [30, 39, "about"], [39, 50, "itself."], [67, 80, "Today,"], [98, 101, "I've"], [101, 106, "got"], [106, 113, "you."]]};
 
-export const TOTAL_FRAMES = 753;
+export const TOTAL_FRAMES = 524;
