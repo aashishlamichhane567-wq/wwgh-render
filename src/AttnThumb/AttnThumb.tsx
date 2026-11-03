@@ -29,9 +29,9 @@ const Words: React.FC<{ a: string; b: string; box: string; x?: number; y?: numbe
  *  The gap sits left of x 1650 so YouTube's duration badge (bottom-right) never covers the gag. */
 const Cliff: React.FC = () => {
   const barY = 720, edge = 1250, gap = 330, s = 2.25;
-  const px = edge - 150, py = barY - 108 * s;
-  // the dangler's raised left hand (arm angle 180) sits on the broken edge
-  const ds = 1.2, dx = edge + 40 - (79 - 100) * ds, dy = barY + 66 - (32 - 160) * ds;
+  const px = edge - 95, py = barY - 108 * s;
+  // the dangler's raised left hand (arm angle 145, clear of his head; rig hand at 37|45) grips the broken edge
+  const ds = 1.2, dx = edge + 8 - (37 - 100) * ds, dy = barY + 44 - (45 - 160) * ds;
   const panic = { ...FACES.shocked, browTilt: -16, browY: 28, eyeOpen: 1.7, mouthOpen: 1, mouthCurve: -5, lookX: 0.85, lookY: 0.9 };
   return (
     <svg viewBox="0 0 1920 1080" style={{ position: "absolute", inset: 0 }}>
@@ -54,7 +54,7 @@ const Cliff: React.FC = () => {
       ))}
       {[[edge + 60, barY + 120, 30], [edge + 240, barY + 160, -25]].map(([x, y, r], i) => <rect key={i} x={x} y={y} width={36} height={22} fill={i ? "#6B6E78" : RED} {...ln} strokeWidth={5} transform={`rotate(${r} ${x} ${y})`} />)}
       {/* the one hanging on */}
-      <Pal x={dx} y={dy} scale={ds} frame={2} ink={INK} skin="#C9C4BA" shirt={GREY} armL={180} armR={-30} legL={12} legR={-18} face={{ ...FACES.shocked, lookY: -0.9, lookX: -0.3 }} bob={0} />
+      <Pal x={dx} y={dy} scale={ds} frame={2} ink={INK} skin="#C9C4BA" shirt={GREY} armL={145} armR={-35} legL={14} legR={-20} face={{ ...FACES.shocked, lookY: -0.9, lookX: -0.3 }} bob={0} />
       <circle cx={edge - 120} cy={barY + 32} r={50} fill={RED} {...ln} />
       <circle cx={edge - 134} cy={barY + 18} r={13} fill="#FFB3A6" />
       {/* Pal: leaning over the drop, arms windmilling, sweat flying */}
