@@ -611,7 +611,7 @@ const World: React.FC = () => {
 
 // ─────────────── sound ───────────────
 type Fx = "ding" | "boing" | "sparkle" | "whoosh_low" | "whoosh" | "tick" | "thud" | "crowd" | "pop" | "paper" | "typing" | "clang" | "sting" | "clock" | "splash" | "wind" | "beep" | "tear" | "gulp" | "snip";
-const CUES: Record<string, [string, number, Fx, number, number?][]> = {
+export const CUES: Record<string, [string, number, Fx, number, number?][]> = {
   hook: [["26", 0, "ding", 0.35], ["much,", 0, "boing", 0.22], ["lifetime", 0, "sparkle", 0.25], ["lose", 0, "whoosh_low", 0.3], ["23.7%", 0, "tick", 0.4]],
   math: [["For", 0, "pop", 0.25], ["20", 0, "thud", 0.5], ["20", 0, "whoosh", 0.3, 6], ["20", 0, "thud", 0.3, 22], ["seconds.", 0, "pop", 0.3, 10], ["tune", 0, "wind", 0.3], ["outlasted", 0, "crowd", 0.3], ["outlasted", 0, "sparkle", 0.3], ["tune", 0, "whoosh", 0.3]],
   caught: [["Be", 0, "sting", 0.4], ["Be", 0, "beep", 0.15, 6], ["recommended", 0, "pop", 0.3], ["skimming", 0, "paper", 0.3], ["tab", 0, "pop", 0.35], ["shrank", 0, "tear", 0.3], ["searching", 0, "tick", 0.3]],

@@ -3,9 +3,11 @@ import { AbsoluteFill, Audio, Img, Sequence, getStaticFiles, spring, staticFile,
 import { usePaperFonts } from "../Puppet/paper";
 import { Captions, w } from "../Attn/overlays";
 import { Grade } from "../AttnToon/AttnToon";
+import { CUES } from "../Attn/AttnVideo";
+import { SCENES, TOTAL_FRAMES } from "../Attn/timing";
 
 /**
- * Hybrid style test on the same attention hook as AttnToon: AI-illustrated stills (public/hybrid/a-e.webp, made by
+ * The Attention episode in the hybrid style (first built as a hook-only test against AttnToon): AI-illustrated stills (public/hybrid/a-e.webp, made by
  * public/hybrid/flux_stills.py) carry the art; code carries camera, kinetic type, light and sync. Same voice, cuts and SFX
  * as AttnToon so the two can be compared shot for shot. A missing still renders as a labelled placeholder.
  */
@@ -125,20 +127,87 @@ const CutFlash: React.FC<{ f: number }> = ({ f }) => {
   return d < 4 ? <div style={{ position: "absolute", inset: 0, background: "#fff", opacity: 0.18 * (1 - d / 4) }} /> : null;
 };
 
+const Hook: React.FC = () => {
+  const f = useCurrentFrame();
+  const shot = f < B_AT ? <ShotA f={f} /> : f < C_AT ? <ShotB f={f} /> : f < D_AT ? <ShotC f={f} /> : f < E_AT ? <ShotD f={f} /> : <ShotE f={f} />;
+  return <>{shot}<CutFlash f={f} /></>;
+};
+
+/* ─────────────── scenes after the hook: one still per shot, cut on a spoken word ─────────────── */
+type Kin = { at: string; text: string; color: string; size?: number; y?: number; out?: string };
+/** at: the word the cut lands on (n: which occurrence); z/x: camera zoom and focus from shot start to end; glow: phone light (x%, y%). */
+type Shot = { id: string; at: string; n?: number; z: [number, number]; x?: [number, number]; y?: number; roll?: number; glow?: [string, string]; kin?: Kin[] };
+
+const SHOTS: Record<string, Shot[]> = {
+  math: [
+    { id: "m1", at: "For", z: [1.25, 1.05], x: [0.45, 0.5], kin: [{ at: "1:26", text: "1:26 × 23.7%", color: C.cream, size: 170, out: "20" }, { at: "20", text: "≈ 20 SECONDS", color: C.amber, size: 210 }] },
+    { id: "m2", at: "That", n: 1, z: [1.1, 1.25], y: 0.4, glow: ["55%", "60%"] },
+    { id: "m3", at: "you've", z: [1.45, 1.05], y: 0.45, kin: [{ at: "outlasted", text: "YOU OUTLASTED THEM", color: C.amber, size: 150, y: 120 }] },
+    { id: "m4", at: "It", z: [1.05, 1.3], roll: 2, glow: ["50%", "50%"] },
+  ],
+  caught: [
+    { id: "c1", at: "Be", z: [1.3, 1.1], y: 0.45, glow: ["50%", "60%"] },
+    { id: "c2", at: "Were", z: [1.05, 1.3], x: [0.4, 0.65] },
+    { id: "c3", at: "skimming", z: [1.2, 1.05], glow: ["50%", "55%"] },
+    { id: "c4", at: "or", z: [1.35, 1.05], y: 0.5 },
+    { id: "c5", at: "Maybe", z: [1.05, 1.3], x: [0.5, 0.6], kin: [{ at: "next", text: "NEXT?", color: C.red, size: 220 }] },
+  ],
+  wired: [
+    { id: "w1", at: "If", z: [1.1, 1.25], y: 0.4 },
+    { id: "w2", at: "Almost", z: [1.3, 1.05], kin: [{ at: "everyone", text: "EVERYONE", color: C.amber, size: 220, out: "We've" }] },
+    { id: "w3", at: "We've", z: [1.05, 1.35], kin: [{ at: "wired", text: "WIRED", color: C.amber, size: 260 }] },
+    { id: "w4", at: "As", z: [1.1, 1.3], x: [0.45, 0.6], y: 0.4 },
+    { id: "w5", at: "brain", z: [1.05, 1.2], y: 0.55 },
+  ],
+  truth: [
+    { id: "t1", at: "The", z: [1.4, 1.05], y: 0.55, kin: [{ at: "exploit", text: "EXPLOIT", color: C.red, size: 240 }] },
+    { id: "t2", at: "Their", z: [1.05, 1.3], y: 0.4 },
+    { id: "t3", at: "making", z: [1.1, 1.25], x: [0.35, 0.6] },
+    { id: "t4", at: "so", z: [1.1, 1.4], y: 0.45, glow: ["50%", "70%"], kin: [{ at: "glued", text: "GLUED", color: C.red, size: 260 }] },
+  ],
+  end: [
+    { id: "e1", at: "So,", z: [1.2, 1.05], y: 0.4 },
+    { id: "e2", at: "outsmarted", z: [1.35, 1.05], kin: [{ at: "outsmarted", text: "YOU OUTSMARTED", color: C.amber, size: 190, y: 140 }, { at: "algorithm.", text: "THE ALGORITHM", color: C.cream, size: 150, y: 330 }] },
+    { id: "e3", at: "Now,", z: [1.05, 1.25], y: 0.4, glow: ["55%", "75%"] },
+  ],
+};
+
+const Scene: React.FC<{ scene: string; dur: number }> = ({ scene, dur }) => {
+  const f = useCurrentFrame();
+  const S = (word: string, n = 0) => w(scene, word, n);
+  const shots = SHOTS[scene]!;
+  const starts = shots.map((s, i) => (i === 0 ? 0 : S(s.at, s.n)));
+  const i = starts.reduce((k, st, j) => (f >= st ? j : k), 0);
+  const s = shots[i]!, a = starts[i]!, b = starts[i + 1] ?? dur;
+  const t = ez(f, a, b);
+  return (
+    <>
+      <Plate id={s.id} f={f} z={mix(s.z[0], s.z[1], t)} x={s.x ? mix(s.x[0], s.x[1], t) : 0.5} y={s.y} roll={s.roll ? s.roll * t : 0} />
+      {s.glow ? <ScreenGlow f={f} x={s.glow[0]} y={s.glow[1]} /> : null}
+      {(s.kin ?? []).map((k, j) => <Word key={j} f={f} at={S(k.at)} text={k.text} color={k.color} size={k.size ?? 200} y={k.y ?? 340} outAt={k.out ? S(k.out) - 6 : undefined} />)}
+      {f - a < 4 ? <div style={{ position: "absolute", inset: 0, background: "#fff", opacity: 0.18 * (1 - (f - a) / 4) }} /> : null}
+    </>
+  );
+};
+
 export const AttnHybrid: React.FC = () => {
   usePaperFonts();
   const f = useCurrentFrame();
-  const shot = f < B_AT ? <ShotA f={f} /> : f < C_AT ? <ShotB f={f} /> : f < D_AT ? <ShotC f={f} /> : f < E_AT ? <ShotD f={f} /> : <ShotE f={f} />;
-  const fx: [string, number, number][] = [["pop", W("26"), 0.3], ["sparkle", W("lifetime"), 0.18], ["tick", W("lose"), 0.2], ["tick", W("focus"), 0.2], ["thud", W("23.7%") + 6, 0.35]];
   return (
     <AbsoluteFill style={{ background: "#0B1426", overflow: "hidden" }}>
-      {shot}
-      <CutFlash f={f} />
+      {Object.entries(SCENES).map(([key, sc]) => (
+        <Sequence key={key} from={sc.start} durationInFrames={sc.dur} name={key}>
+          {key === "hook" ? <Hook /> : <Scene scene={key} dur={sc.dur} />}
+          <Captions scene={key} toon />
+          <Sequence from={sc.lead}><Audio src={staticFile(`vo_attn/${key}.wav`)} /></Sequence>
+          {(CUES[key] ?? []).map(([word, n, fx, vol, off = 0], i) => (
+            <Sequence key={i} from={Math.max(0, w(key, word, n) + off)} durationInFrames={60}><Audio src={staticFile(`sfx/${fx}.wav`)} volume={vol} /></Sequence>
+          ))}
+        </Sequence>
+      ))}
       <Grade f={f} />
-      <Captions scene="hook" toon />
-      <Sequence from={12}><Audio src={staticFile("vo_attn/hook.wav")} /></Sequence>
-      {fx.map(([s, at, v], i) => <Sequence key={i} from={at} durationInFrames={40}><Audio src={staticFile(`sfx/${s}.wav`)} volume={v} /></Sequence>)}
-      <Audio src={staticFile("music/modern.mp3")} volume={0.06} />
+      <div style={{ position: "absolute", inset: 0, background: "#000", opacity: cl((f - (TOTAL_FRAMES - 24)) / 24) }} />
+      <Audio src={staticFile("music/modern.mp3")} loop volume={(fr) => 0.07 * Math.min(1, fr / 20, Math.max(0, (TOTAL_FRAMES - fr) / 20))} />
     </AbsoluteFill>
   );
 };
