@@ -25,36 +25,46 @@ const Words: React.FC<{ a: string; b: string; box: string; x?: number; y?: numbe
   </div>
 );
 
-/** A "the cliff": the progress bar snaps off at 0:20; the grey crowd falls into the gap, Pal teeters on the edge looking down. */
+/** A "the cliff" v3: the bar snaps at 0:20 mid-frame; Pal windmills on the edge, one viewer dangles from it, the rest fall.
+ *  The gap sits left of x 1650 so YouTube's duration badge (bottom-right) never covers the gag. */
 const Cliff: React.FC = () => {
-  const barY = 640, edge = 1180, gap = 380;
-  const fallers: [number, number, number, number][] = [[edge + 90, barY + 170, -35, 1.35], [edge + 270, barY + 250, 70, 1.2], [edge + 150, barY + 360, -125, 1.05], [edge + 320, barY + 400, 25, 0.95]];
+  const barY = 700, edge = 1250, gap = 310, s = 2.6;
+  const px = edge - 120, py = barY - 108 * s;
+  // the dangler's raised left hand (arm angle 180) sits on the broken edge
+  const ds = 1.2, dx = edge + 16 - (79 - 100) * ds, dy = barY + 30 - (32 - 160) * ds;
+  const panic = { ...FACES.shocked, browTilt: -16, browY: 28, eyeOpen: 1.7, mouthOpen: 1, mouthCurve: -5, lookX: 0.85, lookY: 0.9 };
   return (
     <svg viewBox="0 0 1920 1080" style={{ position: "absolute", inset: 0 }}>
       <defs>
-        <radialGradient id="ga" cx="0.6" cy="0.62" r="0.7"><stop offset="0" stopColor={NAVY2} /><stop offset="1" stopColor={NAVY} /></radialGradient>
-        <linearGradient id="pit" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#000" stopOpacity={0} /><stop offset="1" stopColor="#000" stopOpacity={0.75} /></linearGradient>
-        <filter id="glow" x="-20%" y="-200%" width="140%" height="500%"><feGaussianBlur stdDeviation="18" /></filter>
+        <radialGradient id="ga" cx="0.62" cy="0.55" r="0.75"><stop offset="0" stopColor={NAVY2} /><stop offset="1" stopColor={NAVY} /></radialGradient>
+        <linearGradient id="pit" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#000" stopOpacity={0} /><stop offset="1" stopColor="#000" stopOpacity={0.6} /></linearGradient>
+        <filter id="glow" x="-20%" y="-200%" width="140%" height="500%"><feGaussianBlur stdDeviation="20" /></filter>
       </defs>
       <rect width={1920} height={1080} fill="url(#ga)" />
-      {/* the watched part glows red right up to the break */}
-      <rect x={-40} y={barY} width={edge + 40} height={64} fill={RED} filter="url(#glow)" opacity={0.8} />
-      <path d={`M-40 ${barY} H${edge} l-18 22 l26 14 l-20 28 H-40 Z`} fill={RED} {...ln} />
-      <path d={`M${edge + gap} ${barY + 6} l22 18 l-24 16 l18 24 H1960 V${barY + 6} Z`} fill="#6B6E78" {...ln} />
-      {/* crumbs of the bar falling */}
-      {[[edge + 40, barY + 110, 30], [edge + 160, barY + 200, -20], [edge + 290, barY + 90, 50]].map(([x, y, r], i) => <rect key={i} x={x} y={y} width={34} height={22} fill={i ? "#6B6E78" : RED} {...ln} strokeWidth={5} transform={`rotate(${r} ${x} ${y})`} />)}
-      {fallers.map(([x, y, rot, sc], i) => (
-        <g key={i} transform={`rotate(${rot} ${x} ${y})`} opacity={1 - i * 0.08}>
-          <Pal x={x} y={y} scale={sc} frame={i * 7} ink={INK} skin="#C9C4BA" shirt={GREY} armL={160} armR={-160} legL={35} legR={-35} face={FACES.shocked} bob={0} />
+      <rect x={edge - 20} y={barY + 40} width={gap + 40} height={420} fill="url(#pit)" />
+      <rect x={-40} y={barY} width={edge + 40} height={64} fill={RED} filter="url(#glow)" opacity={0.85} />
+      <path d={`M-40 ${barY} H${edge} l-16 20 l24 14 l-18 30 H-40 Z`} fill={RED} {...ln} />
+      <path d={`M${edge + gap} ${barY + 4} l20 18 l-22 16 l16 26 H1960 V${barY + 4} Z`} fill="#6B6E78" {...ln} />
+      {/* falling viewers with speed streaks */}
+      {([[edge + 200, barY + 300, 55, 1.05], [edge + 90, barY + 400, -140, 0.9]] as const).map(([x, y, rot, sc], i) => (
+        <g key={i}>
+          {[-30, 0, 30].map((o) => <line key={o} x1={x + o} y1={y - 200 * sc} x2={x + o} y2={y - 120 * sc} stroke="#8E95A8" strokeWidth={6} strokeLinecap="round" opacity={0.6} />)}
+          <g transform={`rotate(${rot} ${x} ${y})`}><Pal x={x} y={y} scale={sc} frame={i * 7} ink={INK} skin="#C9C4BA" shirt={GREY} armL={165} armR={-160} legL={40} legR={-30} face={FACES.shocked} bob={0} /></g>
         </g>
       ))}
-      <rect x={edge - 10} y={barY + 300} width={gap + 20} height={200} fill="url(#pit)" />
-      {/* the playhead, stopped at the edge */}
-      <circle cx={edge - 30} cy={barY + 32} r={52} fill={RED} {...ln} />
-      <circle cx={edge - 44} cy={barY + 18} r={14} fill="#FFB3A6" />
-      {/* Pal teeters over the drop: leaning in, arms out, eyes on the fall */}
-      <Pal x={edge - 190} y={barY - 108 * 2.2} scale={2.2} frame={3} ink={INK} skin={INKCOL.skin} shirt={TEAL} lean={10} armL={70} armR={-115} legL={4} legR={-14}
-        face={blendFace(FACES.worried, FACES.shocked, 0.85, { lookX: 0.9, lookY: 0.8 })} bob={0} />
+      {[[edge + 60, barY + 120, 30], [edge + 240, barY + 160, -25]].map(([x, y, r], i) => <rect key={i} x={x} y={y} width={36} height={22} fill={i ? "#6B6E78" : RED} {...ln} strokeWidth={5} transform={`rotate(${r} ${x} ${y})`} />)}
+      {/* the one hanging on */}
+      <Pal x={dx} y={dy} scale={ds} frame={2} ink={INK} skin="#C9C4BA" shirt={GREY} armL={180} armR={-30} legL={12} legR={-18} face={{ ...FACES.shocked, lookY: -0.9, lookX: -0.3 }} bob={0} />
+      <circle cx={edge - 30} cy={barY + 32} r={50} fill={RED} {...ln} />
+      <circle cx={edge - 44} cy={barY + 18} r={13} fill="#FFB3A6" />
+      {/* Pal: leaning over the drop, arms windmilling, sweat flying */}
+      <g transform={`rotate(-4 ${px} ${barY})`}>
+        <Pal x={px} y={py} scale={s} frame={3} ink={INK} skin={INKCOL.skin} shirt={TEAL} lean={14} armL={125} armR={-150} legL={2} legR={-48} face={panic} bob={0} />
+      </g>
+      {[[-1, 150], [1, 210]].map(([d, r], i) => <path key={i} d={`M${px + d * r} ${py - 260} a ${r} ${r} 0 0 ${d > 0 ? 1 : 0} ${d * 60} 90`} fill="none" stroke="#FFF8EC" strokeWidth={8} strokeLinecap="round" opacity={0.7} />)}
+      {[[px + 175, py - 420, 20], [px + 215, py - 360, 35], [px - 140, py - 400, -25]].map(([x, y, r], i) => (
+        <path key={i} d="M0 -26 Q16 0 0 12 Q-16 0 0 -26 Z" transform={`translate(${x} ${y}) rotate(${r}) scale(1.4)`} fill="#8FD3FF" {...ln} strokeWidth={3} />
+      ))}
     </svg>
   );
 };
