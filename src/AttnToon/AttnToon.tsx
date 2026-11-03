@@ -86,7 +86,7 @@ const ShotA: React.FC<{ f: number }> = ({ f }) => {
   const pop26 = sp(f, W("26"), 9, 0.5);
   const long = sp(f, W("long."), 14);
   const pos = f / 30 / 86;
-  const tc = { x: SCR.x + 70, y: SCR.y + SCR.h - 104 };
+  const tc = { x: SCR.x + 190, y: SCR.y + SCR.h - 104 };
   return (
     <g>
       <g transform={camT(960, 540, 1.04, 0.4)}><Bokeh f={f} /></g>
@@ -319,7 +319,8 @@ const Viewer: React.FC<{ x: number; y: number; hood: string; f: number; restless
   const swipes = restless > 0 ? Math.floor((f * (1 + restless * 2.5) + i * 13) / 14) : 0;
   const scr = ray ? C.glow : SCREEN[(swipes + i) % SCREEN.length]!;
   const flick = restless > 0 ? Math.max(0, 1 - (((f * (1 + restless * 2.5) + i * 13) % 14) / 4)) : 0; // thumb flick right after each swipe
-  const headT = restless > 0 ? Math.sin(f / (6 - restless * 2) + i) * 8 * restless : Math.sin(f / 30 + i) * 2;
+  const headT = restless > 0 ? Math.sin(f / (6 - restless * 2) + i) * 16 * restless : Math.sin(f / 30 + i) * 2;
+  const eye = restless > 0 ? Math.sign(Math.sin(f / 9 + i * 2)) * 7 * restless : 0; // glancing off the phone
   return (
     <g transform={`translate(${x} ${y})`}>
       <ellipse cx={0} cy={WH - 30} rx={120} ry={18} fill="#000" opacity={0.25} />
@@ -327,8 +328,8 @@ const Viewer: React.FC<{ x: number; y: number; hood: string; f: number; restless
       <g transform={`translate(${headT} 0) rotate(${headT * 0.8} 0 ${WH - 190})`}>
         <circle cx={0} cy={WH - 190} r={40} fill={P.skin} stroke={C.ink} strokeWidth={5} />
         <path d={`M-40 ${WH - 196} Q-34 ${WH - 240} 0 ${WH - 236} Q34 ${WH - 240} 40 ${WH - 196} Q20 ${WH - 212} -40 ${WH - 196} Z`} fill={P.hair} />
-        <circle cx={-13} cy={WH - 180} r={5} fill={C.ink} />
-        <circle cx={13} cy={WH - 180} r={5} fill={C.ink} />
+        <circle cx={-13 + eye} cy={WH - 180 - Math.abs(eye) * 0.6} r={5} fill={C.ink} />
+        <circle cx={13 + eye} cy={WH - 180 - Math.abs(eye) * 0.6} r={5} fill={C.ink} />
       </g>
       {/* phone + its light on the face */}
       <rect x={-22} y={WH - 130} width={44} height={66} rx={8} fill={scr} stroke={C.ink} strokeWidth={4} />
