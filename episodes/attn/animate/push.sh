@@ -9,7 +9,7 @@ user=$(python -c "from kaggle.api.kaggle_api_extended import KaggleApi as K;a=K(
 [ "$1" = all ] && set -- $(cd "$here" && python -c "import json;print(' '.join(json.load(open('motion.json'))))")
 keys=$(printf '"%s",' "$@"); keys="[${keys%,}]"
 k="$(mktemp -d)"
-sed "s/^KEYS = .*/KEYS = $keys/" "$here/run.py" > "$k/run.py"
+sed -e "s/^KEYS = .*/KEYS = $keys/" -e "s/^SEED = .*/SEED = ${SEED:-7}/" "$here/run.py" > "$k/run.py"
 cat > "$k/kernel-metadata.json" <<EOF
 {"id": "$user/attn-animate", "title": "attn-animate", "code_file": "run.py", "language": "python",
  "kernel_type": "script", "is_private": true, "enable_gpu": true, "enable_internet": true,

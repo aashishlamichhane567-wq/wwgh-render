@@ -1,5 +1,5 @@
 import React from "react";
-import { AbsoluteFill, Audio, Img, Sequence, getStaticFiles, spring, staticFile, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Audio, Img, OffthreadVideo, Sequence, getStaticFiles, spring, staticFile, useCurrentFrame } from "remotion";
 import { usePaperFonts } from "../Puppet/paper";
 import { Captions, w } from "../Attn/overlays";
 import { Grade } from "../AttnToon/AttnToon";
@@ -23,14 +23,22 @@ const C = { amber: "#FFB45E", red: "#E4572E", cream: "#F4F1E8", glow: "#7FB6FF" 
 const OS = { fontFamily: "Oswald", fontWeight: 700 } as const;
 const B_AT = W("That"), C_AT = W("but"), D_AT = W("One"), E_AT = W("of") + 2;
 
-/** One still under a camera: zoom z, focus point (x, y) in 0-1 of the frame, roll in degrees, plus a slow handheld drift. */
-const Plate: React.FC<{ id: string; f: number; z: number; x?: number; y?: number; roll?: number }> = ({ id, f, z, x = 0.5, y = 0.5, roll = 0 }) => {
-  const src = `hybrid/${id}.webp`;
+const CLIP_FRAMES = 118; // Wan clips are 97 frames at 24 fps (~121 at 30); keep a margin before the end
+
+/** One shot under a camera: zoom z, focus point (x, y) in 0-1 of the frame, roll in degrees, plus a slow handheld drift.
+ *  Plays hybrid/clips/<id>.mp4 from shot start `at` (slowed to fill `len`) when it exists, else the still. */
+const Plate: React.FC<{ id: string; f: number; z: number; x?: number; y?: number; roll?: number; at?: number; len?: number }> = ({ id, f, z, x = 0.5, y = 0.5, roll = 0, at = 0, len = CLIP_FRAMES }) => {
+  const src = `hybrid/${id}.webp`, clip = `hybrid/clips/${id}.mp4`;
   const dx = 6 * Math.sin(f / 37) + 3 * Math.sin(f / 13), dy = 5 * Math.cos(f / 29);
   const style: React.CSSProperties = {
     position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover",
     transformOrigin: `${x * 100}% ${y * 100}%`, transform: `translate(${dx}px, ${dy}px) scale(${z * 1.03}) rotate(${roll}deg)`,
   };
+  if (has(clip)) return (
+    <Sequence from={at} layout="none">
+      <OffthreadVideo src={staticFile(clip)} muted playbackRate={Math.min(1, CLIP_FRAMES / Math.max(1, len))} style={style} />
+    </Sequence>
+  );
   return has(src) ? <Img src={staticFile(src)} style={style} /> : (
     <div style={{ ...style, background: "linear-gradient(#0B1426, #1A2C48)", color: "#3A4F78", ...OS, fontSize: 90, display: "flex", alignItems: "center", justifyContent: "center" }}>
       still {id} pending
@@ -65,7 +73,7 @@ const ShotA: React.FC<{ f: number }> = ({ f }) => {
   const pop = sp(f, W("26"), 9, 0.5);
   return (
     <>
-      <Plate id="a" f={f} z={mix(1.0, 1.25, ez(f, 0, B_AT))} x={0.5} y={0.55} roll={-1.5 + ez(f, 0, B_AT)} />
+      <Plate id="a" f={f} at={0} len={B_AT} z={mix(1.0, 1.25, ez(f, 0, B_AT))} x={0.5} y={0.55} roll={-1.5 + ez(f, 0, B_AT)} />
       <ScreenGlow f={f} x="50%" y="50%" />
       <div style={{ position: "absolute", left: 120, top: 110, ...OS, fontSize: 64, color: C.cream, opacity: 0.85 }}>{fmt(f / 30)} / 1:26</div>
       <Word f={f} at={W("26")} text="1:26" color={C.amber} size={300 + 60 * Math.max(0, 1 - (f - W("26")) / 12) * cl(pop)} y={330} />
@@ -76,7 +84,7 @@ const ShotA: React.FC<{ f: number }> = ({ f }) => {
 /** B (mid): Ray on the sofa, a quick push as he shrugs it off. */
 const ShotB: React.FC<{ f: number }> = ({ f }) => (
   <>
-    <Plate id="b" f={f} z={mix(1.12, 1.22, ez(f, B_AT, C_AT))} x={0.55} y={0.4} />
+    <Plate id="b" f={f} at={B_AT} len={C_AT - B_AT} z={mix(1.12, 1.22, ez(f, B_AT, C_AT))} x={0.55} y={0.4} />
     <ScreenGlow f={f} x="55%" y="60%" k={0.7} />
   </>
 );
@@ -86,7 +94,7 @@ const ShotC: React.FC<{ f: number }> = ({ f }) => {
   const dim = ez(f, W("lose"), W("days."));
   return (
     <>
-      <Plate id="c" f={f} z={mix(1.6, 1.05, ez(f, C_AT, W("lose")))} x={0.45} y={0.45} />
+      <Plate id="c" f={f} at={C_AT} len={D_AT - C_AT} z={mix(1.6, 1.05, ez(f, C_AT, W("lose")))} x={0.45} y={0.45} />
       {/* the building's light drains as people lose focus */}
       <div style={{ position: "absolute", inset: 0, background: `linear-gradient(90deg, rgba(4,8,20,${0.55 * dim}) ${mix(0, 100, dim)}%, transparent ${mix(0, 100, dim) + 15}%)` }} />
       <Word f={f} at={W("lifetime")} text="A LIFETIME" color={C.amber} size={200} y={360} outAt={W("lose") - 6} />
@@ -102,7 +110,7 @@ const ShotD: React.FC<{ f: number }> = ({ f }) => {
   const shake = f > W("23.7%") + 6 && f < W("23.7%") + 16 ? 8 * Math.sin(f * 3) * (1 - (f - W("23.7%") - 6) / 10) : 0;
   return (
     <div style={{ position: "absolute", inset: 0, transform: `translate(${shake}px, ${shake / 2}px)` }}>
-      <Plate id="d" f={f} z={mix(1.15, 1.35, ez(f, D_AT, E_AT))} x={mix(0.3, 0.6, ez(f, D_AT, E_AT))} y={0.5} />
+      <Plate id="d" f={f} at={D_AT} len={E_AT - D_AT} z={mix(1.15, 1.35, ez(f, D_AT, E_AT))} x={mix(0.3, 0.6, ez(f, D_AT, E_AT))} y={0.5} />
       {f >= W("average") ? (
         <div style={{ position: "absolute", left: 0, right: 0, top: 300, textAlign: "center", ...OS, fontSize: 280 + 50 * land * Math.max(0, 1 - (f - W("23.7%") - 6) / 14),
           color: land > 0.01 ? C.amber : C.cream, textShadow: "0 10px 50px rgba(0,0,0,0.7)", fontVariantNumeric: "tabular-nums" }}>
@@ -116,7 +124,7 @@ const ShotD: React.FC<{ f: number }> = ({ f }) => {
 /** E (close): Ray looks up from the phone at you. */
 const ShotE: React.FC<{ f: number }> = ({ f }) => (
   <>
-    <Plate id="e" f={f} z={mix(1.05, 1.3, ez(f, E_AT, E_AT + 40))} x={0.5} y={0.4} />
+    <Plate id="e" f={f} at={E_AT} len={SCENES.hook!.dur - E_AT} z={mix(1.05, 1.3, ez(f, E_AT, E_AT + 40))} x={0.5} y={0.4} />
     <ScreenGlow f={f} x="50%" y="75%" />
   </>
 );
@@ -182,7 +190,7 @@ const Scene: React.FC<{ scene: string; dur: number }> = ({ scene, dur }) => {
   const t = ez(f, a, b);
   return (
     <>
-      <Plate id={s.id} f={f} z={mix(s.z[0], s.z[1], t)} x={s.x ? mix(s.x[0], s.x[1], t) : 0.5} y={s.y} roll={s.roll ? s.roll * t : 0} />
+      <Plate key={s.id} id={s.id} f={f} at={a} len={b - a} z={mix(s.z[0], s.z[1], t)} x={s.x ? mix(s.x[0], s.x[1], t) : 0.5} y={s.y} roll={s.roll ? s.roll * t : 0} />
       {s.glow ? <ScreenGlow f={f} x={s.glow[0]} y={s.glow[1]} /> : null}
       {(s.kin ?? []).map((k, j) => <Word key={j} f={f} at={S(k.at)} text={k.text} color={k.color} size={k.size ?? 200} y={k.y ?? 340} outAt={k.out ? S(k.out) - 6 : undefined} />)}
       {f - a < 4 ? <div style={{ position: "absolute", inset: 0, background: "#fff", opacity: 0.18 * (1 - (f - a) / 4) }} /> : null}

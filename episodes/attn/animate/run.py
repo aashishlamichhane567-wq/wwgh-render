@@ -6,6 +6,7 @@ from pathlib import Path
 
 KEYS = ["e"]
 FRAMES = 97            # 4 s at 24 fps
+SEED = 7
 RES = "1280x720"
 RAW = "https://raw.githubusercontent.com/aashishlamichhane567-wq/wwgh-render/claude/disc-hook-test"
 STYLE = ", 2D cel-shaded cartoon animation, consistent clean line art and colours, smooth natural motion, static camera"
@@ -59,7 +60,7 @@ for k in KEYS:
     png = STILLS / f"{k}.png"
     Image.open(webp).convert("RGB").resize((1280, 720), Image.LANCZOS).save(png)
     jobs.append({"model_type": "ti2v_2_2_fastwan", "prompt": motion[k] + STYLE, "image_start": str(png),
-                 "image_prompt_type": "S", "resolution": RES, "video_length": FRAMES, "seed": 7,
+                 "image_prompt_type": "S", "resolution": RES, "video_length": FRAMES, "seed": SEED,
                  "output_filename": k})
 (DATA / "jobs.json").write_text(json.dumps(jobs, indent=1))
 
