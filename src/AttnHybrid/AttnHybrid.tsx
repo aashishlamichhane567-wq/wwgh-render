@@ -150,7 +150,7 @@ const SHOTS: Record<string, Shot[]> = {
     { id: "c2", at: "Were", z: [1.05, 1.3], x: [0.4, 0.65] },
     { id: "c3", at: "skimming", z: [1.2, 1.05], glow: ["50%", "55%"] },
     { id: "c4", at: "or", z: [1.35, 1.05], y: 0.5 },
-    { id: "c5", at: "Maybe", z: [1.05, 1.3], x: [0.5, 0.6], kin: [{ at: "next", text: "NEXT?", color: C.red, size: 220 }] },
+    { id: "c5", at: "Maybe", z: [1.05, 1.3], x: [0.5, 0.6], kin: [{ at: "next", text: "NEXT?", color: C.red, size: 220, y: 90 }] },
   ],
   wired: [
     { id: "w1", at: "If", z: [1.1, 1.25], y: 0.4 },
