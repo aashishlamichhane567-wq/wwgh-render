@@ -388,7 +388,7 @@ const ShotC: React.FC<{ f: number }> = ({ f }) => {
 };
 
 /* ─────────────── grade + assembly ─────────────── */
-const Grade: React.FC<{ f: number }> = ({ f }) => (
+export const Grade: React.FC<{ f: number }> = ({ f }) => (
   <svg viewBox="0 0 1920 1080" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
     <defs>
       <radialGradient id="vig" cx="0.5" cy="0.45" r="0.78"><stop offset="0.55" stopColor="#000" stopOpacity={0} /><stop offset="1" stopColor="#02040C" stopOpacity={0.7} /></radialGradient>
