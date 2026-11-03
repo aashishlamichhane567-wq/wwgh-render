@@ -66,11 +66,25 @@ const toPhrases = (caps: Tok[]): Phrase[] => {
 const PHRASES: Record<string, Phrase[]> = Object.fromEntries(Object.entries(CAPS).map(([k, v]) => [k, toPhrases(v)]));
 
 /** `paper`: the puppet-theatre look, a torn cream strip with the spoken word in red. */
-export const Captions: React.FC<{ scene: string; paper?: boolean }> = ({ scene, paper }) => {
+export const Captions: React.FC<{ scene: string; paper?: boolean; toon?: boolean }> = ({ scene, paper, toon }) => {
   const f = useCurrentFrame();
   const p = (PHRASES[scene] ?? []).find((x) => f >= x.start && f < x.end);
   if (!p) return null;
   const op = Math.min(ramp(f, p.start, p.start + 3), 1 - ramp(f, p.end - 3, p.end));
+  if (toon) {
+    // Toon Ray look: navy pill, white Oswald, spoken word amber
+    return (
+      <AbsoluteFill style={{ justifyContent: "flex-end", alignItems: "center", paddingBottom: 46 }}>
+        <div style={{ fontFamily: "Oswald", fontWeight: 600, fontSize: 50, lineHeight: 1.15, opacity: op, maxWidth: 1500, textAlign: "center", color: "#F4F1E8",
+          background: "rgba(8,13,28,0.78)", borderRadius: 22, padding: "6px 28px 10px" }}>
+          {p.toks.map(([s, e, t], i) => {
+            const active = f >= s && f < (p.toks[i + 1]?.[0] ?? e + 6);
+            return <span key={i} style={{ display: "inline-block", margin: "0 8px", color: active ? "#FFB45E" : "#F4F1E8", transform: `scale(${active ? 1.08 : 1})` }}>{t}</span>;
+          })}
+        </div>
+      </AbsoluteFill>
+    );
+  }
   if (paper) {
     return (
       <AbsoluteFill style={{ justifyContent: "flex-end", alignItems: "center", paddingBottom: 44 }}>
