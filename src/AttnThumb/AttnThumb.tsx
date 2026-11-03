@@ -1,5 +1,5 @@
 import React from "react";
-import { AbsoluteFill, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Audio, staticFile, useCurrentFrame } from "remotion";
 import { usePaperFonts } from "../Puppet/paper";
 import { Pal } from "../Disc/Pal";
 import { FACES, blendFace } from "../Hangry/Stickman";
@@ -73,6 +73,8 @@ export const AttnThumb: React.FC = () => {
   return (
     <AbsoluteFill>
       <Bg />
+      {/* history.yml loudnorms the audio; pure silence makes it fail, so a near-silent tick */}
+      <Audio src={staticFile("sfx/tick.wav")} volume={0.05} />
       {f < 10 ? <><Road /><Words a="most quit" b="at 0:20" /></> : <><Stare /><Words a="can you" b="finish it?" size={140} /></>}
     </AbsoluteFill>
   );
