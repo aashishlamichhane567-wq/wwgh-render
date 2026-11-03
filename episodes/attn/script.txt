@@ -1,0 +1,30 @@
+# "You Already Beat the Average Viewer" (attention), 16:9, ~1:26. One "## key" per scene, one line = one beat.
+# shown{spoken}: captions show the left side, the voice says the braces. The runtime claim in "hook" must match the render.
+
+## hook
+This video is 1{one} minute and 26{twenty-six} seconds long.
+That might not sound like much, but it's actually a lifetime compared to how fast people lose focus these days.
+One industry estimate says the average viewer only sticks around for about 23.7%{twenty-three point seven percent} of a YouTube video.
+
+## math
+For a 1:26{one minute twenty-six} video, that works out to roughly 20{twenty} seconds.
+That means if you're still listening to this right now, you've already outlasted the average viewer.
+It really goes to show just how quick we are to tune out.
+
+## caught
+Be honest with yourself for a second.
+Were you checking out the recommended videos on the side, skimming the comment section, or looking at another tab while this was running?
+Maybe you even shrank the player to start searching for your next distraction.
+
+## wired
+If you caught yourself doing that, don't feel bad. Almost everyone does it.
+We've become wired to constantly hunt for quick hits of stimulation.
+As soon as something slightly more interesting catches our eye, our brain tells us to jump ship.
+
+## truth
+The truth is, these platforms are built to exploit that tendency.
+Their feeds thrive on short attention spans, making it effortless to hop from one video to the next, so you stay glued to your screen.
+
+## end
+So, if you made it all the way to this point, take a moment to appreciate the fact that you just outsmarted the algorithm.
+Now, go ahead and get back to your feed.

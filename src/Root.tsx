@@ -14,6 +14,8 @@ import { DiscThumb } from "./Disc/Thumb";
 import { SlideVideo } from "./Slide/SlideVideo";
 import { TOTAL_FRAMES as SLIDE_FRAMES } from "./Slide/timing";
 import { FaithVideo } from "./Faith/FaithVideo";
+import { AttnVideo } from "./Attn/AttnVideo";
+import { TOTAL_FRAMES as ATTN_FRAMES } from "./Attn/timing";
 import { TOTAL_FRAMES as FAITH_FRAMES } from "./Faith/timing";
 
 // Render-only copy of one episode from the private channel repo (free Actions minutes need a public repo).
@@ -23,6 +25,7 @@ export const RemotionRoot: React.FC = () => (
     <Composition id="Russia" component={RussiaVideo} durationInFrames={RUSSIA_FRAMES} fps={30} width={1920} height={1080} />
     <Composition id="Disc" component={DiscVideo} durationInFrames={DISC_FRAMES} fps={30} width={1920} height={1080} />
     <Composition id="Slide" component={SlideVideo} durationInFrames={SLIDE_FRAMES} fps={30} width={1080} height={1920} />
+    <Composition id="Attn" component={AttnVideo} durationInFrames={ATTN_FRAMES} fps={30} width={1920} height={1080} />
     <Composition id="Faith" component={FaithVideo} durationInFrames={FAITH_FRAMES} fps={30} width={1080} height={1920} />
     <Composition id="RussiaPilot" component={RussiaPilot} durationInFrames={PILOT_FRAMES} fps={30} width={1920} height={1080} />
     <Composition id="StyleLab" component={StyleLab} durationInFrames={4} fps={30} width={1920} height={1080} />
