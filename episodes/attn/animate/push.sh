@@ -5,7 +5,7 @@
 #   python -m kaggle kernels output USER/attn-animate -p <dir>
 set -e
 here="$(cd "$(dirname "$0")" && pwd)"
-user=$(python -c "import json,os;print(json.load(open(os.path.expanduser('~/.kaggle/kaggle.json')))['username'])")
+user=$(python -c "from kaggle.api.kaggle_api_extended import KaggleApi as K;a=K();a.authenticate();print(a.config_values['username'])")
 [ "$1" = all ] && set -- $(python -c "import json;print(' '.join(json.load(open('$here/motion.json'))))")
 keys=$(printf '"%s",' "$@"); keys="[${keys%,}]"
 k="$(mktemp -d)"
