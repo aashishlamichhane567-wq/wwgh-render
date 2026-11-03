@@ -165,8 +165,8 @@ const Page: React.FC<{ f: number }> = ({ f }) => {
           <Gear x={-120} y={-80} r={170} a={f * 0.9} />
           <Gear x={2060} y={60} r={210} a={-f * 0.7} />
           <Gear x={1980} y={1160} r={140} a={f * 1.1} />
-          <Robot f={f} x={960} y={-200} />
-          {truth ? [0, 1, 2, 3].map((k) => <line key={k} x1={-160 + k * 107} y1={-90} x2={1450 + (k % 2) * 110} y2={210 + k * 160 + tug * 24} stroke={INK} strokeWidth={2.5} strokeDasharray="2 10" />) : null}
+          <g transform="translate(960 -230) scale(1.7) translate(-960 0)"><Robot f={f} x={960} y={0} /></g>
+          {truth ? [0, 1, 2, 3].map((k) => <line key={k} x1={960 - 270 + k * 180} y1={-60} x2={1450 + (k % 2) * 110} y2={210 + k * 160 + tug * 24} stroke={INK} strokeWidth={2.5} strokeDasharray="2 10" />) : null}
         </g>
       ) : null}
       {/* browser window */}
@@ -204,7 +204,7 @@ const Page: React.FC<{ f: number }> = ({ f }) => {
       {/* player */}
       <g transform={`translate(${pl.x} ${pl.y}) scale(${pl.s}) translate(${-PL.x} ${-PL.y})`}>
         <rect x={PL.x} y={PL.y} width={PL.w} height={PL.h} rx={22} fill="#3A332C" {...ln} strokeWidth={5} />
-        <text x={PL.x + PL.w / 2} y={PL.y + 380} fontSize={150} textAnchor="middle" {...TXT} fill={PAPER}>{clock(sec)} / 1:26</text>
+        <text x={PL.x + PL.w / 2} y={PL.y + 380} fontSize={150} textAnchor="middle" {...TXT} fill={PAPER} opacity={upNext ? 0 : 1}>{clock(sec)} / 1:26</text>
         {f >= T("hook", "26") && f < T("hook", "One") ? (
           <ellipse cx={PL.x + PL.w / 2 + 230} cy={PL.y + 330} rx={190 * ez(f, T("hook", "26"), T("hook", "26") + 10)} ry={100} fill="none" stroke={RED} strokeWidth={8} />
         ) : null}
@@ -216,7 +216,7 @@ const Page: React.FC<{ f: number }> = ({ f }) => {
           <g transform={`translate(${BAR.x + BAR.w * AVG} ${BAR.y + 7}) scale(${mark})`}>
             <line x1={0} y1={-70} x2={0} y2={24} stroke={GOLD} strokeWidth={6} />
             <path d="M0 -70 L44 -58 L0 -46 Z" fill={GOLD} {...ln} strokeWidth={2} />
-            <text x={0} y={70} fontSize={34} textAnchor="middle" {...TXT} fill={GOLD}>23.7%</text>
+            <text x={56} y={-50} fontSize={34} {...TXT} fill={GOLD}>23.7%</text>
           </g>
         ) : null}
         {label > 0 ? (
@@ -300,7 +300,7 @@ const Desk: React.FC<{ f: number }> = ({ f }) => {
     [SCENES.end.start, 960, 480, 1.25, true],
   ];
   const vign = f >= SCENES.caught.start && f < SCENES.wired.start ? ez(f, T("caught", "Be"), T("caught", "Be") + 20) : 0;
-  const wire = (k: number) => `M${930 + k * 30} 300 C${700 + k * 120} ${120 - k * 40} ${560 + k * 200} 520 ${900 + k * 60} 580`;
+  const wire = (k: number) => `M${930 + k * 30} 250 C${700 + k * 120} ${120 - k * 40} ${560 + k * 200} 520 ${900 + k * 60} 580`;
   return (
     <g transform={cam(f, keys)}>
       <rect x={-1200} y={-900} width={4400} height={3600} fill={INKCOL.wall} />
@@ -309,6 +309,10 @@ const Desk: React.FC<{ f: number }> = ({ f }) => {
       <line x1={385} y1={170} x2={385} y2={420} {...ln} /><line x1={220} y1={295} x2={550} y2={295} {...ln} />
       <rect x={1420} y={260} width={300} height={16} fill={INKCOL.wood} {...ln} strokeWidth={3} />
       {[0, 1, 2, 3, 4].map((k) => <rect key={k} x={1440 + k * 44} y={180 - (k % 2) * 16} width={34} height={80 + (k % 2) * 16} fill={["#C8553D", "#7E8B5A", "#D9A441", "#8E9AAE", "#B9716E"][k]} {...ln} strokeWidth={3} />)}
+      {wired ? [0, 1, 2].map((k) => {
+        const on = ez(f, T("wired", "wired") + k * 4, T("wired", "wired") + k * 4 + 14);
+        return on > 0 ? <path key={k} d={wire(k)} fill="none" stroke={[RED, TEAL, GOLD][k]} strokeWidth={6} strokeDasharray={`${900 * on} 900`} strokeLinecap="round" /> : null;
+      }) : null}
       <Pal x={960} y={560} scale={2.3} frame={f} ink={INK} skin={INKCOL.skin} shirt={SAGE} face={face} armL={armL} armR={armR} legL={80} legR={-80} headTilt={tilt} bob={1.2} />
       {brainOut > 0 ? <Brain x={bx} y={by} s={1.3} legs={Math.sin(brainOut * Math.PI)} rot={brainOut * 360} /> : null}
       <ellipse cx={960} cy={360} rx={260} ry={220} fill="#8FB7C9" opacity={0.12 + 0.05 * Math.sin(f / 6)} />
@@ -325,14 +329,10 @@ const Desk: React.FC<{ f: number }> = ({ f }) => {
           </g>
         );
       })() : null}
-      {wired ? [0, 1, 2].map((k) => {
-        const on = ez(f, T("wired", "wired") + k * 4, T("wired", "wired") + k * 4 + 14);
-        return on > 0 ? <path key={k} d={wire(k)} fill="none" stroke={[RED, TEAL, GOLD][k]} strokeWidth={6} strokeDasharray={`${900 * on} 900`} strokeLinecap="round" /> : null;
-      }) : null}
       {wired ? ["quick", "hits", "stimulation."].map((wd, k) => {
         const t = cl((f - T("wired", wd)) / 14);
         if (t <= 0 || t >= 1) return null;
-        const u = 1 - t, a = [930 + k * 30, 300], c1 = [700 + k * 120, 120 - k * 40], c2 = [560 + k * 200, 520], b = [900 + k * 60, 580];
+        const u = 1 - t, a = [930 + k * 30, 250], c1 = [700 + k * 120, 120 - k * 40], c2 = [560 + k * 200, 520], b = [900 + k * 60, 580];
         // spark runs from the laptop up the wire into the head
         const p = (i: number) => u * u * u * b[i] + 3 * u * u * t * c2[i] + 3 * u * t * t * c1[i] + t * t * t * a[i];
         return <g key={wd} transform={`translate(${p(0)} ${p(1)})`}><path d="M0 -26 L8 -6 L26 0 L8 6 L0 26 L-8 6 L-26 0 L-8 -6 Z" fill={GOLD} {...ln} strokeWidth={2} /></g>;
