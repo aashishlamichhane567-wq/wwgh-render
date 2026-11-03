@@ -6,7 +6,7 @@
 set -e
 here="$(cd "$(dirname "$0")" && pwd)"
 user=$(python -c "from kaggle.api.kaggle_api_extended import KaggleApi as K;a=K();a.authenticate();print(a.config_values['username'])")
-[ "$1" = all ] && set -- $(python -c "import json;print(' '.join(json.load(open('$here/motion.json'))))")
+[ "$1" = all ] && set -- $(cd "$here" && python -c "import json;print(' '.join(json.load(open('motion.json'))))")
 keys=$(printf '"%s",' "$@"); keys="[${keys%,}]"
 k="$(mktemp -d)"
 sed "s/^KEYS = .*/KEYS = $keys/" "$here/run.py" > "$k/run.py"
