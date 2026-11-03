@@ -23,22 +23,25 @@ const mix = (a: number, b: number, t: number) => a + (b - a) * t;
 /** 0 before `at`, then a springy 0 -> 1 with a little overshoot (pop-ins, eye darts). */
 const pop = (f: number, at: number, damping = 11) => (f < at ? 0 : spring({ frame: f - at, fps: 30, config: { damping, mass: 0.55 } }));
 
-const INK = "#2B2620", RED = "#C8553D", GOLD = "#D9A441", TEAL = "#4E7F7A", SAGE = "#7E8B5A", PAPER = INKCOL.paper;
-const ln = { stroke: INK, strokeWidth: 4, strokeLinejoin: "round" as const, strokeLinecap: "round" as const };
+// v3 contrast pass: darker ink, a warmer wall, and Pal is always bold teal (one colour, one meaning: you).
+const INK = "#1F1A15", RED = "#D2452F", GOLD = "#E3A22B", TEAL = "#2E8C83", SAGE = "#7E8B5A", PAPER = INKCOL.paper;
+const WALL = "#EED9B4", WALL_LO = "#E3C99C", FLOOR = "#B8895A", PLAYER = "#2F3B52";
+const ln = { stroke: INK, strokeWidth: 5, strokeLinejoin: "round" as const, strokeLinecap: "round" as const };
 const TXT = { fontFamily: "Kalam", fill: INK } as const;
 
 // ─────────────── camera: eased moves between word-keyed framings ───────────────
 type K = [number, number, number, number, boolean?]; // [frame, centre x, centre y, zoom, hard cut]
-const cam = (f: number, keys: K[]) => {
+const camV = (f: number, keys: K[]) => {
   let [, x, y, z] = keys[0];
   for (const [at, nx, ny, nz, cut] of keys.slice(1)) {
     if (f < at) break;
     const t = cut ? 1 : ez(f, at, at + 20);
     x = mix(x, nx, t); y = mix(y, ny, t); z = mix(z, nz, t);
   }
-  const drift = 1 + 0.012 * Math.sin(f / 70); // the camera is never perfectly still
-  return `translate(960 540) scale(${z * drift}) translate(${-x} ${-y})`;
+  return [x, y, z * (1 + 0.012 * Math.sin(f / 70))]; // the camera is never perfectly still
 };
+const camAt = (x: number, y: number, z: number) => `translate(960 540) scale(${z}) translate(${-x} ${-y})`;
+const cam = (f: number, keys: K[]) => { const [x, y, z] = camV(f, keys); return camAt(x, y, z); };
 
 // ─────────────── the watch page ───────────────
 const PL = { x: 100, y: 180, w: 1200, h: 675 }; // player
@@ -59,37 +62,6 @@ const Thumb: React.FC<{ x: number; y: number; i: number; f: number; glow?: numbe
       <rect x={0} y={0} width={220} height={124} rx={14} fill={hue} {...ln} />
       <circle cx={110} cy={62} r={22} fill={PAPER} {...ln} strokeWidth={3} />
       <path d="M103 50 L122 62 L103 74 Z" fill={INK} />
-    </g>
-  );
-};
-
-const Walker: React.FC<{ x: number; y: number; f: number; i: number; leave: number; crown?: boolean }> = ({ x, y, f, i, leave, crown }) => {
-  const shirts = [SAGE, RED, TEAL, GOLD, "#8E9AAE", "#B9716E"];
-  const g = f - leave; // after leaving: hop off the bar, tumble and fade
-  const off = g > 0 ? { dx: g * 4, dy: -40 * Math.sin(Math.min(g, 12) / 12 * Math.PI) + Math.max(0, g - 12) ** 1.6, rot: Math.max(0, g - 6) * 9, op: cl(1 - (g - 14) / 12) } : { dx: 0, dy: 0, rot: 0, op: 1 };
-  if (off.op <= 0) return null;
-  const sw = Math.sin(f / 3.2 + i * 1.7) * 26;
-  return (
-    <g transform={`translate(${x + off.dx} ${y + off.dy}) rotate(${off.rot})`} opacity={off.op}>
-      <Pal x={0} y={0} scale={0.22} frame={f + i * 23} ink={INK} skin={INKCOL.skin} shirt={shirts[i % shirts.length]} bob={0}
-        armL={20 + sw} armR={-20 + sw} legL={sw * 0.8} legR={-sw * 0.8} face={g > 0 ? FACES.shocked : FACES.happy} />
-      {crown ? <path d="M-12 -34 L-12 -46 L-5 -39 L0 -48 L5 -39 L12 -46 L12 -34 Z" fill={GOLD} {...ln} strokeWidth={2} /> : null}
-    </g>
-  );
-};
-
-/** Tiny viewers walking with the playhead: 11 of 14 drop off at the average mark, the last two before the ending. */
-const Crowd: React.FC<{ f: number }> = ({ f }) => {
-  const appear = T("math", "For");
-  if (f < appear) return null;
-  const hx = headX(f);
-  return (
-    <g>
-      {Array.from({ length: 14 }, (_, i) => {
-        const leave = i === 0 ? 1e9 : i < 3 ? SCENES.end.start - 30 + i * 6 : LEAVE + (i - 3) * 4;
-        const k = pop(f, appear + i * 3);
-        return <g key={i} transform={`translate(0 ${(1 - k) * 30})`} opacity={k}><Walker x={hx - 18 - i * 30} y={789} f={f} i={i} leave={leave} crown={i === 0 && f >= T("end", "way")} /></g>;
-      })}
     </g>
   );
 };
@@ -134,8 +106,6 @@ const Page: React.FC<{ f: number }> = ({ f }) => {
   const pl = { x: mix(PL.x, 1380, mini), y: mix(PL.y, 780, mini), s: mix(1, 0.36, mini) };
   const fill = ez(f, T("hook", "23.7%"), T("hook", "23.7%") + 24);
   const mark = pop(f, T("hook", "23.7%"));
-  const label = pop(f, T("math", "20"));
-  const crossed = f >= LEAVE ? 1 - ez(f, LEAVE + 30, LEAVE + 50) : 0;
   const recIn = inCaught ? ez(f, T("caught", "recommended"), T("caught", "recommended") + 8) * (1 - ez(f, T("caught", "skimming"), T("caught", "skimming") + 10)) : 0;
   const tabs = inCaught ? Math.min(4, Math.max(0, Math.floor((f - T("caught", "another")) / 5) + 1)) : 0;
   const typed = inCaught ? "next distraction...".slice(0, Math.max(0, Math.floor((f - T("caught", "searching")) / 2))) : "";
@@ -159,7 +129,7 @@ const Page: React.FC<{ f: number }> = ({ f }) => {
   })() : null;
   return (
     <g transform={cam(f, keys)}>
-      <rect x={-1200} y={-900} width={4400} height={3600} fill={INKCOL.wall} />
+      <rect x={-1200} y={-900} width={4400} height={3600} fill={WALL} />
       {truth || f >= SCENES.end.start ? (
         <g>
           <Gear x={-120} y={-80} r={170} a={f * 0.9} />
@@ -203,7 +173,7 @@ const Page: React.FC<{ f: number }> = ({ f }) => {
       ))}
       {/* player */}
       <g transform={`translate(${pl.x} ${pl.y}) scale(${pl.s}) translate(${-PL.x} ${-PL.y})`}>
-        <rect x={PL.x} y={PL.y} width={PL.w} height={PL.h} rx={22} fill="#3A332C" {...ln} strokeWidth={5} />
+        <rect x={PL.x} y={PL.y} width={PL.w} height={PL.h} rx={22} fill={PLAYER} {...ln} strokeWidth={5} />
         <text x={PL.x + PL.w / 2} y={PL.y + 380} fontSize={150} textAnchor="middle" {...TXT} fill={PAPER} opacity={upNext ? 0 : 1}>{clock(sec)} / 1:26</text>
         {f >= T("hook", "26") && f < T("hook", "One") ? (
           <ellipse cx={PL.x + PL.w / 2 + 230} cy={PL.y + 330} rx={190 * ez(f, T("hook", "26"), T("hook", "26") + 10)} ry={100} fill="none" stroke={RED} strokeWidth={8} />
@@ -216,16 +186,9 @@ const Page: React.FC<{ f: number }> = ({ f }) => {
           <g transform={`translate(${BAR.x + BAR.w * AVG} ${BAR.y + 7}) scale(${mark})`}>
             <line x1={0} y1={-70} x2={0} y2={24} stroke={GOLD} strokeWidth={6} />
             <path d="M0 -70 L44 -58 L0 -46 Z" fill={GOLD} {...ln} strokeWidth={2} />
-            <text x={56} y={-50} fontSize={34} {...TXT} fill={GOLD}>23.7%</text>
+            <text x={56} y={-40} fontSize={64} {...TXT} fill={GOLD} stroke={INK} strokeWidth={2}>23.7%</text>
           </g>
         ) : null}
-        {label > 0 ? (
-          <g transform={`translate(${BAR.x + BAR.w * AVG} ${BAR.y - 170}) scale(${label}) rotate(-3)`}>
-            <rect x={-200} y={-40} width={400} height={78} rx={16} fill={crossed > 0 ? RED : PAPER} {...ln} strokeWidth={3} />
-            <text x={0} y={14} fontSize={32} textAnchor="middle" {...TXT} fill={crossed > 0 ? PAPER : INK}>{f >= LEAVE ? "average viewer left" : "average viewer leaves"}</text>
-          </g>
-        ) : null}
-        <Crowd f={f} />
         {upNext ? (
           <g opacity={ez(f, T("end", "feed.") + 20, T("end", "feed.") + 30)}>
             <rect x={PL.x} y={PL.y} width={PL.w} height={PL.h - 90} rx={22} fill="#2B2620" opacity={0.75} />
@@ -240,6 +203,166 @@ const Page: React.FC<{ f: number }> = ({ f }) => {
         ) : null}
       </g>
       {cur ? <Cursor x={cur.x} y={cur.y} click={cur.click} /> : null}
+    </g>
+  );
+};
+
+// ─────────────── the road: the progress bar as a street the viewers walk in real time ───────────────
+const SPD = 2.4; // world px per frame
+const headW = (f: number) => 300 + f * SPD;
+const ROAD_Y = 760;
+const FLAG_X = headW(LEAVE);
+const WS = 0.95; // walker scale
+const WALK_Y = ROAD_Y - 108 * WS; // Pal's feet sit 108 rig units below its centre
+/** Rig-space hand position for Pal: arm pivot (79|121, 106), 74 long, rotated by `a` degrees. */
+const palHand = (x: number, y: number, s: number, side: -1 | 1, a: number) => {
+  const r = (a * Math.PI) / 180, sx = side < 0 ? 79 : 121;
+  return [x + (sx - 74 * Math.sin(r) - 100) * s, y + (106 + 74 * Math.cos(r) - 160) * s] as const;
+};
+
+type Gag = "poof" | "hook" | "sleep" | "cat" | "phone";
+// each viewer quits their own way: one early, four right at the 23.7% mark
+const QUIT: [Gag, number, string][] = [["hook", LEAVE, RED], ["sleep", LEAVE + 8, GOLD], ["cat", LEAVE + 16, "#8E9AAE"], ["phone", LEAVE + 24, "#B9716E"], ["poof", T("hook", "sticks"), SAGE]];
+
+const CatCard: React.FC<{ x: number; y: number; f: number }> = ({ x, y, f }) => (
+  <g transform={`translate(${x} ${y}) rotate(${Math.sin(f / 6) * 6})`}>
+    <rect x={-80} y={-48} width={160} height={96} rx={12} fill="#FBF8F0" {...ln} />
+    <path d="M-30 -2 L-26 -30 L-12 -14 Q0 -18 12 -14 L26 -30 L30 -2 Q30 26 0 26 Q-30 26 -30 -2 Z" fill={GOLD} {...ln} strokeWidth={3} />
+    <circle cx={-10} cy={0} r={3.5} fill={INK} /><circle cx={10} cy={0} r={3.5} fill={INK} />
+    <path d="M-4 10 L0 14 L4 10" fill="none" {...ln} strokeWidth={2.5} />
+  </g>
+);
+
+const Quitter: React.FC<{ f: number; i: number }> = ({ f, i }) => {
+  const [gag, at, shirt] = QUIT[i - 1];
+  const g = f - at;
+  const walking = g < 0;
+  const x = headW(Math.min(f, at)) - 70 - i * 135;
+  const sw = walking ? Math.sin(f / 3.2 + i * 1.7) * 26 : 0;
+  let dx = 0, dy = 0, rot = 0, sc = 1, op = 1, face: Face = FACES.happy, armR = -20 + sw, lookY = 0;
+  const extra: React.ReactNode[] = [];
+  if (!walking) {
+    if (gag === "poof") {
+      sc = 1 - ez(f, at, at + 8); op = sc;
+      [0, 1, 2, 3, 4].forEach((k) => { const a = (k / 5) * Math.PI * 2, r = 30 + g * 6; extra.push(<circle key={k} cx={x + Math.cos(a) * r} cy={WALK_Y - 40 + Math.sin(a) * r} r={Math.max(1, 30 - g)} fill="#D9D2BF" {...ln} strokeWidth={3} opacity={cl(1 - g / 20)} />); });
+      if (g > 20) return null;
+    } else if (gag === "hook") {
+      const drop = ez(f, at - 14, at), yank = g > 6 ? (g - 6) ** 2 * 4 : 0;
+      face = FACES.shocked; dy = -yank;
+      const top = WALK_Y - 150 * WS;
+      extra.push(<g key="hook" transform={`translate(${x + 10} ${mix(-500, top, drop) - yank})`}>
+        <line x1={0} y1={-1200} x2={0} y2={0} stroke={INK} strokeWidth={6} />
+        <path d="M0 0 L0 30 Q0 70 -34 62 Q-54 52 -44 30" fill="none" stroke={RED} strokeWidth={14} strokeLinecap="round" />
+      </g>);
+      if (yank > 1400) return null;
+    } else if (gag === "sleep") {
+      rot = -82 * ez(f, at + 6, at + 16); face = { ...FACES.neutral, eyeOpen: 0.06, mouthCurve: 0 };
+      [0, 1, 2].forEach((k) => { const t = ((g + k * 14) % 42) / 42; extra.push(<text key={k} x={x - 70 + t * 60} y={WALK_Y - 40 - t * 140} fontSize={36 + t * 30} {...TXT} opacity={g > 10 ? 1 - t : 0}>z</text>); });
+    } else if (gag === "cat") {
+      face = blendFace(FACES.happy, FACES.laugh, 0.6, { lookX: 0.8, lookY: 0.6 });
+      const hop = g > 10 ? g - 10 : 0;
+      dx = -hop * 5; dy = hop > 0 ? -60 * Math.sin(Math.min(hop, 10) / 10 * Math.PI) + Math.max(0, hop - 10) ** 1.8 : 0; rot = -hop * 4;
+      extra.push(<CatCard key="cat" x={x - 160 - g * 5} y={mix(-200, WALK_Y + 60 + g * 6, ez(f, at - 24, at))} f={f} />);
+      if (dy > 900) return null;
+    } else if (gag === "phone") {
+      face = { ...FACES.neutral, eyeOpen: 0.8 }; lookY = 0.9; armR = -150;
+      const [hx2, hy2] = palHand(x, WALK_Y, WS, 1, -150);
+      extra.push(<g key="ph"><rect x={hx2 - 16} y={hy2 - 46} width={32} height={54} rx={6} fill={PLAYER} {...ln} strokeWidth={3} />
+        <ellipse cx={hx2} cy={hy2 - 40} rx={60} ry={40} fill="#8FB7C9" opacity={0.25 + 0.1 * Math.sin(f / 4)} /></g>);
+    }
+  }
+  return (
+    <g>
+      <g transform={`translate(${x + dx} ${ROAD_Y + dy}) rotate(${rot}) scale(${sc}) translate(${-x} ${-ROAD_Y})`} opacity={op}>
+        <Pal x={x} y={WALK_Y} scale={WS} frame={f + i * 23} ink={INK} skin={INKCOL.skin} shirt={shirt} bob={walking ? 1 : 0}
+          armL={20 + sw} armR={armR} legL={sw * 0.8} legR={-sw * 0.8} face={{ ...face, lookY: face.lookY + lookY }} />
+      </g>
+      {extra}
+    </g>
+  );
+};
+
+const Tumbleweed: React.FC<{ x: number; y: number; a: number }> = ({ x, y, a }) => (
+  <g transform={`translate(${x} ${y}) rotate(${a})`}>
+    {Array.from({ length: 9 }, (_, k) => <ellipse key={k} rx={56} ry={22} transform={`rotate(${k * 20})`} fill="none" stroke="#8C6A47" strokeWidth={4} />)}
+  </g>
+);
+
+const Road: React.FC<{ f: number }> = ({ f }) => {
+  const end = f >= SCENES.end.start;
+  const hx = headW(f);
+  const flagIn = pop(f, T("hook", "23.7%"));
+  const twenty = f >= T("math", "20");
+  const out = T("math", "outlasted"), tune = T("math", "tune");
+  // camera keys are offsets from the playhead, so the world scrolls with the video
+  const [ox, cy, z] = camV(f, end
+    ? [[SCENES.end.start, -60, 520, 1.5], [T("end", "way"), -60, 470, 1.9]]
+    : [[T("hook", "average"), -250, 560, 1], [T("hook", "23.7%"), -60, 600, 1.12], [T("math", "For"), -220, 560, 1], [LEAVE - 12, -300, 560, 1.18],
+      [out - 4, -60, 470, 2.2], [T("math", "It"), -560, 560, 0.85]]);
+  const pal: Face = !end && f >= out ? blendFace(FACES.happy, FACES.smug, 0.7, { lookX: 0, lookY: 0 }) : FACES.happy;
+  const pump = f >= out && !end ? pop(f, out + 4, 8) * (1 - ez(f, out + 40, out + 52)) : 0;
+  const sw = Math.sin(f / 3.2) * 26;
+  const crown = end ? pop(f, T("end", "way"), 9) : 0;
+  return (
+    <g transform={camAt(hx + ox, cy, z)}>
+      <rect x={hx - 3000} y={-900} width={6000} height={3600} fill={WALL} />
+      {/* framed thumbnails on the wall: the rest of the internet, waiting */}
+      {Array.from({ length: 22 }, (_, k) => <g key={k} opacity={0.55}><Thumb x={200 + k * 300} y={330 + (k % 2) * 90} i={k} f={f} s={0.8} /></g>)}
+      <rect x={hx - 3000} y={ROAD_Y + 40} width={6000} height={1800} fill={FLOOR} />
+      {/* the bar itself: watched part red, the rest grey, ticks every 10 s */}
+      <rect x={300} y={ROAD_Y} width={RUN * SPD} height={40} rx={20} fill="#B9AE97" {...ln} />
+      <rect x={300} y={ROAD_Y} width={f * SPD} height={40} rx={20} fill={RED} {...ln} />
+      {Array.from({ length: 9 }, (_, k) => <line key={k} x1={headW(k * 300)} y1={ROAD_Y + 8} x2={headW(k * 300)} y2={ROAD_Y + 32} stroke={PAPER} strokeWidth={4} opacity={0.6} />)}
+      {flagIn > 0 ? (
+        <g transform={`translate(${FLAG_X} ${ROAD_Y}) scale(${flagIn})`}>
+          <line x1={0} y1={0} x2={0} y2={-330} stroke={INK} strokeWidth={8} />
+          <path d="M0 -330 L230 -290 L0 -250 Z" fill={GOLD} {...ln} />
+          <text x={84} y={-278} fontSize={44} textAnchor="middle" {...TXT}>{twenty ? "0:20" : "23.7%"}</text>
+        </g>
+      ) : null}
+      {f >= tune && !end ? <Tumbleweed x={hx + 540 - (f - tune) * 16} y={ROAD_Y - 50 - Math.abs(Math.sin((f - tune) / 5)) * 50} a={-(f - tune) * 14} /> : null}
+      {end ? null : [5, 4, 3, 2, 1].map((i) => <Quitter key={i} f={f} i={i} />)}
+      {end ? <ellipse cx={hx - 70} cy={ROAD_Y + 10} rx={170} ry={36} fill="#FFF3C4" opacity={0.6} /> : null}
+      <Pal x={hx - 70} y={WALK_Y} scale={WS} frame={f} ink={INK} skin={INKCOL.skin} shirt={TEAL} armL={20 + sw} armR={pump > 0 ? mix(-20 + sw, -165, pump) : -20 + sw}
+        legL={sw * 0.8} legR={-sw * 0.8} face={pal} />
+      {crown > 0 ? <path transform={`translate(${hx - 70} ${WALK_Y - 166 * WS}) scale(${crown * 2.4})`} d="M-12 0 L-12 -12 L-5 -5 L0 -14 L5 -5 L12 -12 L12 0 Z" fill={GOLD} {...ln} strokeWidth={1.5} /> : null}
+      <circle cx={hx} cy={ROAD_Y + 20} r={30} fill={RED} {...ln} />
+    </g>
+  );
+};
+
+// ─────────────── the algorithm pulling the strings ───────────────
+const Puppet: React.FC<{ f: number }> = ({ f }) => {
+  const cut = T("end", "outsmarted"), snipped = f >= cut;
+  const fall = snipped ? ez(f, cut, cut + 14) : 0;
+  const tug = snipped ? 0 : Math.sin(f / 5), tug2 = snipped ? 0 : Math.sin(f / 5 + 1.7);
+  const s = 1.8, px = 960, py = 690 + 30 * fall - 24 * Math.sin(Math.min(1, fall) * Math.PI);
+  const aL = snipped ? 25 : 70 + 45 * tug, aR = snipped ? -25 : -70 - 45 * tug2;
+  const hL = palHand(px, py, s, -1, aL), hR = palHand(px, py, s, 1, aR), head = [px, py - 147 * s] as const;
+  const barY = 330 + 18 * tug;
+  const strings: [number, readonly [number, number]][] = [[640, hL], [960, head], [1280, hR]];
+  const face = snipped ? blendFace(FACES.shocked, FACES.smug, ez(f, cut + 10, cut + 24)) : blendFace(FACES.worried, FACES.confused, 0.5 + 0.5 * tug);
+  return (
+    <g transform={cam(f, [[SCENES.truth.start, 960, 520, 0.9], [T("truth", "exploit"), 960, 560, 1.05], [cut - 6, 960, 560, 1.05, true], [cut + 20, 960, 600, 1.2]])}>
+      <rect x={-1200} y={-900} width={4400} height={3600} fill={WALL_LO} />
+      <Gear x={180} y={120} r={170} a={f * 0.9} />
+      <Gear x={1760} y={200} r={210} a={-f * 0.7} />
+      <rect x={-1200} y={900} width={4400} height={1800} fill={FLOOR} />
+      <g transform="translate(960 70) scale(1.1) translate(-960 0)"><Robot f={f} x={960} y={0} /></g>
+      {/* the control bar the robot works */}
+      <rect x={600} y={barY - 14} width={720} height={28} rx={12} fill={INKCOL.wood} {...ln} />
+      {strings.map(([x1, [x2, y2]], k) => snipped
+        ? <path key={k} d={`M${x1} ${barY + 10} q 12 ${120 + fall * 60} ${-10 + k * 6} ${200 + fall * 160}`} fill="none" stroke={INK} strokeWidth={3} opacity={1 - fall * 0.6} />
+        : <line key={k} x1={x1} y1={barY + 10} x2={x2} y2={y2} stroke={INK} strokeWidth={3} />)}
+      <Pal x={px} y={py} scale={s} frame={f} ink={INK} skin={INKCOL.skin} shirt={TEAL} armL={aL} armR={aR} legL={snipped ? 6 : 14 * tug} legR={snipped ? -6 : -14 * tug2} headTilt={snipped ? 0 : 8 * tug} face={face} bob={0} />
+      {f >= cut - 10 && f < cut + 30 ? (() => {
+        const open = f < cut ? 30 * ez(f, cut - 10, cut - 2) : 30 * (1 - ez(f, cut, cut + 3));
+        return (
+          <g transform={`translate(${hR[0] + 10} ${hR[1] - 80}) rotate(-30)`}>
+            {[1, -1].map((d) => <g key={d} transform={`rotate(${d * open})`}><path d="M0 0 L90 -8 L0 8 Z" fill="#D2CBB6" {...ln} strokeWidth={3} /><circle cx={-26} cy={d * 14} r={14} fill="none" stroke={RED} strokeWidth={7} /></g>)}
+          </g>
+        );
+      })() : null}
     </g>
   );
 };
@@ -271,9 +394,18 @@ const Desk: React.FC<{ f: number }> = ({ f }) => {
     armL = 20 + 55 * sh; armR = -20 - 55 * sh; tilt = -8 * sh;
     face = f >= T("hook", "lose") ? blendFace(FACES.smug, FACES.worried, ez(f, T("hook", "lose"), T("hook", "lose") + 12)) : f >= T("hook", "lifetime") ? FACES.smug : FACES.neutral;
     look = sh * 0.6;
+  } else if (f < T("caught", "Maybe")) {
+    // caught: hands up under a spotlight, then the guilty side-glance
+    const up = pop(f, T("caught", "Be") + 2, 9) * (1 - ez(f, T("caught", "second."), T("caught", "second.") + 10));
+    armL = mix(20, 160, up); armR = mix(-20, -160, up);
+    face = blendFace(FACES.shocked, FACES.worried, ez(f, T("caught", "yourself"), T("caught", "second.")), { lookX: 0, lookY: 0, eyeOpen: 1.25 });
+    look = f >= T("caught", "second.") ? 0.7 : 0;
   } else if (f < SCENES.wired.start) {
-    const t = ez(f, T("caught", "Be"), T("caught", "second."));
-    face = blendFace(FACES.neutral, FACES.worried, t, { lookX: 0, lookY: 0, eyeOpen: 1 + 0.25 * t });
+    const press = pop(f, T("caught", "shrank") - 6, 10) * (1 - ez(f, T("caught", "searching") - 8, T("caught", "searching")));
+    const torch = pop(f, T("caught", "searching") - 4, 12);
+    armL = mix(20, 120, press); armR = mix(-20, -120, press);
+    if (torch > 0) armR = mix(-20, -105 + 16 * Math.sin((f - T("caught", "searching")) / 9), torch);
+    face = torch > 0 ? blendFace(FACES.neutral, FACES.happy, 0.4, { lookX: 0.9 * Math.sin((f - T("caught", "searching")) / 9), lookY: -0.4 }) : blendFace(FACES.neutral, FACES.annoyed, press);
   } else if (wired) {
     const relief = ez(f, T("wired", "bad."), T("wired", "bad.") + 10);
     face = blendFace(FACES.worried, FACES.happy, relief);
@@ -295,16 +427,24 @@ const Desk: React.FC<{ f: number }> = ({ f }) => {
   const card = wired ? pop(f, T("wired", "As")) : 0;
   const keys: K[] = [
     [SCENES.hook.start, 960, 560, 1], [T("hook", "lifetime"), 960, 430, 1.35],
-    [SCENES.caught.start, 960, 360, 1.6, true], [T("caught", "Be") + 4, 960, 320, 2.6],
+    [SCENES.caught.start, 960, 360, 1.6, true], [T("caught", "Be") + 4, 960, 380, 2.0], [T("caught", "second."), 1000, 330, 2.5],
+    [T("caught", "Maybe"), 960, 420, 1.15, true], [T("caught", "searching"), 960, 400, 0.95],
     [SCENES.wired.start, 960, 450, 1.35, true], [T("wired", "We've"), 960, 420, 1.2], [T("wired", "As"), 1180, 420, 1.15], [T("wired", "jump"), 1250, 380, 1.3],
     [SCENES.end.start, 960, 480, 1.25, true],
   ];
-  const vign = f >= SCENES.caught.start && f < SCENES.wired.start ? ez(f, T("caught", "Be"), T("caught", "Be") + 20) : 0;
+  const caughtNow = f >= SCENES.caught.start && f < T("caught", "Maybe");
+  const vign = caughtNow ? ez(f, T("caught", "Be"), T("caught", "Be") + 6) : 0;
+  const siren = caughtNow && f < T("caught", "second.") + 10 ? (Math.floor(f / 6) % 2 ? RED : "#3D6FD1") : null;
+  const inMaybe = f >= T("caught", "Maybe") && f < SCENES.wired.start;
+  const shrink = inMaybe ? ez(f, T("caught", "shrank"), T("caught", "shrank") + 12) : 0;
+  const torchT = inMaybe ? pop(f, T("caught", "searching") - 4, 12) : 0;
+  const torchHand = palHand(960, 560, 2.3, 1, -105 + 16 * Math.sin((f - T("caught", "searching")) / 9));
+  const beamX = 960 + 760 * Math.sin((f - T("caught", "searching")) / 9);
   const wire = (k: number) => `M${930 + k * 30} 250 C${700 + k * 120} ${120 - k * 40} ${560 + k * 200} 520 ${900 + k * 60} 580`;
   return (
     <g transform={cam(f, keys)}>
-      <rect x={-1200} y={-900} width={4400} height={3600} fill={INKCOL.wall} />
-      <rect x={-1200} y={800} width={4400} height={1800} fill={INKCOL.floor} />
+      <rect x={-1200} y={-900} width={4400} height={3600} fill={WALL} />
+      <rect x={-1200} y={800} width={4400} height={1800} fill={FLOOR} />
       <rect x={220} y={170} width={330} height={250} rx={10} fill="#E6E0CF" {...ln} strokeWidth={5} />
       <line x1={385} y1={170} x2={385} y2={420} {...ln} /><line x1={220} y1={295} x2={550} y2={295} {...ln} />
       <rect x={1420} y={260} width={300} height={16} fill={INKCOL.wood} {...ln} strokeWidth={3} />
@@ -313,8 +453,28 @@ const Desk: React.FC<{ f: number }> = ({ f }) => {
         const on = ez(f, T("wired", "wired") + k * 4, T("wired", "wired") + k * 4 + 14);
         return on > 0 ? <path key={k} d={wire(k)} fill="none" stroke={[RED, TEAL, GOLD][k]} strokeWidth={6} strokeDasharray={`${900 * on} 900`} strokeLinecap="round" /> : null;
       }) : null}
-      <Pal x={960} y={560} scale={2.3} frame={f} ink={INK} skin={INKCOL.skin} shirt={SAGE} face={face} armL={armL} armR={armR} legL={80} legR={-80} headTilt={tilt} bob={1.2} />
-      {brainOut > 0 ? <Brain x={bx} y={by} s={1.3} legs={Math.sin(brainOut * Math.PI)} rot={brainOut * 360} /> : null}
+      <Pal x={960} y={560} scale={2.3} frame={f} ink={INK} skin={INKCOL.skin} shirt={TEAL} face={face} armL={armL} armR={armR} legL={80} legR={-80} headTilt={tilt} bob={1.2} />
+      {brainOut > 0 ? <g>
+        <Brain x={bx} y={by} s={1.3} legs={Math.sin(brainOut * Math.PI)} rot={brainOut * 360} />
+        {/* jumping ship: the brain wears a life ring */}
+        <circle cx={bx} cy={by + 10} r={58} fill="none" stroke={RED} strokeWidth={16} />
+        <circle cx={bx} cy={by + 10} r={58} fill="none" stroke={PAPER} strokeWidth={16} strokeDasharray="22 69" />
+      </g> : null}
+      {inMaybe && shrink < 1 && f >= T("caught", "Maybe") ? (
+        // the player he is about to crush, floating over the laptop
+        <g transform={`translate(960 330) scale(${mix(1, 0.08, shrink)} ${mix(1, 0.08, shrink ** 0.6)})`} opacity={pop(f, T("caught", "Maybe"))}>
+          <rect x={-330} y={-190} width={660} height={380} rx={22} fill={PLAYER} {...ln} />
+          <path d="M-30 -50 L50 0 L-30 50 Z" fill={PAPER} />
+          <rect x={-290} y={140} width={580} height={12} rx={6} fill="#6B6560" /><rect x={-290} y={140} width={200} height={12} rx={6} fill={RED} />
+        </g>
+      ) : null}
+      {inMaybe && shrink >= 1 ? <rect x={1080 - 18} y={600 - 12} width={36} height={22} rx={4} fill={PLAYER} {...ln} strokeWidth={3} /> : null}
+      {torchT > 0 ? <g>
+        {/* flashlight sweep: wall thumbnails light up as the beam finds them */}
+        {[220, 640, 1280, 1700].map((x, k) => <Thumb key={k} x={x - 110} y={120} i={k + 3} f={f} glow={cl(1 - Math.abs(beamX - x) / 180) * torchT} />)}
+        <path d={`M${torchHand[0]} ${torchHand[1]} L${beamX - 170} 60 L${beamX + 170} 60 Z`} fill="#FFF3C4" opacity={0.45 * torchT} />
+        <rect x={torchHand[0] - 14} y={torchHand[1] - 34} width={28} height={50} rx={6} fill={INK} transform={`rotate(${(beamX - 960) / 30} ${torchHand[0]} ${torchHand[1]})`} />
+      </g> : null}
       <ellipse cx={960} cy={360} rx={260} ry={220} fill="#8FB7C9" opacity={0.12 + 0.05 * Math.sin(f / 6)} />
       <rect x={300} y={720} width={1320} height={70} rx={12} fill={INKCOL.wood} {...ln} strokeWidth={5} />
       <rect x={360} y={790} width={30} height={200} fill={INKCOL.woodD} {...ln} /><rect x={1530} y={790} width={30} height={200} fill={INKCOL.woodD} {...ln} />
@@ -325,8 +485,7 @@ const Desk: React.FC<{ f: number }> = ({ f }) => {
           <g transform={`translate(1160 120) scale(${pop(f, T("hook", "lose"))})`}>
             <rect x={0} y={0} width={150} height={70} rx={12} fill={PAPER} {...ln} /><rect x={150} y={22} width={14} height={26} fill={INK} />
             <rect x={10} y={10} width={130 * lvl} height={50} rx={6} fill={lvl > 0.3 ? SAGE : RED} />
-            <text x={75} y={110} fontSize={30} textAnchor="middle" {...TXT}>focus</text>
-          </g>
+                      </g>
         );
       })() : null}
       {wired ? ["quick", "hits", "stimulation."].map((wd, k) => {
@@ -338,7 +497,8 @@ const Desk: React.FC<{ f: number }> = ({ f }) => {
         return <g key={wd} transform={`translate(${p(0)} ${p(1)})`}><path d="M0 -26 L8 -6 L26 0 L8 6 L0 26 L-8 6 L-26 0 L-8 -6 Z" fill={GOLD} {...ln} strokeWidth={2} /></g>;
       }) : null}
       {card > 0 ? <g transform={`translate(${1520 - 110} ${300 - 62 + Math.sin(f / 8) * 8})`}><Thumb x={0} y={0} i={2} f={f} glow={1} s={card} /></g> : null}
-      {vign > 0 ? <rect x={-1200} y={-900} width={4400} height={3600} fill="url(#attnVig)" opacity={vign} /> : null}
+      {vign > 0 ? <rect x={-1200} y={-900} width={4400} height={3600} fill="url(#attnSpot)" opacity={vign} /> : null}
+      {siren ? <rect x={-1200} y={-900} width={4400} height={3600} fill={siren} opacity={0.16} /> : null}
     </g>
   );
 };
@@ -348,12 +508,12 @@ const Everyone: React.FC<{ f: number }> = ({ f }) => {
   const at = T("wired", "everyone");
   return (
     <g transform={cam(f, [[SCENES.wired.start, 960, 560, 1.12], [at, 960, 540, 1]])}>
-      <rect x={-1200} y={-900} width={4400} height={3600} fill={INKCOL.wall} />
+      <rect x={-1200} y={-900} width={4400} height={3600} fill={WALL} />
       {[0, 1, 2, 3, 4].map((k) => {
         const x = 230 + k * 365, d = pop(f, at + k * 3, 9);
         return (
           <g key={k} opacity={pop(f, SCENES.wired.start + k * 2)}>
-            <Pal x={x} y={600} scale={1.05} frame={f + k * 17} ink={INK} skin={INKCOL.skin} shirt={[SAGE, RED, TEAL, GOLD, "#8E9AAE"][k]} legL={80} legR={-80}
+            <Pal x={x} y={600} frame={f + k * 17} ink={INK} skin={INKCOL.skin} shirt={[SAGE, RED, TEAL, GOLD, "#8E9AAE"][k]} scale={1.25} legL={80} legR={-80}
               face={{ ...FACES.neutral, lookX: d * 0.9, lookY: -0.2 * d }} headTilt={7 * d} />
             <rect x={x - 160} y={700} width={320} height={34} rx={8} fill={INKCOL.wood} {...ln} strokeWidth={4} />
             <Laptop x={x} y={700} s={0.5} f={f + k * 5} />
@@ -371,7 +531,7 @@ const Feed: React.FC<{ f: number }> = ({ f }) => {
     const scroll = (f - SCENES.truth.start) * 9;
     return (
       <g transform={cam(f, [[T("truth", "Their"), 960, 540, 1.25], [T("truth", "attention"), 960, 540, 1]])}>
-        <rect x={-1200} y={-900} width={4400} height={3600} fill={INKCOL.wallLo} />
+        <rect x={-1200} y={-900} width={4400} height={3600} fill={WALL_LO} />
         <rect x={700} y={40} width={520} height={1000} rx={60} fill="#3A332C" {...ln} strokeWidth={6} />
         <clipPath id="attnPhone"><rect x={730} y={90} width={460} height={900} rx={30} /></clipPath>
         <g clipPath="url(#attnPhone)">
@@ -391,36 +551,41 @@ const Feed: React.FC<{ f: number }> = ({ f }) => {
     const air = Math.sin(t * Math.PI), squash = t < 0.12 ? 1 - 0.18 * (1 - t / 0.12) : 1;
     return (
       <g transform={cam(f, [[hopAt, 960, 560, 1]])}>
-        <rect x={-1200} y={-900} width={4400} height={3600} fill={INKCOL.wall} />
+        <rect x={-1200} y={-900} width={4400} height={3600} fill={WALL} />
         {Array.from({ length: 7 }, (_, k) => <Thumb key={k} x={260 + k * 280} y={700 + Math.sin(f / 10 + k) * 6} i={k} f={f} glow={k === i + (t > 0.5 ? 1 : 0) ? 1 : 0} />)}
         <g transform={`translate(${x} ${700 - 172 * squash - air * 170}) scale(1 ${squash})`}>
-          <Pal x={0} y={0} scale={1.05} frame={f} ink={INK} skin={INKCOL.skin} shirt={SAGE} face={FACES.happy} armL={20 + air * 110} armR={-20 - air * 110} legL={air * 30} legR={-air * 30} lean={air * 8} />
+          <Pal x={0} y={0} scale={1.05} frame={f} ink={INK} skin={INKCOL.skin} shirt={TEAL} face={FACES.happy} armL={20 + air * 110} armR={-20 - air * 110} legL={air * 30} legR={-air * 30} lean={air * 8} />
         </g>
       </g>
     );
   }
-  const g = f - glueAt, pull = Math.max(0, Math.sin((g - 10) / 7)) * ez(f, glueAt + 10, glueAt + 20);
+  // glued: Pal leans into a giant phone, his face stuck to it with bubble gum that stretches every time he pulls away
+  const g = f - glueAt, pull = Math.max(0, Math.sin((g - 8) / 8)) * ez(f, glueAt + 8, glueAt + 16);
+  const s = 2.0, px = 900, py = 600, lean = mix(24, 2, pull);
+  const r = (lean * Math.PI) / 180;
+  const hx = px + (140 * Math.sin(r)) * s, hy = py + (194 - 140 * Math.cos(r) - 160) * s; // head centre after the lean
+  const face = blendFace(FACES.worried, FACES.shocked, pull, { lookX: 0.8, lookY: 0 });
   return (
-    <g transform={cam(f, [[glueAt, 960, 540, 1.1], [T("truth", "glued"), 960, 500, 1.35]])}>
-      <rect x={-1200} y={-900} width={4400} height={3600} fill={INKCOL.wallLo} />
-      <rect x={700} y={40} width={520} height={1000} rx={60} fill="#3A332C" {...ln} strokeWidth={6} />
-      <rect x={730} y={90} width={460} height={900} rx={30} fill="#8FB7C9" opacity={0.55} />
-      <g transform={`translate(${-pull * 30} 0)`}>
-        <Pal x={960} y={560} scale={2.1} frame={f} ink={INK} skin={INKCOL.skin} shirt={SAGE} face={blendFace(FACES.happy, FACES.shocked, ez(f, T("truth", "glued"), T("truth", "glued") + 8))}
-          armL={-70 + pull * 20} armR={70 - pull * 20} lean={-pull * 6} />
-      </g>
-      {[0, 1, 2, 3, 4, 5].map((k) => {
-        const len = cl((g - k * 4) / 40) * (60 + k * 22);
-        return <path key={k} d={`M${830 + k * 50} ${420 + (k % 3) * 90} q 6 ${len / 2} 0 ${len}`} fill="none" stroke="#FBF8F0" strokeWidth={14 - k} strokeLinecap="round" opacity={0.95} />;
+    <g transform={cam(f, [[glueAt, 1040, 520, 1.15], [T("truth", "glued"), 1060, 480, 1.4]])}>
+      <rect x={-1200} y={-900} width={4400} height={3600} fill={WALL_LO} />
+      <rect x={-1200} y={880} width={4400} height={1800} fill={FLOOR} />
+      <rect x={1180} y={60} width={460} height={900} rx={56} fill={PLAYER} {...ln} strokeWidth={6} />
+      <rect x={1206} y={110} width={408} height={800} rx={30} fill="#8FB7C9" />
+      {Array.from({ length: 4 }, (_, k) => <g key={k}><Thumb x={1300} y={150 + ((k * 210 + g * 6) % 840)} i={k} f={f} s={1} /></g>)}
+      <Pal x={px} y={py} scale={s} frame={f} ink={INK} skin={INKCOL.skin} shirt={TEAL} face={face} lean={lean} armL={40 + 60 * pull} armR={-60} bob={0} />
+      {[-26, 0, 26, 50].map((dy, k) => {
+        const x1 = hx + 38 * s, x2 = 1210, y1 = hy + dy, sag = 20 + 50 * pull;
+        return <path key={k} d={`M${x1} ${y1} Q${(x1 + x2) / 2} ${y1 + sag} ${x2} ${y1 + 6}`} fill="none" stroke="#F08FB0" strokeWidth={mix(22, 6, pull) - k * 2} strokeLinecap="round" opacity={0.95} />;
       })}
     </g>
   );
 };
 
 const cuts = (): [number, React.FC<{ f: number }>][] => [
-  [0, Page], [T("hook", "That"), Desk], [T("hook", "One"), Page], [T("caught", "Be"), Desk], [T("caught", "Were"), Page],
-  [SCENES.wired.start, Desk], [T("wired", "Almost"), Everyone], [T("wired", "We've"), Desk], [SCENES.truth.start, Page], [T("truth", "Their"), Feed],
-  [SCENES.end.start, Page], [T("end", "Now,"), Desk], [T("end", "feed.") + 20, Page],
+  [0, Page], [T("hook", "That"), Desk], [T("hook", "One"), Page], [T("hook", "average"), Road],
+  [T("caught", "Be"), Desk], [T("caught", "Were"), Page], [T("caught", "Maybe"), Desk],
+  [SCENES.wired.start, Desk], [T("wired", "Almost"), Everyone], [T("wired", "We've"), Desk], [SCENES.truth.start, Puppet], [T("truth", "Their"), Feed],
+  [SCENES.end.start, Road], [T("end", "outsmarted") - 6, Puppet], [T("end", "Now,"), Desk], [T("end", "feed.") + 20, Page],
 ];
 
 const World: React.FC = () => {
@@ -434,6 +599,8 @@ const World: React.FC = () => {
       <Ink>
         <defs>
           <radialGradient id="attnVig" cx="50%" cy="40%" r="60%"><stop offset="55%" stopColor="#2B2620" stopOpacity={0} /><stop offset="100%" stopColor="#2B2620" stopOpacity={0.55} /></radialGradient>
+          {/* caught: a hard spotlight on Pal, user-space so it sits on him whatever the camera does */}
+          <radialGradient id="attnSpot" gradientUnits="userSpaceOnUse" cx={960} cy={420} r={520}><stop offset="0.55" stopColor="#120E0A" stopOpacity={0} /><stop offset="0.62" stopColor="#120E0A" stopOpacity={0.78} /><stop offset="1" stopColor="#120E0A" stopOpacity={0.85} /></radialGradient>
         </defs>
         <Set f={f} />
         {cutAt > 0 ? <rect x={0} y={0} width={1920} height={1080} fill={PAPER} opacity={flash * 0.5} /> : null}
@@ -443,15 +610,15 @@ const World: React.FC = () => {
 };
 
 // ─────────────── sound ───────────────
-type Fx = "ding" | "boing" | "sparkle" | "whoosh_low" | "whoosh" | "tick" | "thud" | "crowd" | "pop" | "paper" | "typing" | "clang" | "sting" | "clock" | "splash";
+type Fx = "ding" | "boing" | "sparkle" | "whoosh_low" | "whoosh" | "tick" | "thud" | "crowd" | "pop" | "paper" | "typing" | "clang" | "sting" | "clock" | "splash" | "wind" | "beep" | "tear" | "gulp" | "snip";
 const CUES: Record<string, [string, number, Fx, number, number?][]> = {
   hook: [["26", 0, "ding", 0.35], ["much,", 0, "boing", 0.22], ["lifetime", 0, "sparkle", 0.25], ["lose", 0, "whoosh_low", 0.3], ["23.7%", 0, "tick", 0.4]],
-  math: [["For", 0, "pop", 0.25], ["20", 0, "thud", 0.5], ["outlasted", 0, "crowd", 0.3], ["outlasted", 0, "sparkle", 0.3], ["tune", 0, "whoosh", 0.3]],
-  caught: [["Be", 0, "whoosh_low", 0.35], ["recommended", 0, "pop", 0.3], ["skimming", 0, "paper", 0.3], ["tab", 0, "pop", 0.35], ["shrank", 0, "whoosh", 0.3], ["searching", 0, "typing", 0.3]],
+  math: [["For", 0, "pop", 0.25], ["20", 0, "thud", 0.5], ["20", 0, "whoosh", 0.3, 6], ["20", 0, "thud", 0.3, 22], ["seconds.", 0, "pop", 0.3, 10], ["tune", 0, "wind", 0.3], ["outlasted", 0, "crowd", 0.3], ["outlasted", 0, "sparkle", 0.3], ["tune", 0, "whoosh", 0.3]],
+  caught: [["Be", 0, "sting", 0.4], ["Be", 0, "beep", 0.15, 6], ["recommended", 0, "pop", 0.3], ["skimming", 0, "paper", 0.3], ["tab", 0, "pop", 0.35], ["shrank", 0, "tear", 0.3], ["searching", 0, "tick", 0.3]],
   wired: [["bad.", 0, "ding", 0.25], ["everyone", 0, "whoosh", 0.25], ["wired", 0, "clang", 0.2], ["quick", 0, "pop", 0.3], ["hits", 0, "pop", 0.3], ["stimulation.", 0, "pop", 0.3],
-    ["interesting", 0, "sparkle", 0.35], ["brain", 0, "boing", 0.3], ["jump", 0, "thud", 0.3]],
-  truth: [["truth", 0, "sting", 0.3], ["built", 0, "clock", 0.2], ["short", 0, "whoosh", 0.25], ["making", 0, "boing", 0.2], ["glued", 0, "splash", 0.3]],
-  end: [["way", 0, "whoosh_low", 0.25], ["outsmarted", 0, "crowd", 0.3], ["algorithm.", 0, "clang", 0.3], ["feed.", 0, "pop", 0.25]],
+    ["interesting", 0, "sparkle", 0.35], ["brain", 0, "boing", 0.3], ["jump", 0, "splash", 0.35]],
+  truth: [["truth", 0, "sting", 0.3], ["built", 0, "clock", 0.2], ["short", 0, "whoosh", 0.25], ["making", 0, "boing", 0.2], ["glued", 0, "gulp", 0.3]],
+  end: [["way", 0, "sparkle", 0.3], ["outsmarted", 0, "snip", 0.45], ["outsmarted", 0, "crowd", 0.3, 8], ["algorithm.", 0, "clang", 0.3], ["feed.", 0, "pop", 0.25]],
 };
 const has = (src: string) => getStaticFiles().some((s) => s.name === src);
 
