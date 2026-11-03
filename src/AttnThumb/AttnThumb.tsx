@@ -28,10 +28,10 @@ const Words: React.FC<{ a: string; b: string; box: string; x?: number; y?: numbe
 /** A "the cliff" v3: the bar snaps at 0:20 mid-frame; Pal windmills on the edge, one viewer dangles from it, the rest fall.
  *  The gap sits left of x 1650 so YouTube's duration badge (bottom-right) never covers the gag. */
 const Cliff: React.FC = () => {
-  const barY = 700, edge = 1250, gap = 310, s = 2.6;
-  const px = edge - 120, py = barY - 108 * s;
+  const barY = 720, edge = 1250, gap = 330, s = 2.25;
+  const px = edge - 150, py = barY - 108 * s;
   // the dangler's raised left hand (arm angle 180) sits on the broken edge
-  const ds = 1.2, dx = edge + 16 - (79 - 100) * ds, dy = barY + 30 - (32 - 160) * ds;
+  const ds = 1.2, dx = edge + 40 - (79 - 100) * ds, dy = barY + 66 - (32 - 160) * ds;
   const panic = { ...FACES.shocked, browTilt: -16, browY: 28, eyeOpen: 1.7, mouthOpen: 1, mouthCurve: -5, lookX: 0.85, lookY: 0.9 };
   return (
     <svg viewBox="0 0 1920 1080" style={{ position: "absolute", inset: 0 }}>
@@ -55,14 +55,14 @@ const Cliff: React.FC = () => {
       {[[edge + 60, barY + 120, 30], [edge + 240, barY + 160, -25]].map(([x, y, r], i) => <rect key={i} x={x} y={y} width={36} height={22} fill={i ? "#6B6E78" : RED} {...ln} strokeWidth={5} transform={`rotate(${r} ${x} ${y})`} />)}
       {/* the one hanging on */}
       <Pal x={dx} y={dy} scale={ds} frame={2} ink={INK} skin="#C9C4BA" shirt={GREY} armL={180} armR={-30} legL={12} legR={-18} face={{ ...FACES.shocked, lookY: -0.9, lookX: -0.3 }} bob={0} />
-      <circle cx={edge - 30} cy={barY + 32} r={50} fill={RED} {...ln} />
-      <circle cx={edge - 44} cy={barY + 18} r={13} fill="#FFB3A6" />
+      <circle cx={edge - 120} cy={barY + 32} r={50} fill={RED} {...ln} />
+      <circle cx={edge - 134} cy={barY + 18} r={13} fill="#FFB3A6" />
       {/* Pal: leaning over the drop, arms windmilling, sweat flying */}
       <g transform={`rotate(-4 ${px} ${barY})`}>
         <Pal x={px} y={py} scale={s} frame={3} ink={INK} skin={INKCOL.skin} shirt={TEAL} lean={14} armL={125} armR={-150} legL={2} legR={-48} face={panic} bob={0} />
       </g>
-      {[[-1, 150], [1, 210]].map(([d, r], i) => <path key={i} d={`M${px + d * r} ${py - 260} a ${r} ${r} 0 0 ${d > 0 ? 1 : 0} ${d * 60} 90`} fill="none" stroke="#FFF8EC" strokeWidth={8} strokeLinecap="round" opacity={0.7} />)}
-      {[[px + 175, py - 420, 20], [px + 215, py - 360, 35], [px - 140, py - 400, -25]].map(([x, y, r], i) => (
+      {[[-1, 150], [1, 210]].map(([d, r], i) => <path key={i} d={`M${px + 60 + d * r} ${py - 200} a ${r} ${r} 0 0 ${d > 0 ? 1 : 0} ${d * 60} 90`} fill="none" stroke="#FFF8EC" strokeWidth={8} strokeLinecap="round" opacity={0.7} />)}
+      {[[px + 170, py - 330, 20], [px + 205, py - 270, 35], [px - 90, py - 320, -25]].map(([x, y, r], i) => (
         <path key={i} d="M0 -26 Q16 0 0 12 Q-16 0 0 -26 Z" transform={`translate(${x} ${y}) rotate(${r}) scale(1.4)`} fill="#8FD3FF" {...ln} strokeWidth={3} />
       ))}
     </svg>
