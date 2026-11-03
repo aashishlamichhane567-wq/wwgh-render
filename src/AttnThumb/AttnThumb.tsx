@@ -27,8 +27,8 @@ const Words: React.FC<{ a: string; b: string; box: string; x?: number; y?: numbe
 
 /** A "the cliff": the progress bar snaps off at 0:20; the grey crowd falls into the gap, Pal teeters on the edge looking down. */
 const Cliff: React.FC = () => {
-  const barY = 760, edge = 1180, gap = 330;
-  const fallers: [number, number, number, number][] = [[edge + 70, barY + 150, -40, 1.25], [edge + 210, barY + 290, 75, 1.1], [edge + 120, barY + 420, -120, 0.95], [edge + 270, barY + 520, 20, 0.85]];
+  const barY = 640, edge = 1180, gap = 380;
+  const fallers: [number, number, number, number][] = [[edge + 90, barY + 170, -35, 1.35], [edge + 270, barY + 250, 70, 1.2], [edge + 150, barY + 360, -125, 1.05], [edge + 320, barY + 400, 25, 0.95]];
   return (
     <svg viewBox="0 0 1920 1080" style={{ position: "absolute", inset: 0 }}>
       <defs>
@@ -44,17 +44,17 @@ const Cliff: React.FC = () => {
       {/* crumbs of the bar falling */}
       {[[edge + 40, barY + 110, 30], [edge + 160, barY + 200, -20], [edge + 290, barY + 90, 50]].map(([x, y, r], i) => <rect key={i} x={x} y={y} width={34} height={22} fill={i ? "#6B6E78" : RED} {...ln} strokeWidth={5} transform={`rotate(${r} ${x} ${y})`} />)}
       {fallers.map(([x, y, rot, sc], i) => (
-        <g key={i} transform={`rotate(${rot} ${x} ${y})`} opacity={1 - i * 0.12}>
+        <g key={i} transform={`rotate(${rot} ${x} ${y})`} opacity={1 - i * 0.08}>
           <Pal x={x} y={y} scale={sc} frame={i * 7} ink={INK} skin="#C9C4BA" shirt={GREY} armL={160} armR={-160} legL={35} legR={-35} face={FACES.shocked} bob={0} />
         </g>
       ))}
-      <rect x={edge - 10} y={barY + 60} width={gap + 20} height={400} fill="url(#pit)" />
+      <rect x={edge - 10} y={barY + 300} width={gap + 20} height={200} fill="url(#pit)" />
       {/* the playhead, stopped at the edge */}
       <circle cx={edge - 30} cy={barY + 32} r={52} fill={RED} {...ln} />
       <circle cx={edge - 44} cy={barY + 18} r={14} fill="#FFB3A6" />
       {/* Pal teeters over the drop: leaning in, arms out, eyes on the fall */}
-      <Pal x={edge - 200} y={barY - 108 * 2.7} scale={2.7} frame={3} ink={INK} skin={INKCOL.skin} shirt={TEAL} lean={10} armL={70} armR={-115} legL={4} legR={-14}
-        face={blendFace(FACES.worried, FACES.shocked, 0.6, { lookX: 0.9, lookY: 0.8 })} bob={0} />
+      <Pal x={edge - 190} y={barY - 108 * 2.2} scale={2.2} frame={3} ink={INK} skin={INKCOL.skin} shirt={TEAL} lean={10} armL={70} armR={-115} legL={4} legR={-14}
+        face={blendFace(FACES.worried, FACES.shocked, 0.85, { lookX: 0.9, lookY: 0.8 })} bob={0} />
     </svg>
   );
 };
