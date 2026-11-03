@@ -610,15 +610,16 @@ const World: React.FC = () => {
 };
 
 // ─────────────── sound ───────────────
-type Fx = "ding" | "boing" | "sparkle" | "whoosh_low" | "whoosh" | "tick" | "thud" | "crowd" | "pop" | "paper" | "typing" | "clang" | "sting" | "clock" | "splash" | "wind" | "beep" | "tear" | "gulp" | "snip";
+// no noise-based effects (crowd, tear, clock, wind, paper, typing): under the voice they read as static
+type Fx = "ding" | "boing" | "sparkle" | "whoosh_low" | "whoosh" | "tick" | "thud" | "pop" | "clang" | "sting" | "splash" | "beep" | "gulp" | "snip";
 export const CUES: Record<string, [string, number, Fx, number, number?][]> = {
   hook: [["26", 0, "ding", 0.35], ["much,", 0, "boing", 0.22], ["lifetime", 0, "sparkle", 0.25], ["lose", 0, "whoosh_low", 0.3], ["23.7%", 0, "tick", 0.4]],
-  math: [["For", 0, "pop", 0.25], ["20", 0, "thud", 0.5], ["20", 0, "whoosh", 0.3, 6], ["20", 0, "thud", 0.3, 22], ["seconds.", 0, "pop", 0.3, 10], ["tune", 0, "wind", 0.3], ["outlasted", 0, "crowd", 0.3], ["outlasted", 0, "sparkle", 0.3], ["tune", 0, "whoosh", 0.3]],
-  caught: [["Be", 0, "sting", 0.4], ["Be", 0, "beep", 0.15, 6], ["recommended", 0, "pop", 0.3], ["skimming", 0, "paper", 0.3], ["tab", 0, "pop", 0.35], ["shrank", 0, "tear", 0.3], ["searching", 0, "tick", 0.3]],
+  math: [["For", 0, "pop", 0.25], ["20", 0, "thud", 0.5], ["20", 0, "whoosh", 0.3, 6], ["20", 0, "thud", 0.3, 22], ["seconds.", 0, "pop", 0.3, 10], ["tune", 0, "whoosh_low", 0.3], ["outlasted", 0, "ding", 0.3], ["outlasted", 0, "sparkle", 0.3], ["tune", 0, "whoosh", 0.3]],
+  caught: [["Be", 0, "sting", 0.4], ["Be", 0, "beep", 0.15, 6], ["recommended", 0, "pop", 0.3], ["skimming", 0, "pop", 0.25], ["tab", 0, "pop", 0.35], ["shrank", 0, "boing", 0.3], ["searching", 0, "tick", 0.3]],
   wired: [["bad.", 0, "ding", 0.25], ["everyone", 0, "whoosh", 0.25], ["wired", 0, "clang", 0.2], ["quick", 0, "pop", 0.3], ["hits", 0, "pop", 0.3], ["stimulation.", 0, "pop", 0.3],
     ["interesting", 0, "sparkle", 0.35], ["brain", 0, "boing", 0.3], ["jump", 0, "splash", 0.35]],
-  truth: [["truth", 0, "sting", 0.3], ["built", 0, "clock", 0.2], ["short", 0, "whoosh", 0.25], ["making", 0, "boing", 0.2], ["glued", 0, "gulp", 0.3]],
-  end: [["way", 0, "sparkle", 0.3], ["outsmarted", 0, "snip", 0.45], ["outsmarted", 0, "crowd", 0.3, 8], ["algorithm.", 0, "clang", 0.3], ["feed.", 0, "pop", 0.25]],
+  truth: [["truth", 0, "sting", 0.3], ["built", 0, "clang", 0.15], ["short", 0, "whoosh", 0.25], ["making", 0, "boing", 0.2], ["glued", 0, "gulp", 0.3]],
+  end: [["way", 0, "sparkle", 0.3], ["outsmarted", 0, "snip", 0.45], ["outsmarted", 0, "sparkle", 0.35, 8], ["algorithm.", 0, "clang", 0.3], ["feed.", 0, "pop", 0.25]],
 };
 const has = (src: string) => getStaticFiles().some((s) => s.name === src);
 

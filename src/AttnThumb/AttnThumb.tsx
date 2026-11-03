@@ -7,62 +7,71 @@ import { INKCOL } from "../Disc/hook";
 
 /**
  * Thumbnails for "You Already Beat the Average Viewer", drawn in the video's own look so the click matches what plays.
- * Frames 0-9 = A "the road" (crowd falling off the bar at 0:20, Pal alone at the playhead),
- * frames 10-19 = B "the stare" (Pal's face, the 0:19 timer about to tick). Rendered through history.yml, then frames 5 and 15 are pulled.
+ * Frames 0-9 = A "the cliff" (the bar snaps at 0:20, the crowd falls, Pal teeters on the edge),
+ * frames 10-19 = B "the stare" (Pal's suspicious face, the 0:19 timer about to tick). Rendered through history.yml, then frames 5 and 15 are pulled.
  * Rules (stickman-thumbnail-format): <=3 words that the narrator says, one hero in full colour, everyone else greyed, bottom-right clear for the badge.
  */
 
-const INK = "#1F1A15", RED = "#D2452F", GOLD = "#E3A22B", TEAL = "#2E8C83", WALL = "#EED9B4", GREY = "#8E8678";
+const INK = "#1F1A15", RED = "#D2452F", TEAL = "#2E8C83", GREY = "#8E8678";
 const ln = { stroke: INK, strokeWidth: 7, strokeLinejoin: "round" as const, strokeLinecap: "round" as const };
 
-const Words: React.FC<{ a: string; b: string; x?: number; y?: number; size?: number }> = ({ a, b, x = 70, y = 70, size = 150 }) => (
+// v2: dark/saturated grounds so they stand out in YouTube's white feed (the beige v1 melted into it), bigger heroes, real tension
+const NAVY = "#141B2B", NAVY2 = "#2F3B52";
+
+const Words: React.FC<{ a: string; b: string; box: string; x?: number; y?: number; size?: number }> = ({ a, b, box, x = 70, y = 60, size = 160 }) => (
   <div style={{ position: "absolute", left: x, top: y, fontFamily: "Oswald", fontWeight: 700, lineHeight: 0.95, textTransform: "uppercase" }}>
-    <div style={{ fontSize: size, color: INK, textShadow: "6px 6px 0 rgba(31,26,21,0.18)" }}>{a}</div>
-    <div style={{ display: "inline-block", marginTop: 14, fontSize: size * 1.05, color: "#FFF8EC", background: RED, padding: "4px 26px 12px", transform: "rotate(-2deg)", boxShadow: `10px 10px 0 ${INK}` }}>{b}</div>
+    <div style={{ fontSize: size, color: "#FFF8EC", textShadow: `8px 8px 0 ${INK}` }}>{a}</div>
+    <div style={{ display: "inline-block", marginTop: 16, fontSize: size * 1.1, color: "#FFF8EC", background: box, padding: "4px 28px 14px", transform: "rotate(-2deg)", border: `7px solid ${INK}`, boxShadow: `12px 12px 0 ${INK}` }}>{b}</div>
   </div>
 );
 
-const Bg: React.FC = () => (
-  <svg viewBox="0 0 1920 1080" style={{ position: "absolute", inset: 0 }}>
-    <defs>
-      <radialGradient id="tv" cx="0.62" cy="0.55" r="0.75"><stop offset="0.5" stopColor="#000" stopOpacity={0} /><stop offset="1" stopColor="#2A1A0C" stopOpacity={0.45} /></radialGradient>
-    </defs>
-    <rect width={1920} height={1080} fill={WALL} />
-    <rect width={1920} height={1080} fill="url(#tv)" />
-  </svg>
-);
-
-const Road: React.FC = () => {
-  const barY = 800, x0 = 60, w = 1800, ph = x0 + w * 0.237 + 380; // the bar is cropped so 0:20 sits right of centre
-  const fallers: [number, number, number][] = [[ph - 300, barY + 120, -50], [ph - 120, barY + 210, 70], [ph + 220, barY + 160, -110], [ph + 420, barY + 260, 30]];
+/** A "the cliff": the progress bar snaps off at 0:20; the grey crowd falls into the gap, Pal teeters on the edge looking down. */
+const Cliff: React.FC = () => {
+  const barY = 760, edge = 1180, gap = 330;
+  const fallers: [number, number, number, number][] = [[edge + 70, barY + 150, -40, 1.25], [edge + 210, barY + 290, 75, 1.1], [edge + 120, barY + 420, -120, 0.95], [edge + 270, barY + 520, 20, 0.85]];
   return (
     <svg viewBox="0 0 1920 1080" style={{ position: "absolute", inset: 0 }}>
-      <rect x={-20} y={barY} width={1960} height={48} rx={24} fill="#B9AE97" {...ln} />
-      <rect x={-20} y={barY} width={ph + 20} height={48} rx={24} fill={RED} {...ln} />
-      <line x1={ph} y1={barY} x2={ph} y2={barY - 420} stroke={INK} strokeWidth={10} />
-      <path d={`M${ph} ${barY - 420} L${ph + 260} ${barY - 372} L${ph} ${barY - 324} Z`} fill={GOLD} {...ln} />
-      <text x={ph + 98} y={barY - 356} fontSize={56} textAnchor="middle" style={{ fontFamily: "Oswald", fontWeight: 700 }} fill={INK}>0:20</text>
-      {fallers.map(([x, y, rot], i) => (
-        <g key={i} transform={`rotate(${rot} ${x} ${y})`}>
-          <Pal x={x} y={y} scale={1.15} frame={i * 7} ink={INK} skin="#E6E0D6" shirt={GREY} armL={150} armR={-150} legL={30} legR={-30} face={FACES.shocked} bob={0} />
+      <defs>
+        <radialGradient id="ga" cx="0.6" cy="0.62" r="0.7"><stop offset="0" stopColor={NAVY2} /><stop offset="1" stopColor={NAVY} /></radialGradient>
+        <linearGradient id="pit" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#000" stopOpacity={0} /><stop offset="1" stopColor="#000" stopOpacity={0.75} /></linearGradient>
+        <filter id="glow" x="-20%" y="-200%" width="140%" height="500%"><feGaussianBlur stdDeviation="18" /></filter>
+      </defs>
+      <rect width={1920} height={1080} fill="url(#ga)" />
+      {/* the watched part glows red right up to the break */}
+      <rect x={-40} y={barY} width={edge + 40} height={64} fill={RED} filter="url(#glow)" opacity={0.8} />
+      <path d={`M-40 ${barY} H${edge} l-18 22 l26 14 l-20 28 H-40 Z`} fill={RED} {...ln} />
+      <path d={`M${edge + gap} ${barY + 6} l22 18 l-24 16 l18 24 H1960 V${barY + 6} Z`} fill="#6B6E78" {...ln} />
+      {/* crumbs of the bar falling */}
+      {[[edge + 40, barY + 110, 30], [edge + 160, barY + 200, -20], [edge + 290, barY + 90, 50]].map(([x, y, r], i) => <rect key={i} x={x} y={y} width={34} height={22} fill={i ? "#6B6E78" : RED} {...ln} strokeWidth={5} transform={`rotate(${r} ${x} ${y})`} />)}
+      {fallers.map(([x, y, rot, sc], i) => (
+        <g key={i} transform={`rotate(${rot} ${x} ${y})`} opacity={1 - i * 0.12}>
+          <Pal x={x} y={y} scale={sc} frame={i * 7} ink={INK} skin="#C9C4BA" shirt={GREY} armL={160} armR={-160} legL={35} legR={-35} face={FACES.shocked} bob={0} />
         </g>
       ))}
-      <ellipse cx={ph - 120} cy={barY + 6} rx={150} ry={30} fill="#FFF3C4" opacity={0.7} />
-      <Pal x={ph - 120} y={barY - 230} scale={2.1} frame={3} ink={INK} skin={INKCOL.skin} shirt={TEAL} armL={30} armR={-150} legL={8} legR={-8}
-        face={blendFace(FACES.happy, FACES.smug, 0.8, { lookX: 0, lookY: 0 })} bob={0} />
-      <circle cx={ph} cy={barY + 24} r={42} fill={RED} {...ln} />
+      <rect x={edge - 10} y={barY + 60} width={gap + 20} height={400} fill="url(#pit)" />
+      {/* the playhead, stopped at the edge */}
+      <circle cx={edge - 30} cy={barY + 32} r={52} fill={RED} {...ln} />
+      <circle cx={edge - 44} cy={barY + 18} r={14} fill="#FFB3A6" />
+      {/* Pal teeters over the drop: leaning in, arms out, eyes on the fall */}
+      <Pal x={edge - 200} y={barY - 108 * 2.7} scale={2.7} frame={3} ink={INK} skin={INKCOL.skin} shirt={TEAL} lean={10} armL={70} armR={-115} legL={4} legR={-14}
+        face={blendFace(FACES.worried, FACES.shocked, 0.6, { lookX: 0.9, lookY: 0.8 })} bob={0} />
     </svg>
   );
 };
 
+/** B "the stare": red ground, a huge suspicious Pal, the clock one second from the drop-off beside his face. */
 const Stare: React.FC = () => (
   <svg viewBox="0 0 1920 1080" style={{ position: "absolute", inset: 0 }}>
-    {/* the stare: a huge face looking straight at you, the clock one second from the drop-off */}
-    <Pal x={1350} y={1180} scale={6.4} frame={0} ink={INK} skin={INKCOL.skin} shirt={TEAL} armL={20} armR={-20} legL={6} legR={-6}
-      face={blendFace(FACES.neutral, FACES.smug, 0.55, { lookX: -0.15, lookY: 0, eyeOpen: 1.1 })} bob={0} />
-    <g transform="translate(1180 120) rotate(4)">
-      <rect x={0} y={0} width={420} height={170} rx={30} fill="#2F3B52" {...ln} />
-      <text x={210} y={124} fontSize={120} textAnchor="middle" style={{ fontFamily: "Oswald", fontWeight: 700 }} fill="#FFF8EC">0:19</text>
+    <defs>
+      <radialGradient id="gb" cx="0.7" cy="0.45" r="0.8"><stop offset="0" stopColor="#E8603F" /><stop offset="1" stopColor="#9E2A1B" /></radialGradient>
+    </defs>
+    <rect width={1920} height={1080} fill="url(#gb)" />
+    <Pal x={1420} y={1240} scale={6.8} frame={0} ink={INK} skin={INKCOL.skin} shirt={TEAL} armL={20} armR={-20} legL={6} legR={-6}
+      face={blendFace(FACES.annoyed, FACES.smug, 0.5, { lookX: -0.25, lookY: 0.05, eyeOpen: 0.75 })} bob={0} />
+    <g transform="translate(540 600) rotate(-5)">
+      <rect x={0} y={0} width={500} height={210} rx={36} fill={NAVY} {...ln} strokeWidth={9} />
+      <circle cx={70} cy={105} r={34} fill={RED} />
+      <text x={290} y={155} fontSize={150} textAnchor="middle" style={{ fontFamily: "Oswald", fontWeight: 700 }} fill="#FFF8EC">0:19</text>
     </g>
   </svg>
 );
@@ -72,10 +81,9 @@ export const AttnThumb: React.FC = () => {
   const f = useCurrentFrame();
   return (
     <AbsoluteFill>
-      <Bg />
       {/* history.yml loudnorms the audio; pure silence makes it fail, so a near-silent tick */}
       <Audio src={staticFile("sfx/tick.wav")} volume={0.05} />
-      {f < 10 ? <><Road /><Words a="most quit" b="at 0:20" /></> : <><Stare /><Words a="can you" b="finish it?" size={140} /></>}
+      {f < 10 ? <><Cliff /><Words a="most quit" b="at 0:20" box={RED} /></> : <><Stare /><Words a="can you" b="finish it?" box={NAVY} size={145} /></>}
     </AbsoluteFill>
   );
 };
