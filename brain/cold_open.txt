@@ -1,0 +1,15 @@
+# pause_after_seconds | delivery direction | line          (cold open of "Every Brain Glitch That Happens While You Sleep")
+0.45 | Quiet, intimate, slow, like a late-night storyteller. | You're lying in bed. Your thoughts are going soft at the edges.
+0.30 | Quiet, then a sudden lift of tension on the last words. | Then the floor drops out from under you.
+0.85 | Fast and startled, then breathless. | Your leg kicks, your whole body jolts, and you're wide awake with your heart going.
+0.60 | Plain and matter-of-fact, naming the thing. | That's a hypnic jerk.
+0.30 | Conversational, a little sceptical. | The number everyone quotes is sixty to seventy percent of people.
+0.25 | Conversational, honest, slightly amused. | I went looking for the study that measured that.
+0.80 | Dry, deadpan admission. | I couldn't find one.
+0.30 | Warm, storytelling, slightly playful. | The popular explanation is apes. Our ancestors slept in trees, the story goes, so they needed a reflex to catch themselves when they slipped.
+0.25 | Warm and gently amused. | It's a lovely story.
+0.85 | Dry and flat, a small reveal. | Nobody has solid evidence for it.
+0.70 | Curious, leaning in, a real question. | So what actually just happened to you? Hold that thought.
+0.35 | Clear, inviting, building interest. | That kick is one of seven glitches your brain can run between bedtime and your alarm.
+0.30 | Curious and light. | They look like seven different bugs.
+0.00 | Slower, confident, landing the promise. | By the time your alarm goes off, you'll see they're all the same bug.
