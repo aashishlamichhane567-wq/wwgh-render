@@ -1,0 +1,5 @@
+studio.js, and the materials at the top of mind.js, are copied from Lemo-Opuscar
+(github.com/lemomo-ai/lemo-opuscar, styles/glass-product/demo), MIT License, by Lemomo.
+main.js adapts that demo's staging, title glint and frosted subtitle bar (MIT).
+fonts/InterTight-var.woff2: Inter Tight, SIL Open Font License (fonts/OFL-InterTight.txt), via @fontsource-variable/inter-tight.
+Everything else (the glass head, brain, neural pathways, misfire) was written for this project.
